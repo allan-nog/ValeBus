@@ -248,104 +248,208 @@
     });
 
     const tbody = document.getElementById('tabela-motoristas-corpo');
-    if (!tbody) return;
+    const containerMobile = document.getElementById('cards-motoristas-mobile');
 
     if (filtrados.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="9" style="text-align:center; padding: 32px 16px; color: var(--texto-secundario);">
-            Nenhum motorista encontrado com os filtros selecionados.
-          </td>
-        </tr>
+      const msgVazio = `
+        <div style="text-align:center; padding: 32px 16px; color: var(--texto-secundario); background: var(--fundo-card); border: 1px solid var(--borda-cor); border-radius: var(--raio-medio);">
+          Nenhum motorista encontrado com os filtros selecionados.
+        </div>
       `;
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align:center; padding: 32px 16px; color: var(--texto-secundario);">
+              Nenhum motorista encontrado com os filtros selecionados.
+            </td>
+          </tr>
+        `;
+      }
+      if (containerMobile) {
+        containerMobile.innerHTML = msgVazio;
+      }
     } else {
-      tbody.innerHTML = filtrados.map(m => {
-        const corLinha = obterCorLinha(m.linha);
-        const partesNome = m.nome.split(' ');
-        const iniciais = (partesNome[0][0] + (partesNome[1] ? partesNome[1][0] : '')).toUpperCase();
-        const pinMostrado = pinsVisiveis[m.id] ? m.pin : '••••';
+      if (tbody) {
+        tbody.innerHTML = filtrados.map(m => {
+          const corLinha = obterCorLinha(m.linha);
+          const partesNome = m.nome.split(' ');
+          const iniciais = (partesNome[0][0] + (partesNome[1] ? partesNome[1][0] : '')).toUpperCase();
+          const pinMostrado = pinsVisiveis[m.id] ? m.pin : '••••';
 
-        // Badge de Status
-        let statusBadge = '';
-        if (m.status === 'ativo') {
-          statusBadge = `<span class="status-pill status-pill--ativo">Ativo</span>`;
-        } else if (m.status === 'viagem') {
-          statusBadge = `<span class="status-pill status-pill--viagem">Em Viagem</span>`;
-        } else if (m.status === 'folga') {
-          statusBadge = `<span class="status-pill status-pill--folga">Folga</span>`;
-        } else {
-          statusBadge = `<span class="status-pill status-pill--inativo">Inativo</span>`;
-        }
+          // Badge de Status
+          let statusBadge = '';
+          if (m.status === 'ativo') {
+            statusBadge = `<span class="status-pill status-pill--ativo">Ativo</span>`;
+          } else if (m.status === 'viagem') {
+            statusBadge = `<span class="status-pill status-pill--viagem">Em Viagem</span>`;
+          } else if (m.status === 'folga') {
+            statusBadge = `<span class="status-pill status-pill--folga">Folga</span>`;
+          } else {
+            statusBadge = `<span class="status-pill status-pill--inativo">Inativo</span>`;
+          }
 
-        return `
-          <tr data-id="${m.id}">
-            <td>
-              <div class="gestor-motorista-info">
-                <div class="gestor-motorista-avatar">${iniciais}</div>
-                <div>
-                  <div class="gestor-motorista-nome">${m.nome}</div>
-                  <div class="gestor-motorista-cpf">${m.telefone || m.cpf || 'Sem telefone'}</div>
+          return `
+            <tr data-id="${m.id}">
+              <td>
+                <div class="gestor-motorista-info">
+                  <div class="gestor-motorista-avatar">${iniciais}</div>
+                  <div>
+                    <div class="gestor-motorista-nome">${m.nome}</div>
+                    <div class="gestor-motorista-cpf">${m.telefone || m.cpf || 'Sem telefone'}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="gestor-matricula-badge">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/></svg>
+                  ${m.matricula}
+                </span>
+              </td>
+              <td>
+                <div class="gestor-cnh-wrap">
+                  <span class="gestor-cnh-cat">Cat. ${m.cnhCat}</span>
+                  <span class="gestor-cnh-val">Val: ${formatarData(m.cnhValidade)}</span>
+                </div>
+              </td>
+              <td>
+                <span class="gestor-linha-badge">
+                  <span class="gestor-linha-dot" style="background-color: ${corLinha};"></span>
+                  ${m.linha}
+                </span>
+              </td>
+              <td>
+                <span style="font-weight: 600; font-size: 12px;">${m.veiculo.split('(')[0].trim()}</span>
+              </td>
+              <td>
+                <span style="font-size: 12px; color: var(--texto-secundario);">${m.turno.split('(')[0].trim()}</span>
+              </td>
+              <td>
+                <span class="gestor-pin-box">
+                  <span>${pinMostrado}</span>
+                  <button type="button" class="gestor-pin-olho-btn" data-acao="toggle-pin" data-id="${m.id}" title="Mostrar/ocultar PIN">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                </span>
+              </td>
+              <td>${statusBadge}</td>
+              <td>
+                <div class="gestor-acoes-td" style="justify-content: flex-end;">
+                  <button type="button" class="gestor-btn-acao-tb" data-acao="editar" data-id="${m.id}" title="Editar motorista">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="gestor-btn-acao-tb" data-acao="toggle-status" data-id="${m.id}" title="Alternar status ativo/folga">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="gestor-btn-acao-tb gestor-btn-acao-tb--excluir" data-acao="excluir" data-id="${m.id}" title="Excluir cadastro">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Renderização de cards móveis
+      if (containerMobile) {
+        containerMobile.innerHTML = filtrados.map(m => {
+          const corLinha = obterCorLinha(m.linha);
+          const partesNome = m.nome.split(' ');
+          const iniciais = (partesNome[0][0] + (partesNome[1] ? partesNome[1][0] : '')).toUpperCase();
+          const pinMostrado = pinsVisiveis[m.id] ? m.pin : '••••';
+
+          let statusBadge = '';
+          if (m.status === 'ativo') {
+            statusBadge = `<span class="status-pill status-pill--ativo">Ativo</span>`;
+          } else if (m.status === 'viagem') {
+            statusBadge = `<span class="status-pill status-pill--viagem">Em Viagem</span>`;
+          } else if (m.status === 'folga') {
+            statusBadge = `<span class="status-pill status-pill--folga">Folga</span>`;
+          } else {
+            statusBadge = `<span class="status-pill status-pill--inativo">Inativo</span>`;
+          }
+
+          return `
+            <div class="gestor-card-motorista-mob" data-id="${m.id}">
+              <div class="gestor-card-motorista-mob__header">
+                <div class="gestor-card-motorista-mob__info">
+                  <div class="gestor-motorista-avatar">${iniciais}</div>
+                  <div>
+                    <div class="gestor-motorista-nome">${m.nome}</div>
+                    <div style="font-size: 11px; color: var(--texto-secundario);">${m.telefone || m.cpf || 'Sem contato'}</div>
+                  </div>
+                </div>
+                ${statusBadge}
+              </div>
+
+              <div class="gestor-card-motorista-mob__detalhes">
+                <div class="gestor-card-motorista-mob__item">
+                  <span class="gestor-card-motorista-mob__item-label">Matrícula</span>
+                  <span class="gestor-matricula-badge" style="display:inline-flex; width:fit-content;">${m.matricula}</span>
+                </div>
+                <div class="gestor-card-motorista-mob__item">
+                  <span class="gestor-card-motorista-mob__item-label">PIN Terminal</span>
+                  <span class="gestor-pin-box" style="display:inline-flex; width:fit-content;">
+                    <span>${pinMostrado}</span>
+                    <button type="button" class="gestor-pin-olho-btn" data-acao="toggle-pin" data-id="${m.id}" title="Ver PIN">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                  </span>
+                </div>
+                <div class="gestor-card-motorista-mob__item gestor-card-motorista-mob__item-full">
+                  <span class="gestor-card-motorista-mob__item-label">Linha Habitual</span>
+                  <span class="gestor-linha-badge" style="display:inline-flex; width:fit-content; margin-top:2px;">
+                    <span class="gestor-linha-dot" style="background-color: ${corLinha};"></span>
+                    ${m.linha}
+                  </span>
+                </div>
+                <div class="gestor-card-motorista-mob__item">
+                  <span class="gestor-card-motorista-mob__item-label">Ônibus</span>
+                  <span class="gestor-card-motorista-mob__item-valor">${m.veiculo.split('(')[0].trim()}</span>
+                </div>
+                <div class="gestor-card-motorista-mob__item">
+                  <span class="gestor-card-motorista-mob__item-label">Turno</span>
+                  <span class="gestor-card-motorista-mob__item-valor">${m.turno.split('(')[0].trim()}</span>
+                </div>
+                <div class="gestor-card-motorista-mob__item gestor-card-motorista-mob__item-full">
+                  <span class="gestor-card-motorista-mob__item-label">CNH & Validade</span>
+                  <span class="gestor-card-motorista-mob__item-valor">Categoria ${m.cnhCat} &bull; Validade: ${formatarData(m.cnhValidade)}</span>
                 </div>
               </div>
-            </td>
-            <td>
-              <span class="gestor-matricula-badge">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/></svg>
-                ${m.matricula}
-              </span>
-            </td>
-            <td>
-              <div class="gestor-cnh-wrap">
-                <span class="gestor-cnh-cat">Cat. ${m.cnhCat}</span>
-                <span class="gestor-cnh-val">Val: ${formatarData(m.cnhValidade)}</span>
-              </div>
-            </td>
-            <td>
-              <span class="gestor-linha-badge">
-                <span class="gestor-linha-dot" style="background-color: ${corLinha};"></span>
-                ${m.linha}
-              </span>
-            </td>
-            <td>
-              <span style="font-weight: 600; font-size: 12px;">${m.veiculo.split('(')[0].trim()}</span>
-            </td>
-            <td>
-              <span style="font-size: 12px; color: var(--texto-secundario);">${m.turno.split('(')[0].trim()}</span>
-            </td>
-            <td>
-              <span class="gestor-pin-box">
-                <span>${pinMostrado}</span>
-                <button type="button" class="gestor-pin-olho-btn" data-acao="toggle-pin" data-id="${m.id}" title="Mostrar/ocultar PIN">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                </button>
-              </span>
-            </td>
-            <td>${statusBadge}</td>
-            <td>
-              <div class="gestor-acoes-td" style="justify-content: flex-end;">
+
+              <div class="gestor-card-motorista-mob__acoes">
                 <button type="button" class="gestor-btn-acao-tb" data-acao="editar" data-id="${m.id}" title="Editar motorista">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
                 </button>
-                <button type="button" class="gestor-btn-acao-tb" data-acao="toggle-status" data-id="${m.id}" title="Alternar status ativo/folga">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="button" class="gestor-btn-acao-tb" data-acao="toggle-status" data-id="${m.id}" title="Alternar status">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
                   </svg>
                 </button>
                 <button type="button" class="gestor-btn-acao-tb gestor-btn-acao-tb--excluir" data-acao="excluir" data-id="${m.id}" title="Excluir cadastro">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                   </svg>
                 </button>
               </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     // Atualiza KPIs
@@ -645,42 +749,49 @@
   }
 
   /* ──────────────────────────────────────────────────────────
-     8. DELEGAÇÃO DE EVENTOS NA TABELA (AÇÕES)
+     8. DELEGAÇÃO DE EVENTOS NA TABELA E CARDS MÓVEIS (AÇÕES)
      ────────────────────────────────────────────────────────── */
+  function tratarAcaoMotorista(e) {
+    const btn = e.target.closest('button[data-acao]');
+    if (!btn) return;
+
+    const acao = btn.getAttribute('data-acao');
+    const id = btn.getAttribute('data-id');
+
+    if (acao === 'toggle-pin') {
+      pinsVisiveis[id] = !pinsVisiveis[id];
+      renderizarTabela();
+    } else if (acao === 'editar') {
+      abrirModal(id);
+    } else if (acao === 'toggle-status') {
+      const lista = obterMotoristas();
+      const mot = lista.find(m => m.id === id);
+      if (mot) {
+        mot.status = mot.status === 'ativo' ? 'folga' : (mot.status === 'folga' ? 'inativo' : 'ativo');
+        salvarMotoristas(lista);
+        mostrarToast(`Status de ${mot.nome} alterado para "${mot.status.toUpperCase()}".`);
+        renderizarTabela();
+      }
+    } else if (acao === 'excluir') {
+      const lista = obterMotoristas();
+      const mot = lista.find(m => m.id === id);
+      if (mot && confirm(`Deseja realmente descredenciar o motorista ${mot.nome} (${mot.matricula})?`)) {
+        const novaLista = lista.filter(m => m.id !== id);
+        salvarMotoristas(novaLista);
+        mostrarToast(`Motorista ${mot.nome} descredenciado com sucesso.`);
+        renderizarTabela();
+      }
+    }
+  }
+
   const tbody = document.getElementById('tabela-motoristas-corpo');
   if (tbody) {
-    tbody.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-acao]');
-      if (!btn) return;
+    tbody.addEventListener('click', tratarAcaoMotorista);
+  }
 
-      const acao = btn.getAttribute('data-acao');
-      const id = btn.getAttribute('data-id');
-
-      if (acao === 'toggle-pin') {
-        pinsVisiveis[id] = !pinsVisiveis[id];
-        renderizarTabela();
-      } else if (acao === 'editar') {
-        abrirModal(id);
-      } else if (acao === 'toggle-status') {
-        const lista = obterMotoristas();
-        const mot = lista.find(m => m.id === id);
-        if (mot) {
-          mot.status = mot.status === 'ativo' ? 'folga' : (mot.status === 'folga' ? 'inativo' : 'ativo');
-          salvarMotoristas(lista);
-          mostrarToast(`Status de ${mot.nome} alterado para "${mot.status.toUpperCase()}".`);
-          renderizarTabela();
-        }
-      } else if (acao === 'excluir') {
-        const lista = obterMotoristas();
-        const mot = lista.find(m => m.id === id);
-        if (mot && confirm(`Deseja realmente descredenciar o motorista ${mot.nome} (${mot.matricula})?`)) {
-          const novaLista = lista.filter(m => m.id !== id);
-          salvarMotoristas(novaLista);
-          mostrarToast(`Motorista ${mot.nome} descredenciado com sucesso.`);
-          renderizarTabela();
-        }
-      }
-    });
+  const containerMobile = document.getElementById('cards-motoristas-mobile');
+  if (containerMobile) {
+    containerMobile.addEventListener('click', tratarAcaoMotorista);
   }
 
   /* ──────────────────────────────────────────────────────────

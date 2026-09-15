@@ -971,36 +971,307 @@
   opacity: 1;
 }
 
-/* ── RESPONSIVIDADE ─────────────────────────────────────────────────── */
+/* ── CARDS DE MOTORISTAS PARA DISPOSITIVOS MÓVEIS ─────────────────── */
+.gestor-motoristas-cards-mobile {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gestor-card-motorista-mob {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all var(--transicao);
+}
+
+.gestor-card-motorista-mob__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gestor-card-motorista-mob__info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gestor-card-motorista-mob__detalhes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  background: var(--fundo-campo);
+  padding: 10px 12px;
+  border-radius: var(--raio-pequeno);
+  font-size: 12px;
+}
+
+.gestor-card-motorista-mob__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gestor-card-motorista-mob__item-full {
+  grid-column: span 2;
+}
+
+.gestor-card-motorista-mob__item-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+  letter-spacing: 0.4px;
+}
+
+.gestor-card-motorista-mob__item-valor {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-principal);
+  word-break: break-word;
+}
+
+.gestor-card-motorista-mob__acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--borda-cor);
+}
+
+.gestor-card-motorista-mob__acoes .gestor-btn-acao-tb {
+  width: 36px;
+  height: 36px;
+}
+
+/* ── RESPONSIVIDADE COMPLETA DO PAINEL DO GESTOR ────────────────────── */
+@media (max-width: 1024px) {
+  .gestor-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .gestor-topbar {
-    padding: 0 16px;
+    padding: 10px 16px;
     height: auto;
-    min-height: 60px;
+    min-height: 56px;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
   }
+
+  .gestor-topbar__esquerda {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .gestor-topbar__direita {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
   .gestor-conteudo {
-    padding: 16px;
+    padding: 16px 12px;
   }
+
   .gestor-banner {
+    padding: 18px 16px;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 16px;
   }
+
+  .gestor-banner__acoes {
+    width: 100%;
+  }
+
+  .btn-gestor-primario {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+  }
+
+  .gestor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .gestor-toolbar__esquerda {
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .gestor-busca-wrapper {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .gestor-select-filtro {
+    width: 100%;
+  }
+
+  .gestor-toolbar__direita {
+    width: 100%;
+  }
+
+  .gestor-toolbar__direita .btn-gestor-secundario {
+    width: 100%;
+    justify-content: center;
+  }
+
   .gestor-form-grid {
     grid-template-columns: 1fr;
   }
+
   .gestor-form-col-2 {
     grid-column: span 1;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  /* Alterna visualização da tabela para cards modernos no celular */
+  .gestor-tabela-container {
+    display: none;
+  }
+
+  .gestor-motoristas-cards-mobile {
+    display: flex;
+  }
+
+  .gestor-kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .gestor-kpi-card {
+    padding: 14px 16px;
+  }
+
+  .gestor-kpi-card__valor {
+    font-size: 24px;
+  }
+
+  .gestor-abas {
+    gap: 4px;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .gestor-aba-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .gestor-escala-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modal adaptativo para tela cheia / folha no celular */
+  .gestor-modal-overlay {
+    padding: 8px;
+    align-items: flex-end;
+  }
+
+  .gestor-modal {
+    max-width: 100%;
+    max-height: 94vh;
+    max-height: 94dvh;
+    border-radius: var(--raio-medio) var(--raio-medio) 0 0;
+    margin: 0;
+  }
+
+  .gestor-modal__header {
+    padding: 14px 18px;
+  }
+
+  .gestor-modal__titulo {
+    font-size: 16px;
+  }
+
+  .gestor-modal__corpo {
+    padding: 16px;
+  }
+
+  .gestor-modal__footer {
+    padding: 12px 16px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .gestor-modal__footer button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .gestor-logo__cidade {
+    display: none;
+  }
+
+  .gestor-topbar__status {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  #gestor-status-texto {
+    max-width: 130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gestor-btn-link {
+    padding: 6px 8px;
+  }
+
   .gestor-btn-link span {
     display: none;
   }
+
   .gestor-usuario-info {
     display: none;
+  }
+
+  .gestor-usuario-card {
+    padding: 2px 4px;
+  }
+
+  .gestor-btn-sair span {
+    display: none;
+  }
+
+  .gestor-btn-sair {
+    padding: 6px 8px;
+  }
+
+  .gestor-banner__info h1 {
+    font-size: 18px;
+  }
+
+  .gestor-banner__info p {
+    font-size: 13px;
+  }
+
+  .gestor-toast {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    border-radius: var(--raio-pequeno);
   }
 }
