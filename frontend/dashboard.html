@@ -464,6 +464,21 @@
             </div>
           </div>
 
+          <!-- Botão Flutuante de Controle de Paradas de Ônibus -->
+          <button type="button" class="mapa-btn-paradas mapa-btn-paradas--ativo" id="btn-toggle-paradas" aria-pressed="true" title="Alternar visibilidade das paradas no mapa">
+            <span class="mapa-btn-paradas__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3">
+                <rect x="4" y="3" width="16" height="13" rx="2"></rect>
+                <path d="M4 10h16"></path>
+                <path d="M7 16v3"></path>
+                <path d="M17 16v3"></path>
+                <circle cx="8" cy="13" r="1" fill="currentColor"></circle>
+                <circle cx="16" cy="13" r="1" fill="currentColor"></circle>
+              </svg>
+            </span>
+            <span class="mapa-btn-paradas__texto">Paradas</span>
+          </button>
+
           <!-- Legenda com Filtro Interativo por Linha em Carrossel -->
           <div class="mapa-legenda">
 
@@ -1514,6 +1529,7 @@
 
   <!-- Bibliotecas de Terceiros e Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/paradas.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
 </html>

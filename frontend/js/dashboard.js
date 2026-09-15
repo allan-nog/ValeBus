@@ -300,6 +300,147 @@
 
 
   /* ──────────────────────────────────────────────────────────
+     4.1. PONTOS (PARADAS) DE ÔNIBUS — ARQUITETURA MODULAR
+     Fonte de dados estruturada em js/paradas.js (window.VALEBUS_PARADAS)
+     Preparada para escalar para ~115 paradas de todas as rotas municipais
+     ────────────────────────────────────────────────────────── */
+  const camadaParadas = L.layerGroup();
+  let paradasVisiveis = true; // Ativo por padrão
+  let linhaAtivaFiltro = 'todas';
+
+  function criarIconeParada(ponto) {
+    const cor = ponto.corLinha || '#16a34a';
+    const htmlIcone = `
+      <div class="ponto-parada-container" data-linha="${ponto.linha || ponto.linhaChave}">
+        <div class="ponto-parada-pin" style="--cor-ponto: ${cor};">
+          <div class="ponto-parada-corpo">
+            <svg class="ponto-parada-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
+              <path d="M4 10h16"></path>
+              <path d="M7 16v3"></path>
+              <path d="M17 16v3"></path>
+              <circle cx="8" cy="13" r="1" fill="currentColor"></circle>
+              <circle cx="16" cy="13" r="1" fill="currentColor"></circle>
+            </svg>
+          </div>
+          <div class="ponto-parada-ponteiro"></div>
+        </div>
+      </div>
+    `;
+
+    return L.divIcon({
+      html: htmlIcone,
+      className: 'leaflet-ponto-parada-wrapper',
+      iconSize: [26, 32],
+      iconAnchor: [13, 30],
+      popupAnchor: [0, -28]
+    });
+  }
+
+  function gerarHtmlPopupParada(ponto) {
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${ponto.posicao[0]},${ponto.posicao[1]}`;
+
+    return `
+      <div class="popup-ponto">
+        <div class="popup-ponto__corpo">
+          <div class="popup-ponto__item">
+            <span class="popup-ponto__rotulo">Endereço</span>
+            <h4 class="popup-ponto__endereco">${ponto.endereco}</h4>
+          </div>
+          <div class="popup-ponto__item">
+            <span class="popup-ponto__rotulo">Ponto de Referência</span>
+            <div class="popup-ponto__referencia">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.5"/>
+              </svg>
+              <span>${ponto.referencia}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="popup-ponto__footer">
+          <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="popup-ponto__btn-maps" title="Abrir localização exata no Google Maps">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <span>Ver no Google Maps</span>
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderizarParadas(linhaSelecionada = linhaAtivaFiltro) {
+    camadaParadas.clearLayers();
+
+    if (!window.VALEBUS_PARADAS) return;
+
+    const paradas = window.VALEBUS_PARADAS.obterParadas(linhaSelecionada);
+
+    paradas.forEach(ponto => {
+      const icone = criarIconeParada(ponto);
+      const popupConteudo = gerarHtmlPopupParada(ponto);
+
+      const marker = L.marker(ponto.posicao, {
+        icon: icone,
+        title: `${ponto.endereco} — ${ponto.referencia}`
+      }).bindPopup(popupConteudo);
+
+      marker.bindTooltip(`<strong>${ponto.referencia}</strong><br><span style="font-size:11px;color:#cbd5e1;">${ponto.endereco}</span>`, {
+        direction: 'top',
+        offset: [0, -28],
+        opacity: 0.95
+      });
+
+      camadaParadas.addLayer(marker);
+    });
+
+    if (paradasVisiveis && !map.hasLayer(camadaParadas)) {
+      camadaParadas.addTo(map);
+    }
+
+    // Mantém o rótulo limpo do botão flutuante
+    const btnTextoParadas = document.querySelector('.mapa-btn-paradas__texto');
+    if (btnTextoParadas) {
+      btnTextoParadas.textContent = 'Paradas';
+    }
+  }
+
+  function atualizarVisibilidadeParadas(linhaSelecionada = linhaAtivaFiltro) {
+    linhaAtivaFiltro = linhaSelecionada;
+
+    if (!paradasVisiveis) {
+      if (map.hasLayer(camadaParadas)) {
+        map.removeLayer(camadaParadas);
+      }
+      return;
+    }
+
+    renderizarParadas(linhaSelecionada);
+  }
+
+  // Renderização inicial
+  renderizarParadas();
+
+  // Controle de alternar visibilidade via botão do mapa
+  const btnToggleParadas = document.getElementById('btn-toggle-paradas');
+  if (btnToggleParadas) {
+    btnToggleParadas.addEventListener('click', () => {
+      paradasVisiveis = !paradasVisiveis;
+      btnToggleParadas.classList.toggle('mapa-btn-paradas--ativo', paradasVisiveis);
+      btnToggleParadas.setAttribute('aria-pressed', String(paradasVisiveis));
+
+      if (paradasVisiveis) {
+        renderizarParadas(linhaAtivaFiltro);
+      } else {
+        if (map.hasLayer(camadaParadas)) {
+          map.removeLayer(camadaParadas);
+        }
+      }
+    });
+  }
+
+
+  /* ──────────────────────────────────────────────────────────
      5. SIMULAÇÃO DE MOVIMENTAÇÃO GPS
      ────────────────────────────────────────────────────────── */
   setInterval(() => {
@@ -454,6 +595,9 @@
         }
       });
 
+      // Atualiza visibilidade dos pontos de parada conforme a linha
+      atualizarVisibilidadeParadas(linhaSelecionada);
+
       // Atualiza o contador no resumo do painel
       const elTotal = document.getElementById('total-onibus-ativo');
       if (elTotal) {
@@ -514,6 +658,9 @@
       if (!map.hasLayer(marker)) {
         map.addLayer(marker);
       }
+
+      // Atualiza visibilidade dos pontos de parada para a linha focada
+      atualizarVisibilidadeParadas(chaveLinha);
 
       // Atualiza popup antes de abrir
       marker.setPopupContent(gerarHtmlPopup(bus));

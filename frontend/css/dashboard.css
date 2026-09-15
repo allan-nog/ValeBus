@@ -1481,6 +1481,205 @@
 }
 
 
+/* ──────────────────────────────────────────────────────────
+   MARCADORES & ÍCONES DE PONTOS (PARADAS) DE ÔNIBUS NO LEAFLET
+   ────────────────────────────────────────────────────────── */
+.leaflet-ponto-parada-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+.ponto-parada-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+.ponto-parada-container:hover {
+  transform: translateY(-4px) scale(1.18);
+  z-index: 1000 !important;
+}
+
+.ponto-parada-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
+}
+
+.ponto-parada-corpo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--cor-ponto, #16a34a);
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: box-shadow 0.2s ease;
+}
+
+.ponto-parada-container:hover .ponto-parada-corpo {
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.ponto-parada-svg {
+  width: 12px;
+  height: 12px;
+  stroke: #ffffff;
+  flex-shrink: 0;
+}
+
+.ponto-parada-ponteiro {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--cor-ponto, #16a34a);
+  margin-top: -1px;
+}
+
+/* Botão Flutuante de Controle de Paradas */
+.mapa-btn-paradas {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--borda-cor);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mapa-btn-paradas:hover {
+  background-color: #ffffff;
+  border-color: #16a34a;
+  color: var(--texto-principal);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.mapa-btn-paradas--ativo {
+  background-color: #ffffff;
+  border-color: rgba(22, 163, 74, 0.5);
+  color: #16a34a;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.18);
+}
+
+.mapa-btn-paradas__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+@media (max-width: 768px) {
+  .mapa-btn-paradas {
+    top: 56px;
+    right: 10px;
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+}
+
+/* Popups dos Pontos de Parada */
+.popup-ponto {
+  padding: 10px 12px 8px;
+  font-family: inherit;
+  min-width: 220px;
+  max-width: 280px;
+}
+
+.popup-ponto__corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popup-ponto__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popup-ponto__rotulo {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--texto-secundario);
+}
+
+.popup-ponto__endereco {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.popup-ponto__referencia {
+  font-size: 12px;
+  font-weight: 600;
+  color: #16a34a;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.3;
+}
+
+.popup-ponto__referencia svg {
+  flex-shrink: 0;
+}
+
+.popup-ponto__footer {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--borda-cor);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.popup-ponto__btn-maps {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cor-marca);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background-color: rgba(37, 99, 235, 0.08);
+  transition: all 0.15s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.popup-ponto__btn-maps:hover {
+  background-color: rgba(37, 99, 235, 0.18);
+  color: #1d4ed8;
+}
+
+
 /* ═══════════════════════════════════════════════════════════
    5.1. SEÇÕES MODULARES (VIEWS: BUSCAR, HORÁRIOS, ALERTAS, SOBRE)
    ═══════════════════════════════════════════════════════════ */
@@ -4250,8 +4449,45 @@
 }
 
 [data-theme="dark"] .popup-onibus__header,
-[data-theme="dark"] .popup-onibus__footer {
+[data-theme="dark"] .popup-onibus__footer,
+[data-theme="dark"] .popup-ponto__header,
+[data-theme="dark"] .popup-ponto__footer {
   border-color: #334155;
+}
+
+[data-theme="dark"] .mapa-btn-paradas {
+  background-color: rgba(30, 41, 59, 0.94);
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .mapa-btn-paradas:hover {
+  background-color: #1e293b;
+  border-color: #22c55e;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .mapa-btn-paradas--ativo {
+  background-color: #1e293b;
+  border-color: rgba(34, 197, 94, 0.6);
+  color: #4ade80;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.2);
+}
+
+[data-theme="dark"] .popup-ponto__tag-parada {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .popup-ponto__btn-maps {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .popup-ponto__btn-maps:hover {
+  background-color: rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
 }
 
 [data-theme="dark"] .popup-onibus__gps-badge {
