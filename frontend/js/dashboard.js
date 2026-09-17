@@ -38,7 +38,12 @@
         if (usuario && usuario.nome) {
           nome = usuario.nome;
           email = usuario.email || `${usuario.nome.toLowerCase().replace(/\s+/g, '.')}@feiratech.com.br`;
-          cargo = usuario.metodo === 'Google' ? 'Avaliador Feira Tech' : (usuario.cargo || 'Operador CCO');
+          const ehGestor = (usuario.email && usuario.email.toLowerCase().trim() === 'valebussrs@gmail.com') || usuario.perfil === 'gestor';
+          if (ehGestor) {
+            cargo = usuario.cargo || 'Gestor CCO & Frotas Master';
+          } else {
+            cargo = usuario.metodo === 'Google' ? 'Avaliador Feira Tech' : (usuario.cargo || 'Operador CCO');
+          }
           if (usuario.metodo) metodo = usuario.metodo;
         }
       }
@@ -1623,8 +1628,9 @@
       if (dropCargo && user.cargo) dropCargo.textContent = user.cargo;
       if (dropAvatar && iniciais) dropAvatar.textContent = iniciais;
 
-      // Se for o gestor valebussrs@gmail.com, exibe o atalho CCO no dropdown
-      if (btnGestor && user.email && user.email.toLowerCase().trim() === 'valebussrs@gmail.com') {
+      // Se for o gestor valebussrs@gmail.com ou perfil gestor, exibe o atalho CCO no dropdown
+      const ehGestor = (user.email && user.email.toLowerCase().trim() === 'valebussrs@gmail.com') || user.perfil === 'gestor';
+      if (btnGestor && ehGestor) {
         btnGestor.style.display = 'flex';
       }
     } catch (e) {

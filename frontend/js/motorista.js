@@ -47,13 +47,22 @@
       const salvo = localStorage.getItem('valebus_usuario');
       if (salvo) {
         const u = JSON.parse(salvo);
-        if (u.nome) estadoMotorista.nome = u.nome;
-        if (u.matricula) estadoMotorista.matricula = u.matricula;
-        if (u.linha) {
-          estadoMotorista.linhaCodigo = u.linha.includes('0') ? u.linha : 'Linha 01';
-          estadoMotorista.linhaNome = u.linha;
+        const ehGestor = (u.email && u.email.toLowerCase().trim() === 'valebussrs@gmail.com') || u.perfil === 'gestor';
+        if (ehGestor) {
+          estadoMotorista.ehGestor = true;
+          estadoMotorista.nome = u.nome || 'Gestor Operacional ValeBus';
+          estadoMotorista.matricula = u.matricula || 'CCO-001';
+          estadoMotorista.cargo = u.cargo || 'Gestor CCO & Supervisor de Bordo';
+          estadoMotorista.email = u.email || 'valebussrs@gmail.com';
+        } else {
+          if (u.nome) estadoMotorista.nome = u.nome;
+          if (u.matricula) estadoMotorista.matricula = u.matricula;
+          if (u.linha) {
+            estadoMotorista.linhaCodigo = u.linha.includes('0') ? u.linha : 'Linha 01';
+            estadoMotorista.linhaNome = u.linha;
+          }
+          if (u.veiculo) estadoMotorista.veiculo = u.veiculo;
         }
-        if (u.veiculo) estadoMotorista.veiculo = u.veiculo;
       }
 
       const viagensSalvas = localStorage.getItem('valebus_viagens_hoje');
@@ -110,13 +119,24 @@
     // Topbar & Dropdown
     const topAvatar = document.getElementById('topbar-usuario-avatar');
     const topNome = document.getElementById('topbar-usuario-nome');
+    const topCargo = document.getElementById('topbar-usuario-cargo');
     const dropAvatar = document.getElementById('dropdown-usuario-avatar');
     const dropNome = document.getElementById('dropdown-usuario-nome');
+    const dropEmail = document.getElementById('dropdown-usuario-email');
+    const dropCargo = document.getElementById('dropdown-usuario-cargo');
+    const btnGestor = document.getElementById('dropdown-motorista-btn-gestor');
 
     if (topAvatar) topAvatar.textContent = iniciais;
     if (topNome) topNome.textContent = estadoMotorista.nome;
     if (dropAvatar) dropAvatar.textContent = iniciais;
     if (dropNome) dropNome.textContent = estadoMotorista.nome;
+
+    if (estadoMotorista.ehGestor) {
+      if (topCargo) topCargo.textContent = 'Gestor CCO (Supervisão)';
+      if (dropEmail) dropEmail.textContent = `${estadoMotorista.email} • Matrícula ${estadoMotorista.matricula}`;
+      if (dropCargo) dropCargo.textContent = 'Gestor CCO & Frotas Master';
+      if (btnGestor) btnGestor.style.display = 'flex';
+    }
 
     // Cockpit Card
     const elNome = document.getElementById('motorista-nome-display');
@@ -489,11 +509,10 @@
 
   const mainTitulo = document.getElementById('main-titulo');
   const mainSubtitulo = document.getElementById('main-subtitulo');
+  const mainHeader = document.querySelector('.main__header');
 
   const titulos = {
-    cockpit: { t: 'Cockpit de Bordo • Telemetria em Tempo Real', s: 'Santa Rita do Sapucaí — Ônibus #02 (Linha 01 Centro / Bairro Industrial)' },
-    rotas: { t: 'Escala & Itinerários Programados', s: 'Linhas atribuídas ao veículo e pontos de controle' },
-    perfil: { t: 'Meu Perfil Operacional & Turno', s: 'Dados do condutor, métricas de pontualidade e equipamento' }
+    cockpit: { t: 'Cockpit de Bordo • Telemetria em Tempo Real', s: 'Santa Rita do Sapucaí — Ônibus #02 (Linha 01 Centro / Bairro Industrial)' }
   };
 
   function trocarSecao(chave) {
@@ -519,9 +538,16 @@
       }
     });
 
-    if (titulos[chave] && mainTitulo && mainSubtitulo) {
-      mainTitulo.textContent = titulos[chave].t;
-      mainSubtitulo.textContent = titulos[chave].s;
+    if (mainHeader) {
+      if (chave === 'cockpit') {
+        mainHeader.style.display = '';
+        if (mainTitulo && titulos.cockpit) mainTitulo.textContent = titulos.cockpit.t;
+        if (mainSubtitulo && titulos.cockpit) mainSubtitulo.textContent = titulos.cockpit.s;
+      } else {
+        mainHeader.style.display = 'none';
+        if (mainTitulo) mainTitulo.textContent = '';
+        if (mainSubtitulo) mainSubtitulo.textContent = '';
+      }
     }
 
     if (chave === 'cockpit' && map) {

@@ -41,7 +41,7 @@
 
     <div class="gestor-topbar__direita">
       <!-- Atalho: Mapa de Passageiros -->
-      <a href="dashboard.html" class="gestor-btn-link" title="Visualizar mapa público da cidade">
+      <a href="dashboard.html" class="gestor-btn-link link-com-confirmacao" data-destino="passageiro" data-tela="passageiro" title="Visualizar mapa público da cidade">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
           <line x1="9" y1="3" x2="9" y2="18"/>
@@ -51,7 +51,7 @@
       </a>
 
       <!-- Atalho: Cockpit do Motorista -->
-      <a href="motorista.html" class="gestor-btn-link" title="Abrir terminal embarcado de motorista">
+      <a href="motorista.html" class="gestor-btn-link link-com-confirmacao" data-destino="motorista" data-tela="motorista" title="Abrir terminal embarcado de motorista">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 3c-.1.2-.1.4-.1.6V16c0 .6.4 1 1 1h2"/>
           <circle cx="7" cy="17" r="2"/>
@@ -92,40 +92,145 @@
         </svg>
         <span>Sair</span>
       </button>
+
+      <!-- Botão Hamburguer para Mobile -->
+      <button type="button" class="gestor-btn-menu-mobile" id="btn-menu-mobile" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="menu-mobile-gaveta">
+        <span class="gestor-hamburguer-linha"></span>
+        <span class="gestor-hamburguer-linha"></span>
+        <span class="gestor-hamburguer-linha"></span>
+      </button>
     </div>
   </header>
+
+  <!-- BACKDROP E GAVETA DO MENU MÓVEL EXPANSÍVEL -->
+  <div class="gestor-menu-mobile-backdrop" id="menu-mobile-backdrop" aria-hidden="true"></div>
+  <aside class="gestor-menu-mobile-gaveta" id="menu-mobile-gaveta" aria-hidden="true" role="dialog" aria-label="Menu principal de navegação">
+    <div class="gestor-menu-mobile__header">
+      <div class="gestor-menu-mobile__logo">
+        <span class="gestor-logo__marca">ValeBus</span>
+        <span class="gestor-badge-pill">CCO</span>
+      </div>
+      <button type="button" class="gestor-menu-mobile__fechar" id="btn-fechar-menu-mobile" aria-label="Fechar menu">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="gestor-menu-mobile__corpo">
+      <!-- Identificação do Usuário -->
+      <div class="gestor-menu-mobile__usuario">
+        <div class="gestor-avatar">GV</div>
+        <div class="gestor-menu-mobile__usuario-info">
+          <span class="gestor-menu-mobile__nome">Gestor Operacional</span>
+          <span class="gestor-menu-mobile__email">valebussrs@gmail.com</span>
+          <span class="gestor-menu-mobile__status-badge">Central de Controle Conectada</span>
+        </div>
+      </div>
+
+      <!-- Seção: Navegação Externa -->
+      <div class="gestor-menu-mobile__secao">
+        <span class="gestor-menu-mobile__secao-titulo">Outros Painéis do Sistema</span>
+
+        <a href="dashboard.html" class="gestor-menu-mobile__link link-com-confirmacao" data-destino="passageiro" data-tela="passageiro">
+          <div class="gestor-menu-mobile__link-icone gestor-menu-mobile__link-icone--azul">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+              <line x1="9" y1="3" x2="9" y2="18"/>
+              <line x1="15" y1="6" x2="15" y2="21"/>
+            </svg>
+          </div>
+          <div class="gestor-menu-mobile__link-textos">
+            <div class="gestor-menu-mobile__link-titulo">Mapa do Passageiro</div>
+            <div class="gestor-menu-mobile__link-sub">Visualizar linhas públicas, rotas e paradas</div>
+          </div>
+          <span class="gestor-tag-modulo">Público</span>
+        </a>
+
+        <a href="motorista.html" class="gestor-menu-mobile__link link-com-confirmacao" data-destino="motorista" data-tela="motorista">
+          <div class="gestor-menu-mobile__link-icone gestor-menu-mobile__link-icone--verde">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 3c-.1.2-.1.4-.1.6V16c0 .6.4 1 1 1h2"/>
+              <circle cx="7" cy="17" r="2"/>
+            </svg>
+          </div>
+          <div class="gestor-menu-mobile__link-textos">
+            <div class="gestor-menu-mobile__link-titulo">Terminal do Motorista</div>
+            <div class="gestor-menu-mobile__link-sub">Tacógrafo digital, escala e bordo</div>
+          </div>
+          <span class="gestor-tag-modulo">Bordo</span>
+        </a>
+      </div>
+
+      <!-- Seção: Ajustes -->
+      <div class="gestor-menu-mobile__secao">
+        <span class="gestor-menu-mobile__secao-titulo">Preferências</span>
+
+        <button type="button" class="gestor-menu-mobile__link-btn" id="btn-tema-mobile">
+          <div class="gestor-menu-mobile__link-icone gestor-menu-mobile__link-icone--neutro">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          </div>
+          <div class="gestor-menu-mobile__link-textos">
+            <div class="gestor-menu-mobile__link-titulo" id="rotulo-tema-mobile">Alternar Tema Visual</div>
+            <div class="gestor-menu-mobile__link-sub">Alternar entre modo Claro e Escuro</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div class="gestor-menu-mobile__footer">
+      <button type="button" class="btn-gestor-sair-mobile" id="btn-sair-mobile">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>Encerrar Sessão CCO</span>
+      </button>
+    </div>
+  </aside>
 
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="gestor-conteudo" role="main">
 
-    <!-- BANNER BOAS-VINDAS -->
+    <!-- CABEÇALHO DA PÁGINA (SIMPLIFICADO) -->
     <section class="gestor-banner" aria-labelledby="banner-titulo">
       <div class="gestor-banner__info">
-        <h1 id="banner-titulo">Gestão de Motoristas & Despacho Operacional</h1>
-        <p>Cadastre, credencie e monitore as escalas de motoristas da frota urbana de Santa Rita do Sapucaí. As credenciais cadastradas aqui são imediatamente sincronizadas com o terminal de bordo dos ônibus.</p>
+        <h1 id="banner-titulo">Painel de Gestão &amp; Despacho CCO</h1>
+        <p>Controle de motoristas, escalas operacionais e telemetria da frota de Santa Rita do Sapucaí.</p>
       </div>
       <div class="gestor-banner__acoes">
         <button type="button" class="btn-gestor-primario" id="btn-abrir-modal-motorista">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          <span>Cadastrar Novo Motorista</span>
+          <span>Novo Motorista</span>
         </button>
       </div>
     </section>
 
-    <!-- KPIS OPERACIONAIS -->
+    <!-- KPIS OPERACIONAIS (SIMPLIFICADOS) -->
     <section class="gestor-kpi-grid" aria-label="Indicadores gerais da frota">
       <!-- Card 1: Motoristas Cadastrados -->
       <div class="gestor-kpi-card">
         <div class="gestor-kpi-card__info">
-          <span class="gestor-kpi-card__rotulo">Motoristas Cadastrados</span>
+          <span class="gestor-kpi-card__rotulo">Motoristas</span>
           <span class="gestor-kpi-card__valor" id="kpi-total-motoristas">0</span>
-          <span class="gestor-kpi-card__sub">Credenciados na base ValeBus</span>
+          <span class="gestor-kpi-card__sub">Cadastrados no CCO</span>
         </div>
         <div class="gestor-kpi-card__icone-wrap gestor-kpi-card__icone-wrap--azul">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -137,12 +242,12 @@
       <!-- Card 2: Motoristas em Turno -->
       <div class="gestor-kpi-card">
         <div class="gestor-kpi-card__info">
-          <span class="gestor-kpi-card__rotulo">Em Turno / Operação</span>
+          <span class="gestor-kpi-card__rotulo">Em Turno</span>
           <span class="gestor-kpi-card__valor" id="kpi-motoristas-ativos">0</span>
-          <span class="gestor-kpi-card__sub">Transmitindo telemetria CCO</span>
+          <span class="gestor-kpi-card__sub">Operando em linha</span>
         </div>
         <div class="gestor-kpi-card__icone-wrap gestor-kpi-card__icone-wrap--verde">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
             <polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
@@ -152,12 +257,12 @@
       <!-- Card 3: Frota em Circulação -->
       <div class="gestor-kpi-card">
         <div class="gestor-kpi-card__info">
-          <span class="gestor-kpi-card__rotulo">Veículos em Linha</span>
+          <span class="gestor-kpi-card__rotulo">Veículos</span>
           <span class="gestor-kpi-card__valor" id="kpi-frota-ativa">6</span>
-          <span class="gestor-kpi-card__sub">Ônibus ativos em SRS</span>
+          <span class="gestor-kpi-card__sub">Frota monitorada</span>
         </div>
         <div class="gestor-kpi-card__icone-wrap gestor-kpi-card__icone-wrap--roxo">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 3c-.1.2-.1.4-.1.6V16c0 .6.4 1 1 1h2"/>
             <circle cx="7" cy="17" r="2"/>
             <path d="M9 17h6"/>
@@ -169,12 +274,12 @@
       <!-- Card 4: Pontualidade -->
       <div class="gestor-kpi-card">
         <div class="gestor-kpi-card__info">
-          <span class="gestor-kpi-card__rotulo">Pontualidade Média</span>
+          <span class="gestor-kpi-card__rotulo">Pontualidade</span>
           <span class="gestor-kpi-card__valor">98.4%</span>
-          <span class="gestor-kpi-card__sub">Conformidade com a tabela horária</span>
+          <span class="gestor-kpi-card__sub">Índice da frota</span>
         </div>
         <div class="gestor-kpi-card__icone-wrap gestor-kpi-card__icone-wrap--amarelo">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
           </svg>
@@ -198,7 +303,7 @@
           <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
           <line x1="3" y1="10" x2="21" y2="10"/>
         </svg>
-        <span>Escalas & Frotas do Dia</span>
+        <span>Escalas do Dia</span>
       </button>
 
       <button type="button" class="gestor-aba-btn" data-aba="ocorrencias">
@@ -206,7 +311,7 @@
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
         </svg>
-        <span>Rádio & Ocorrências CCO</span>
+        <span>Rádio &amp; Ocorrências</span>
       </button>
     </nav>
 
@@ -219,11 +324,11 @@
             <svg class="gestor-busca-icone" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" class="gestor-busca-input" id="input-busca-motorista" placeholder="Buscar por nome, matrícula ou CPF...">
+            <input type="text" class="gestor-busca-input" id="input-busca-motorista" placeholder="Buscar por motorista, matrícula ou linha...">
           </div>
 
           <select class="gestor-select-filtro" id="filtro-status-motorista" aria-label="Filtrar por status">
-            <option value="todos">Todos os Status</option>
+            <option value="todos">Status: Todos</option>
             <option value="ativo">Ativo</option>
             <option value="viagem">Em Viagem</option>
             <option value="folga">Folga</option>
@@ -231,7 +336,7 @@
           </select>
 
           <select class="gestor-select-filtro" id="filtro-linha-motorista" aria-label="Filtrar por linha">
-            <option value="todas">Todas as Linhas</option>
+            <option value="todas">Linha: Todas</option>
             <option value="Fernandes">Linha Fernandes</option>
             <option value="Anchieta">Linha Anchieta</option>
             <option value="Fortaleza">Linha Fortaleza</option>
@@ -247,23 +352,20 @@
               <polyline points="23 4 23 10 17 10"/>
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
             </svg>
-            <span>Restaurar Base Demo</span>
+            <span>Restaurar Padrão</span>
           </button>
         </div>
       </div>
 
-      <!-- TABELA / LISTA DE MOTORISTAS (RESPONSIVA) -->
+      <!-- TABELA DE MOTORISTAS (CONSOLIDADA E AREJADA) -->
       <div class="gestor-tabela-container">
         <table class="gestor-tabela" aria-label="Lista de motoristas cadastrados">
           <thead>
             <tr>
-              <th scope="col">Motorista</th>
-              <th scope="col">Matrícula</th>
-              <th scope="col">CNH & Validade</th>
-              <th scope="col">Linha Principal</th>
-              <th scope="col">Ônibus</th>
+              <th scope="col">Motorista &amp; Matrícula</th>
+              <th scope="col">Linha &amp; Veículo</th>
               <th scope="col">Turno</th>
-              <th scope="col">PIN Terminal</th>
+              <th scope="col">PIN de Bordo</th>
               <th scope="col">Status</th>
               <th scope="col" style="text-align: right;">Ações</th>
             </tr>
@@ -305,6 +407,9 @@
        ═══════════════════════════════════════════════════════ -->
   <div class="gestor-modal-overlay" id="modal-motorista" aria-hidden="true">
     <div class="gestor-modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo-motorista">
+      <!-- Barra puxador visual para dispositivos móveis -->
+      <div class="gestor-modal__pull-bar" aria-hidden="true"></div>
+
       <div class="gestor-modal__header">
         <h2 class="gestor-modal__titulo" id="modal-titulo-motorista">Cadastrar Novo Motorista</h2>
         <button type="button" class="gestor-modal__fechar" id="btn-fechar-modal-motorista" aria-label="Fechar janela">
@@ -323,7 +428,7 @@
             <!-- Nome Completo -->
             <div class="gestor-form-grupo gestor-form-col-2">
               <label class="gestor-form-rotulo" for="form-mot-nome">Nome Completo *</label>
-              <input type="text" class="gestor-form-input" id="form-mot-nome" placeholder="Ex: Carlos Alberto Mendes" required>
+              <input type="text" class="gestor-form-input" id="form-mot-nome" placeholder="Ex: Carlos Alberto Mendes" required autocomplete="name">
             </div>
 
             <!-- Matrícula + Gerador -->
@@ -344,34 +449,39 @@
             <!-- CPF -->
             <div class="gestor-form-grupo">
               <label class="gestor-form-rotulo" for="form-mot-cpf">CPF do Motorista</label>
-              <input type="text" class="gestor-form-input" id="form-mot-cpf" placeholder="000.000.000-00">
+              <input type="text" class="gestor-form-input" id="form-mot-cpf" placeholder="000.000.000-00" inputmode="numeric">
             </div>
 
             <!-- Telefone -->
             <div class="gestor-form-grupo">
               <label class="gestor-form-rotulo" for="form-mot-telefone">Telefone / WhatsApp</label>
-              <input type="text" class="gestor-form-input" id="form-mot-telefone" placeholder="(35) 99999-0000">
+              <input type="tel" class="gestor-form-input" id="form-mot-telefone" placeholder="(35) 99999-0000" autocomplete="tel">
             </div>
 
             <!-- CNH Número -->
             <div class="gestor-form-grupo">
               <label class="gestor-form-rotulo" for="form-mot-cnh">Número da CNH</label>
-              <input type="text" class="gestor-form-input" id="form-mot-cnh" placeholder="Ex: 04829104820">
+              <input type="text" class="gestor-form-input" id="form-mot-cnh" placeholder="Ex: 04829104820" inputmode="numeric">
             </div>
 
             <!-- Categoria CNH -->
             <div class="gestor-form-grupo">
               <label class="gestor-form-rotulo" for="form-mot-cnh-cat">Categoria CNH *</label>
               <select class="gestor-form-select" id="form-mot-cnh-cat">
-                <option value="D" selected>Categoria D (Transporte de Passageiros)</option>
-                <option value="E">Categoria E (Articulados / Cargas Pesadas)</option>
+                <option value="D" selected>Categoria D (Passageiros)</option>
+                <option value="E">Categoria E (Articulados)</option>
               </select>
             </div>
 
-            <!-- Validade CNH -->
-            <div class="gestor-form-grupo">
-              <label class="gestor-form-rotulo" for="form-mot-cnh-validade">Validade da CNH *</label>
-              <input type="date" class="gestor-form-input" id="form-mot-cnh-validade">
+            <!-- Validade CNH (Destacada e 100% responsiva) -->
+            <div class="gestor-form-grupo gestor-form-grupo--validade">
+              <label class="gestor-form-rotulo" for="form-mot-cnh-validade">
+                <span>Validade da CNH *</span>
+                <span class="gestor-rotulo-dica">(Obrigatório para escala)</span>
+              </label>
+              <div class="gestor-date-input-wrap">
+                <input type="date" class="gestor-form-input gestor-form-input--date" id="form-mot-cnh-validade" required>
+              </div>
             </div>
 
             <!-- Linha Principal -->
@@ -436,6 +546,59 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODAL DE CONFIRMAÇÃO DE NAVEGAÇÃO ENTRE TELAS
+       ═══════════════════════════════════════════════════════ -->
+  <div class="gestor-modal-overlay" id="modal-confirmar-navegacao" aria-hidden="true">
+    <div class="gestor-modal gestor-modal--alerta" role="dialog" aria-modal="true" aria-labelledby="alerta-navegacao-titulo">
+      <div class="gestor-modal__header">
+        <div class="gestor-modal__header-alerta">
+          <div class="gestor-alerta-icone-wrap">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <h2 class="gestor-modal__titulo" id="alerta-navegacao-titulo">Sair do Painel do Gestor?</h2>
+        </div>
+        <button type="button" class="gestor-modal__fechar" id="btn-fechar-alerta-navegacao" aria-label="Fechar janela">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="gestor-modal__corpo">
+        <p class="gestor-alerta-texto" id="alerta-navegacao-mensagem">
+          Você está prestes a sair da Central de Controle Operacional (CCO) para acessar outra tela do sistema ValeBus.
+        </p>
+        
+        <div class="gestor-alerta-destino-card" id="alerta-destino-card">
+          <div class="gestor-alerta-destino-icone" id="alerta-destino-icone">
+            <!-- Renderizado dinamicamente -->
+          </div>
+          <div class="gestor-alerta-destino-info">
+            <div class="gestor-alerta-destino-nome" id="alerta-destino-nome">Tela Selecionada</div>
+            <div class="gestor-alerta-destino-sub" id="alerta-destino-sub">Descrição do módulo</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gestor-modal__footer">
+        <button type="button" class="btn-gestor-secundario" id="btn-cancelar-navegacao">Permanecer no Gestor</button>
+        <button type="button" class="btn-gestor-primario" id="btn-confirmar-navegacao">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          <span id="alerta-btn-confirmar-texto">Confirmar e Acessar</span>
+        </button>
+      </div>
     </div>
   </div>
 

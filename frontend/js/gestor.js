@@ -9,51 +9,52 @@
   'use strict';
 
   /* ──────────────────────────────────────────────────────────
-     1. VALIDAÇÃO DE ACESSO DO GESTOR (AUTENTICAÇÃO RESTREITA)
+     1. VALIDAÇÃO DE ACESSO DO GESTOR & SESSÃO PADRÃO
      ────────────────────────────────────────────────────────── */
   const EMAIL_GESTOR_OFICIAL = 'valebussrs@gmail.com';
+  const USUARIO_PADRAO_GESTOR = {
+    nome: 'Gestor Operacional ValeBus',
+    email: 'valebussrs@gmail.com',
+    cargo: 'Gestor CCO & Frotas Master',
+    perfil: 'gestor',
+    matricula: 'CCO-001',
+    metodo: 'Sessão CCO Gestor',
+    veiculo: 'Supervisor CCO (Frota Geral)'
+  };
+
+  function garantirSessaoGestor() {
+    try {
+      const salvo = localStorage.getItem('valebus_usuario');
+      let usuario = null;
+      if (salvo) {
+        try {
+          usuario = JSON.parse(salvo);
+        } catch (e) {}
+      }
+
+      if (!usuario || typeof usuario !== 'object') {
+        usuario = { ...USUARIO_PADRAO_GESTOR };
+      } else {
+        usuario.nome = (usuario.nome && usuario.nome !== 'João da Silva') ? usuario.nome : USUARIO_PADRAO_GESTOR.nome;
+        usuario.email = EMAIL_GESTOR_OFICIAL;
+        usuario.cargo = usuario.cargo || USUARIO_PADRAO_GESTOR.cargo;
+        usuario.perfil = 'gestor';
+        usuario.matricula = usuario.matricula || USUARIO_PADRAO_GESTOR.matricula;
+        usuario.metodo = usuario.metodo || USUARIO_PADRAO_GESTOR.metodo;
+        usuario.veiculo = usuario.veiculo || USUARIO_PADRAO_GESTOR.veiculo;
+      }
+
+      localStorage.setItem('valebus_usuario', JSON.stringify(usuario));
+      return usuario;
+    } catch (e) {
+      console.warn('Erro ao garantir sessão do gestor:', e);
+      return USUARIO_PADRAO_GESTOR;
+    }
+  }
 
   function verificarPermissaoGestor() {
-    let usuario = null;
-    try {
-      usuario = JSON.parse(localStorage.getItem('valebus_usuario') || 'null');
-    } catch (e) {
-      console.warn('Erro ao ler valebus_usuario:', e);
-    }
-
-    // Se não estiver logado com o e-mail oficial do gestor ou perfil de gestor
-    const emailLogado = (usuario && usuario.email) ? usuario.email.trim().toLowerCase() : '';
-    const ehGestor = emailLogado === EMAIL_GESTOR_OFICIAL || (usuario && usuario.perfil === 'gestor');
-
-    if (!ehGestor) {
-      console.warn('Acesso negado: O usuário não possui credenciais de Gestor CCO.');
-      document.body.innerHTML = `
-        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0f172a; color: #f8fafc; font-family: 'Inter', system-ui, sans-serif; padding: 24px;">
-          <div style="background: #1e293b; border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 16px; padding: 36px 32px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
-            <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; color: #ef4444;">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-            </div>
-            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #ffffff;">Acesso Restrito ao Gestor CCO</h2>
-            <p style="font-size: 14px; color: #94a3b8; line-height: 1.5; margin-bottom: 24px;">
-              Este painel de controle e despacho é reservado exclusivamente para o e-mail oficial de gestão do ValeBus:
-              <strong style="display: block; margin-top: 6px; color: #38bdf8; font-family: monospace; font-size: 15px;">${EMAIL_GESTOR_OFICIAL}</strong>
-            </p>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <a href="login.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #7c3aed; color: #ffffff; font-weight: 600; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-size: 14px; transition: background 0.2s;">
-                Fazer Login com ${EMAIL_GESTOR_OFICIAL}
-              </a>
-              <a href="dashboard.html" style="display: inline-flex; align-items: center; justify-content: center; background: transparent; color: #94a3b8; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 13px;">
-                Voltar ao Mapa de Passageiros
-              </a>
-            </div>
-          </div>
-        </div>
-      `;
-      return false;
-    }
+    // Garante sempre a sessão ativa com credenciais de Gestor CCO
+    const usuario = garantirSessaoGestor();
 
     // Atualiza cabeçalho com os dados do gestor
     const elNome = document.getElementById('gestor-nome');
@@ -63,7 +64,7 @@
     if (elNome && usuario.nome) elNome.textContent = usuario.nome;
     if (elEmail && usuario.email) elEmail.textContent = usuario.email;
     if (elAvatar && usuario.nome) {
-      const parts = usuario.nome.split(' ');
+      const parts = usuario.nome.trim().split(/\s+/).filter(Boolean);
       elAvatar.textContent = (parts[0][0] + (parts[1] ? parts[1][0] : 'V')).toUpperCase();
     }
 
@@ -259,7 +260,7 @@
       if (tbody) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="9" style="text-align:center; padding: 32px 16px; color: var(--texto-secundario);">
+            <td colspan="6" style="text-align:center; padding: 32px 16px; color: var(--texto-secundario);">
               Nenhum motorista encontrado com os filtros selecionados.
             </td>
           </tr>
@@ -288,40 +289,37 @@
             statusBadge = `<span class="status-pill status-pill--inativo">Inativo</span>`;
           }
 
+          const horarioTurno = m.turno.includes('(') ? m.turno.split('(')[1].replace(')', '') : 'Integral';
+
           return `
             <tr data-id="${m.id}">
               <td>
                 <div class="gestor-motorista-info">
                   <div class="gestor-motorista-avatar">${iniciais}</div>
-                  <div>
+                  <div class="gestor-motorista-textos">
                     <div class="gestor-motorista-nome">${m.nome}</div>
-                    <div class="gestor-motorista-cpf">${m.telefone || m.cpf || 'Sem telefone'}</div>
+                    <div class="gestor-motorista-sub">
+                      <span class="gestor-sub-matricula">${m.matricula}</span>
+                      <span class="gestor-sub-sep">&bull;</span>
+                      <span class="gestor-sub-cnh">Cat. ${m.cnhCat} (Val: ${formatarData(m.cnhValidade)})</span>
+                    </div>
                   </div>
                 </div>
               </td>
               <td>
-                <span class="gestor-matricula-badge">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/></svg>
-                  ${m.matricula}
-                </span>
-              </td>
-              <td>
-                <div class="gestor-cnh-wrap">
-                  <span class="gestor-cnh-cat">Cat. ${m.cnhCat}</span>
-                  <span class="gestor-cnh-val">Val: ${formatarData(m.cnhValidade)}</span>
+                <div class="gestor-linha-col">
+                  <span class="gestor-linha-badge">
+                    <span class="gestor-linha-dot" style="background-color: ${corLinha};"></span>
+                    ${m.linha}
+                  </span>
+                  <span class="gestor-veiculo-sub">${m.veiculo.split('(')[0].trim()}</span>
                 </div>
               </td>
               <td>
-                <span class="gestor-linha-badge">
-                  <span class="gestor-linha-dot" style="background-color: ${corLinha};"></span>
-                  ${m.linha}
-                </span>
-              </td>
-              <td>
-                <span style="font-weight: 600; font-size: 12px;">${m.veiculo.split('(')[0].trim()}</span>
-              </td>
-              <td>
-                <span style="font-size: 12px; color: var(--texto-secundario);">${m.turno.split('(')[0].trim()}</span>
+                <div class="gestor-turno-col">
+                  <span class="gestor-turno-nome">${m.turno.split('(')[0].trim()}</span>
+                  <span class="gestor-turno-horario">${horarioTurno}</span>
+                </div>
               </td>
               <td>
                 <span class="gestor-pin-box">
@@ -385,16 +383,26 @@
                   <div class="gestor-motorista-avatar">${iniciais}</div>
                   <div>
                     <div class="gestor-motorista-nome">${m.nome}</div>
-                    <div style="font-size: 11px; color: var(--texto-secundario);">${m.telefone || m.cpf || 'Sem contato'}</div>
+                    <div style="font-size: 11px; color: var(--texto-secundario);">${m.matricula} &bull; CNH ${m.cnhCat}</div>
                   </div>
                 </div>
                 ${statusBadge}
               </div>
 
               <div class="gestor-card-motorista-mob__detalhes">
+                <div class="gestor-card-motorista-mob__item gestor-card-motorista-mob__item-full">
+                  <span class="gestor-card-motorista-mob__item-label">Linha &amp; Veículo</span>
+                  <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+                    <span class="gestor-linha-badge">
+                      <span class="gestor-linha-dot" style="background-color: ${corLinha};"></span>
+                      ${m.linha}
+                    </span>
+                    <span style="font-size:12px; color:var(--texto-secundario);">${m.veiculo.split('(')[0].trim()}</span>
+                  </div>
+                </div>
                 <div class="gestor-card-motorista-mob__item">
-                  <span class="gestor-card-motorista-mob__item-label">Matrícula</span>
-                  <span class="gestor-matricula-badge" style="display:inline-flex; width:fit-content;">${m.matricula}</span>
+                  <span class="gestor-card-motorista-mob__item-label">Turno</span>
+                  <span class="gestor-card-motorista-mob__item-valor">${m.turno.split('(')[0].trim()}</span>
                 </div>
                 <div class="gestor-card-motorista-mob__item">
                   <span class="gestor-card-motorista-mob__item-label">PIN Terminal</span>
@@ -406,25 +414,6 @@
                       </svg>
                     </button>
                   </span>
-                </div>
-                <div class="gestor-card-motorista-mob__item gestor-card-motorista-mob__item-full">
-                  <span class="gestor-card-motorista-mob__item-label">Linha Habitual</span>
-                  <span class="gestor-linha-badge" style="display:inline-flex; width:fit-content; margin-top:2px;">
-                    <span class="gestor-linha-dot" style="background-color: ${corLinha};"></span>
-                    ${m.linha}
-                  </span>
-                </div>
-                <div class="gestor-card-motorista-mob__item">
-                  <span class="gestor-card-motorista-mob__item-label">Ônibus</span>
-                  <span class="gestor-card-motorista-mob__item-valor">${m.veiculo.split('(')[0].trim()}</span>
-                </div>
-                <div class="gestor-card-motorista-mob__item">
-                  <span class="gestor-card-motorista-mob__item-label">Turno</span>
-                  <span class="gestor-card-motorista-mob__item-valor">${m.turno.split('(')[0].trim()}</span>
-                </div>
-                <div class="gestor-card-motorista-mob__item gestor-card-motorista-mob__item-full">
-                  <span class="gestor-card-motorista-mob__item-label">CNH & Validade</span>
-                  <span class="gestor-card-motorista-mob__item-valor">Categoria ${m.cnhCat} &bull; Validade: ${formatarData(m.cnhValidade)}</span>
                 </div>
               </div>
 
@@ -644,7 +633,16 @@
 
     modal.classList.add('ativo');
     modal.setAttribute('aria-hidden', 'false');
-    if (inputNome) inputNome.focus();
+
+    // Reseta o scroll para o topo para telas móveis
+    const corpoModal = modal.querySelector('.gestor-modal__corpo');
+    if (corpoModal) {
+      corpoModal.scrollTop = 0;
+    }
+
+    if (inputNome && window.innerWidth > 768) {
+      inputNome.focus();
+    }
   }
 
   function fecharModal() {
@@ -671,6 +669,15 @@
     btnGerarMatricula.addEventListener('click', () => {
       const input = document.getElementById('form-mot-matricula');
       if (input) input.value = gerarMatriculaAleatoria();
+    });
+  }
+
+  // Fechar modal ao clicar no fundo
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        fecharModal();
+      }
     });
   }
 
@@ -837,9 +844,11 @@
   });
 
   /* ──────────────────────────────────────────────────────────
-     11. TEMA CLARO / ESCURO & LOGOUT
+     11. TEMA CLARO / ESCURO
      ────────────────────────────────────────────────────────── */
   const btnTema = document.getElementById('btn-tema-gestor');
+  const btnTemaMobile = document.getElementById('btn-tema-gestor-mobile');
+
   function aplicarTema(tema) {
     document.documentElement.setAttribute('data-theme', tema);
     try {
@@ -849,30 +858,247 @@
     }
   }
 
+  function alternarTema() {
+    const atual = document.documentElement.getAttribute('data-theme') || 'light';
+    const novo = atual === 'dark' ? 'light' : 'dark';
+    aplicarTema(novo);
+    mostrarToast(`Tema ${novo === 'dark' ? 'Escuro' : 'Claro'} ativado.`);
+  }
+
   const temaSalvo = localStorage.getItem('valebus_tema') || 'light';
   aplicarTema(temaSalvo);
 
-  if (btnTema) {
-    btnTema.addEventListener('click', () => {
-      const atual = document.documentElement.getAttribute('data-theme') || 'light';
-      const novo = atual === 'dark' ? 'light' : 'dark';
-      aplicarTema(novo);
-      mostrarToast(`Tema ${novo === 'dark' ? 'Escuro' : 'Claro'} ativado.`);
-    });
+  if (btnTema) btnTema.addEventListener('click', alternarTema);
+  if (btnTemaMobile) btnTemaMobile.addEventListener('click', alternarTema);
+
+  /* ──────────────────────────────────────────────────────────
+     12. MENU GAVETA PARA DISPOSITIVOS MÓVEIS
+     ────────────────────────────────────────────────────────── */
+  const btnMenuMobile = document.getElementById('btn-menu-mobile');
+  const gavetaMobile = document.getElementById('menu-mobile-gaveta');
+  const backdropMobile = document.getElementById('menu-mobile-backdrop');
+  const btnFecharMenuMobile = document.getElementById('btn-fechar-menu-mobile');
+
+  function abrirMenuMobile() {
+    if (!gavetaMobile || !backdropMobile) return;
+    gavetaMobile.classList.add('ativo');
+    backdropMobile.classList.add('ativo');
+    if (btnMenuMobile) {
+      btnMenuMobile.classList.add('ativo');
+      btnMenuMobile.setAttribute('aria-expanded', 'true');
+    }
+    document.body.style.overflow = 'hidden';
   }
 
-  const btnSair = document.getElementById('btn-sair-gestor');
-  if (btnSair) {
-    btnSair.addEventListener('click', () => {
-      if (confirm('Deseja realmente sair da Central de Gestão ValeBus?')) {
-        localStorage.removeItem('valebus_usuario');
-        window.location.href = 'login.html';
+  function fecharMenuMobile() {
+    if (!gavetaMobile || !backdropMobile) return;
+    gavetaMobile.classList.remove('ativo');
+    backdropMobile.classList.remove('ativo');
+    if (btnMenuMobile) {
+      btnMenuMobile.classList.remove('ativo');
+      btnMenuMobile.setAttribute('aria-expanded', 'false');
+    }
+    document.body.style.overflow = '';
+  }
+
+  if (btnMenuMobile) {
+    btnMenuMobile.addEventListener('click', () => {
+      const estaAberto = gavetaMobile && gavetaMobile.classList.contains('ativo');
+      if (estaAberto) {
+        fecharMenuMobile();
+      } else {
+        abrirMenuMobile();
       }
     });
   }
 
+  if (btnFecharMenuMobile) {
+    btnFecharMenuMobile.addEventListener('click', fecharMenuMobile);
+  }
+
+  if (backdropMobile) {
+    backdropMobile.addEventListener('click', fecharMenuMobile);
+  }
+
+  // Fecha gaveta com ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      fecharMenuMobile();
+      fecharModalAlertaNavegacao();
+      fecharModal();
+    }
+  });
+
   /* ──────────────────────────────────────────────────────────
-     12. TOAST DE FEEDBACK
+     13. POP-UP DE ALERTA E CONFIRMAÇÃO DE NAVEGAÇÃO
+     Garante que o usuário não saia do painel CCO por engano
+     ────────────────────────────────────────────────────────── */
+  const modalAlerta = document.getElementById('modal-confirmar-navegacao');
+  const btnFecharAlerta = document.getElementById('btn-fechar-alerta-navegacao');
+  const btnCancelarNavegacao = document.getElementById('btn-cancelar-navegacao');
+  const btnConfirmarNavegacao = document.getElementById('btn-confirmar-navegacao');
+  const elAlertaTitulo = document.getElementById('alerta-navegacao-titulo');
+  const elAlertaMensagem = document.getElementById('alerta-navegacao-mensagem');
+  const elAlertaIcone = document.getElementById('alerta-destino-icone');
+  const elAlertaNome = document.getElementById('alerta-destino-nome');
+  const elAlertaSub = document.getElementById('alerta-destino-sub');
+  const elAlertaBtnTexto = document.getElementById('alerta-btn-confirmar-texto');
+
+  let destinoPendente = null;
+
+  function abrirModalAlertaNavegacao(destino) {
+    if (!modalAlerta) return;
+    destinoPendente = destino;
+
+    // Remove qualquer estilo inline residual (ex: cor vermelha do botão sair)
+    if (elAlertaIcone) {
+      elAlertaIcone.removeAttribute('style');
+    }
+
+    // Identifica a tela de destino mesmo que data-tela tenha faltado
+    let tela = destino.tela || destino.destino || '';
+    if (!tela && destino.url) {
+      if (destino.url.includes('dashboard')) {
+        tela = 'passageiro';
+      } else if (destino.url.includes('motorista')) {
+        tela = 'motorista';
+      } else if (destino.url.includes('login')) {
+        tela = 'sair';
+      }
+    }
+    destino.tela = tela;
+
+    if (tela === 'passageiro') {
+      if (elAlertaTitulo) elAlertaTitulo.textContent = 'Ir para o Mapa do Passageiro?';
+      if (elAlertaMensagem) {
+        elAlertaMensagem.textContent = 'Você está prestes a sair do Painel de Gestão Operacional para acessar o mapa público de linhas e paradas de passageiros. Sua sessão permanecerá conectada com o perfil de Gestor.';
+      }
+      if (elAlertaIcone) {
+        elAlertaIcone.className = 'gestor-alerta-destino-icone gestor-alerta-destino-icone--azul';
+        elAlertaIcone.innerHTML = `
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+            <line x1="9" y1="3" x2="9" y2="18"/>
+            <line x1="15" y1="6" x2="15" y2="21"/>
+          </svg>
+        `;
+      }
+      if (elAlertaNome) elAlertaNome.textContent = 'Mapa do Passageiro (Santa Rita do Sapucaí)';
+      if (elAlertaSub) elAlertaSub.textContent = 'Visualização em tempo real das linhas, itinerários e paradas.';
+      if (elAlertaBtnTexto) elAlertaBtnTexto.textContent = 'Acessar Mapa';
+
+    } else if (tela === 'motorista') {
+      if (elAlertaTitulo) elAlertaTitulo.textContent = 'Acessar Terminal do Motorista?';
+      if (elAlertaMensagem) {
+        elAlertaMensagem.textContent = 'Você está saindo do painel da CCO para acessar o terminal de bordo dos condutores (registro de início de rota e chamados). Sua sessão permanecerá conectada com o perfil de Gestor.';
+      }
+      if (elAlertaIcone) {
+        elAlertaIcone.className = 'gestor-alerta-destino-icone gestor-alerta-destino-icone--verde';
+        elAlertaIcone.innerHTML = `
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        `;
+      }
+      if (elAlertaNome) elAlertaNome.textContent = 'Terminal de Bordo do Motorista';
+      if (elAlertaSub) elAlertaSub.textContent = 'Painel de cockpit com supervisão e telemetria de frotas.';
+      if (elAlertaBtnTexto) elAlertaBtnTexto.textContent = 'Acessar Terminal';
+
+    } else if (tela === 'sair') {
+      if (elAlertaTitulo) elAlertaTitulo.textContent = 'Deseja encerrar a sessão de Gestor?';
+      if (elAlertaMensagem) {
+        elAlertaMensagem.textContent = 'Você será desconectado da Central CCO ValeBus. Para retornar, será necessário realizar login novamente com suas credenciais.';
+      }
+      if (elAlertaIcone) {
+        elAlertaIcone.className = 'gestor-alerta-destino-icone';
+        elAlertaIcone.style.background = 'rgba(220, 38, 38, 0.15)';
+        elAlertaIcone.style.color = '#dc2626';
+        elAlertaIcone.innerHTML = `
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        `;
+      }
+      if (elAlertaNome) elAlertaNome.textContent = 'Encerrar Sessão do Gestor';
+      if (elAlertaSub) elAlertaSub.textContent = 'Conta ativa: valebussrs@gmail.com';
+      if (elAlertaBtnTexto) elAlertaBtnTexto.textContent = 'Sim, Desconectar';
+    }
+
+    modalAlerta.classList.add('ativo');
+    modalAlerta.setAttribute('aria-hidden', 'false');
+  }
+
+  function fecharModalAlertaNavegacao() {
+    if (!modalAlerta) return;
+    modalAlerta.classList.remove('ativo');
+    modalAlerta.setAttribute('aria-hidden', 'true');
+    destinoPendente = null;
+  }
+
+  if (btnFecharAlerta) btnFecharAlerta.addEventListener('click', fecharModalAlertaNavegacao);
+  if (btnCancelarNavegacao) btnCancelarNavegacao.addEventListener('click', fecharModalAlertaNavegacao);
+  if (modalAlerta) {
+    modalAlerta.addEventListener('click', (e) => {
+      if (e.target === modalAlerta) fecharModalAlertaNavegacao();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalAlerta && modalAlerta.classList.contains('ativo')) {
+      fecharModalAlertaNavegacao();
+    }
+  });
+
+  if (btnConfirmarNavegacao) {
+    btnConfirmarNavegacao.addEventListener('click', () => {
+      if (!destinoPendente) return;
+      const destino = destinoPendente;
+      fecharModalAlertaNavegacao();
+      fecharMenuMobile();
+
+      if (destino.tela === 'sair') {
+        localStorage.removeItem('valebus_usuario');
+        window.location.href = 'login.html';
+      } else if (destino.url) {
+        // Assegura que o usuário vá logado com o usuário padrão de gestor
+        garantirSessaoGestor();
+        window.location.href = destino.url;
+      }
+    });
+  }
+
+  // Intercepta todos os links com a classe .link-com-confirmacao
+  document.querySelectorAll('.link-com-confirmacao').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = link.getAttribute('href');
+      const tela = link.getAttribute('data-tela') || link.getAttribute('data-destino') || '';
+      abrirModalAlertaNavegacao({ url, tela });
+    });
+  });
+
+  // Botões de sair (desktop e mobile)
+  const btnSairDesktop = document.getElementById('btn-sair-gestor');
+  if (btnSairDesktop) {
+    btnSairDesktop.addEventListener('click', (e) => {
+      e.preventDefault();
+      abrirModalAlertaNavegacao({ url: 'login.html', tela: 'sair' });
+    });
+  }
+
+  const btnSairMobile = document.getElementById('btn-sair-gestor-mobile');
+  if (btnSairMobile) {
+    btnSairMobile.addEventListener('click', (e) => {
+      e.preventDefault();
+      abrirModalAlertaNavegacao({ url: 'login.html', tela: 'sair' });
+    });
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     14. TOAST DE FEEDBACK
      ────────────────────────────────────────────────────────── */
   let toastTimer = null;
   function mostrarToast(mensagem, tipo = 'sucesso') {
