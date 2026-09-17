@@ -91,7 +91,7 @@
       cnhCat: 'D',
       cnhValidade: '2027-11-20',
       linha: 'Linha Fernandes',
-      veiculo: 'Ônibus #02 (Prefixo 102)',
+      veiculo: 'Ônibus #02',
       turno: 'Manhã (05:30 - 13:30)',
       pin: '4821',
       status: 'ativo',
@@ -107,7 +107,7 @@
       cnhCat: 'D',
       cnhValidade: '2026-08-15',
       linha: 'Linha Anchieta',
-      veiculo: 'Ônibus #01 (Prefixo 101)',
+      veiculo: 'Ônibus #01',
       turno: 'Tarde (13:30 - 21:30)',
       pin: '1042',
       status: 'viagem',
@@ -123,7 +123,7 @@
       cnhCat: 'E',
       cnhValidade: '2028-02-10',
       linha: 'Linha Fortaleza',
-      veiculo: 'Ônibus #03 (Prefixo 103)',
+      veiculo: 'Ônibus #03',
       turno: 'Manhã (05:30 - 13:30)',
       pin: '3310',
       status: 'ativo',
@@ -139,7 +139,7 @@
       cnhCat: 'D',
       cnhValidade: '2026-12-05',
       linha: 'Linha Industrial',
-      veiculo: 'Ônibus #04 (Prefixo 104)',
+      veiculo: 'Ônibus #04',
       turno: 'Integral',
       pin: '2048',
       status: 'ativo',
@@ -155,7 +155,7 @@
       cnhCat: 'D',
       cnhValidade: '2025-09-30',
       linha: 'Linha Porto Sapucaí',
-      veiculo: 'Ônibus #05 (Prefixo 105)',
+      veiculo: 'Ônibus #05',
       turno: 'Tarde (13:30 - 21:30)',
       pin: '5590',
       status: 'folga',
@@ -171,7 +171,7 @@
       cnhCat: 'D',
       cnhValidade: '2027-04-18',
       linha: 'Linha São Benedito',
-      veiculo: 'Ônibus #06 (Prefixo 106)',
+      veiculo: 'Ônibus #06',
       turno: 'Manhã (05:30 - 13:30)',
       pin: '7712',
       status: 'ativo',
@@ -473,12 +473,12 @@
     if (!grid) return;
 
     const veiculos = [
-      { prefixo: '101', numero: 'Ônibus #01', linha: 'Linha Anchieta' },
-      { prefixo: '102', numero: 'Ônibus #02', linha: 'Linha Fernandes' },
-      { prefixo: '103', numero: 'Ônibus #03', linha: 'Linha Fortaleza' },
-      { prefixo: '104', numero: 'Ônibus #04', linha: 'Linha Industrial' },
-      { prefixo: '105', numero: 'Ônibus #05', linha: 'Linha Porto Sapucaí' },
-      { prefixo: '106', numero: 'Ônibus #06', linha: 'Linha São Benedito' }
+      { numero: 'Ônibus #01', linha: 'Linha Anchieta' },
+      { numero: 'Ônibus #02', linha: 'Linha Fernandes' },
+      { numero: 'Ônibus #03', linha: 'Linha Fortaleza' },
+      { numero: 'Ônibus #04', linha: 'Linha Industrial' },
+      { numero: 'Ônibus #05', linha: 'Linha Porto Sapucaí' },
+      { numero: 'Ônibus #06', linha: 'Linha São Benedito' }
     ];
 
     grid.innerHTML = veiculos.map(v => {
@@ -493,7 +493,7 @@
       return `
         <div class="gestor-escala-card">
           <div class="gestor-escala-card__header">
-            <span class="gestor-escala-veiculo">${v.numero} (Prefixo ${v.prefixo})</span>
+            <span class="gestor-escala-veiculo">${v.numero}</span>
             <span class="gestor-escala-linha" style="border-left: 3px solid ${corLinha};">${v.linha}</span>
           </div>
           <div class="gestor-escala-motorista">

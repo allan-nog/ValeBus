@@ -1,51 +1,1870 @@
 /*
- * global.css — Reset e Estilos Base
+ * gestor.css — Estilos do Painel de Gestão Operacional & Frotas (ValeBus CCO)
+ * ────────────────────────────────────────────────────────────────────────
+ * Design System executivo, de alta densidade de informação e contraste,
+ * focado em controle de motoristas, despacho de escalas e telemetria CCO.
  */
 
-*, *::before, *::after {
+/* ── LAYOUT DO GESTOR ───────────────────────────────────────────────── */
+.gestor-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--fundo-pagina);
+  color: var(--texto-principal);
+  font-family: var(--fonte-principal);
+  transition: background-color var(--transicao), color var(--transicao);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* ── TOPBAR EXECUTIVA ───────────────────────────────────────────────── */
+.gestor-topbar {
+  background-color: #0b1628;
+  color: #ffffff;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
-  margin:     0;
-  padding:    0;
-}
-
-html {
-  font-size: 16px;
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  font-family:        var(--fonte-principal);
-  font-size:          var(--tamanho-normal);
-  color:              var(--texto-principal);
-  background-color:   var(--fundo-pagina);
-  line-height:        1.6;
-  min-height:         100vh;
-  -webkit-font-smoothing:  antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  color:           var(--cor-marca);
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
-
-img {
+  width: 100%;
   max-width: 100%;
-  display:   block;
 }
 
-ul, ol {
-  list-style: none;
+.gestor-topbar__esquerda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
-button, input, select, textarea {
+.gestor-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #ffffff;
+  min-width: 0;
+}
+
+.gestor-logo__icone {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #1a6fd4, #2563eb);
+  border-radius: var(--raio-pequeno);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(26, 111, 212, 0.4);
+}
+
+.gestor-logo__icone svg {
+  width: 22px;
+  height: 22px;
+}
+
+.gestor-logo__titulos {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.gestor-logo__nome {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.gestor-badge-pill {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #7c3aed;
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.gestor-logo__cidade {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gestor-topbar__direita {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.gestor-btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 6px 12px;
+  border-radius: var(--raio-pequeno);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transicao);
+}
+
+.gestor-btn-link:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.gestor-btn-icone {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--raio-pequeno);
+  color: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transicao);
+}
+
+.gestor-btn-icone:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.gestor-usuario-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 4px 12px 4px 6px;
+  border-radius: 999px;
+}
+
+.gestor-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+}
+
+.gestor-usuario-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.gestor-usuario-nome {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.gestor-usuario-email {
+  font-size: 10px;
+  color: #a78bfa;
+  line-height: 1.2;
+}
+
+.gestor-btn-sair {
+  background: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  padding: 6px 10px;
+  border-radius: var(--raio-pequeno);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all var(--transicao);
+}
+
+.gestor-btn-sair:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* ── CORPO PRINCIPAL ────────────────────────────────────────────────── */
+.gestor-conteudo {
+  flex: 1;
+  max-width: 1380px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* ── BANNER DE BOAS-VINDAS DO GESTOR (SIMPLIFICADO) ─────────────────── */
+.gestor-banner {
+  background: linear-gradient(135deg, #0b1628 0%, #132040 100%);
+  color: #ffffff;
+  border-radius: var(--raio-medio);
+  padding: 16px 22px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(11, 22, 40, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gestor-banner__info h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin-bottom: 3px;
+  color: #ffffff;
+}
+
+.gestor-banner__info p {
+  font-size: 13px;
+  color: #94a3b8;
+  max-width: 680px;
+  line-height: 1.4;
+}
+
+.gestor-banner__acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-gestor-primario {
+  background: linear-gradient(135deg, #1a6fd4, #2563eb);
+  color: #ffffff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: var(--raio-pequeno);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: all var(--transicao);
+}
+
+.btn-gestor-primario:hover {
+  background: linear-gradient(135deg, #1456a8, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+}
+
+.btn-gestor-secundario {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 14px;
+  border-radius: var(--raio-pequeno);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transicao);
+}
+
+.btn-gestor-secundario:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── GRID DE KPIS / MÉTRICAS ────────────────────────────────────────── */
+.gestor-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.gestor-kpi-card {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  padding: 14px 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all var(--transicao);
+}
+
+.gestor-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.gestor-kpi-card__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.gestor-kpi-card__rotulo {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.gestor-kpi-card__valor {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--texto-principal);
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+
+.gestor-kpi-card__sub {
+  font-size: 11px;
+  color: var(--texto-secundario);
+}
+
+.gestor-kpi-card__icone-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--raio-medio);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gestor-kpi-card__icone-wrap--azul {
+  background: rgba(26, 111, 212, 0.12);
+  color: #1a6fd4;
+}
+
+.gestor-kpi-card__icone-wrap--verde {
+  background: rgba(22, 163, 74, 0.12);
+  color: #16a34a;
+}
+
+.gestor-kpi-card__icone-wrap--roxo {
+  background: rgba(124, 58, 237, 0.12);
+  color: #7c3aed;
+}
+
+.gestor-kpi-card__icone-wrap--amarelo {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+/* ── NAVEGAÇÃO POR ABAS ─────────────────────────────────────────────── */
+.gestor-abas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid var(--borda-cor);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.gestor-aba-btn {
+  background: none;
+  border: none;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all var(--transicao);
+  white-space: nowrap;
+}
+
+.gestor-aba-btn:hover {
+  color: var(--texto-principal);
+}
+
+.gestor-aba-btn.ativo {
+  color: var(--cor-marca);
+  border-bottom-color: var(--cor-marca);
+}
+
+.gestor-aba-badge {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--fundo-campo);
+  color: var(--texto-secundario);
+}
+
+.gestor-aba-btn.ativo .gestor-aba-badge {
+  background: var(--cor-marca-clara);
+  color: var(--cor-marca);
+}
+
+/* ── BARRA DE FERRAMENTAS DA TABELA (BUSCA E FILTROS) ───────────────── */
+.gestor-toolbar {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.gestor-toolbar__esquerda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.gestor-busca-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 380px;
+}
+
+.gestor-busca-icone {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--texto-secundario);
+  pointer-events: none;
+}
+
+.gestor-busca-input {
+  width: 100%;
+  height: 38px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  padding: 0 12px 0 38px;
+  font-size: 13px;
+  color: var(--texto-principal);
+  outline: none;
+  transition: all var(--transicao);
+}
+
+.gestor-busca-input:focus {
+  border-color: var(--borda-foco);
+  box-shadow: var(--sombra-foco);
+}
+
+.gestor-select-filtro {
+  height: 38px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--texto-principal);
+  outline: none;
+  cursor: pointer;
+}
+
+.gestor-select-filtro:focus {
+  border-color: var(--borda-foco);
+}
+
+.gestor-toolbar__direita {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── TABELA DE MOTORISTAS ───────────────────────────────────────────── */
+.gestor-tabela-container {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.gestor-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.gestor-tabela th {
+  background: var(--fundo-campo);
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--texto-secundario);
+  border-bottom: 1px solid var(--borda-cor);
+  white-space: nowrap;
+}
+
+.gestor-tabela td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--borda-cor);
+  vertical-align: middle;
+}
+
+.gestor-tabela tbody tr {
+  transition: background-color var(--transicao);
+}
+
+.gestor-tabela tbody tr:hover {
+  background-color: var(--fundo-campo);
+}
+
+.gestor-motorista-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gestor-motorista-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a6fd4, #0284c7);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(26, 111, 212, 0.25);
+}
+
+.gestor-motorista-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gestor-motorista-nome {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--texto-principal);
+  line-height: 1.3;
+}
+
+.gestor-motorista-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--texto-secundario);
+}
+
+.gestor-sub-matricula {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--cor-marca);
+  background: var(--cor-marca-clara);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.gestor-sub-sep {
+  color: var(--borda-cor);
+}
+
+.gestor-sub-cnh {
+  color: var(--texto-secundario);
+}
+
+.gestor-linha-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.gestor-veiculo-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--texto-secundario);
+  padding-left: 2px;
+}
+
+.gestor-turno-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gestor-turno-nome {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--texto-principal);
+}
+
+.gestor-turno-horario {
+  font-size: 11px;
+  color: var(--texto-secundario);
+}
+
+.gestor-motorista-cpf {
+  font-size: 11px;
+  color: var(--texto-secundario);
+}
+
+.gestor-matricula-badge {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 12px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  padding: 3px 8px;
+  border-radius: var(--raio-pequeno);
+  color: var(--texto-principal);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gestor-cnh-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.gestor-cnh-cat {
+  font-weight: 700;
+  color: var(--texto-principal);
+}
+
+.gestor-cnh-val {
+  font-size: 11px;
+  color: var(--texto-secundario);
+}
+
+.gestor-cnh-alerta {
+  color: #d97706;
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.gestor-linha-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--fundo-campo);
+  color: var(--texto-principal);
+}
+
+.gestor-linha-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.gestor-pin-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: monospace;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  padding: 2px 8px;
+  border-radius: var(--raio-pequeno);
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.gestor-pin-olho-btn {
+  background: none;
+  border: none;
+  color: var(--texto-secundario);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+}
+
+.gestor-pin-olho-btn:hover {
+  color: var(--texto-principal);
+}
+
+/* ── STATUS BADGES ──────────────────────────────────────────────────── */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.status-pill--ativo {
+  background: rgba(22, 163, 74, 0.12);
+  color: #16a34a;
+}
+
+.status-pill--viagem {
+  background: rgba(26, 111, 212, 0.12);
+  color: #1a6fd4;
+}
+
+.status-pill--folga {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.status-pill--inativo {
+  background: rgba(148, 163, 184, 0.15);
+  color: #64748b;
+}
+
+/* ── BOTÕES DE AÇÃO NA TABELA ───────────────────────────────────────── */
+.gestor-acoes-td {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gestor-btn-acao-tb {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--raio-pequeno);
+  border: 1px solid var(--borda-cor);
+  background: var(--fundo-card);
+  color: var(--texto-secundario);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transicao);
+}
+
+.gestor-btn-acao-tb:hover {
+  color: var(--cor-marca);
+  border-color: var(--cor-marca);
+  background: var(--cor-marca-clara);
+}
+
+.gestor-btn-acao-tb--excluir:hover {
+  color: var(--cor-erro);
+  border-color: var(--cor-erro);
+  background: rgba(220, 38, 38, 0.1);
+}
+
+/* ── SEÇÃO DE ESCALA DO DIA ─────────────────────────────────────────── */
+.gestor-escala-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.gestor-escala-card {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  padding: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.gestor-escala-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.gestor-escala-veiculo {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--texto-principal);
+}
+
+.gestor-escala-linha {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--fundo-campo);
+}
+
+.gestor-escala-motorista {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px dashed var(--borda-cor);
+  border-bottom: 1px dashed var(--borda-cor);
+  margin: 10px 0;
+}
+
+/* ── MODAL DE CADASTRO E EDIÇÃO DE MOTORISTA ────────────────────────── */
+.gestor-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 22, 40, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.gestor-modal-overlay.ativo {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gestor-modal {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-grande);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  transform: translateY(15px) scale(0.98);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* O FORM DENTRO DO MODAL DEVE SER UM FLEX CONTAINER PARA PERMITIR SCROLL PERFEITO NO CORPO */
+.gestor-modal form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.gestor-modal__pull-bar {
+  display: none;
+  width: 44px;
+  height: 5px;
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 999px;
+  margin: 10px auto 2px;
+  flex-shrink: 0;
+}
+
+.gestor-modal-overlay.ativo .gestor-modal {
+  transform: translateY(0) scale(1);
+}
+
+.gestor-modal__header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--borda-cor);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.gestor-modal__titulo {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--texto-principal);
+}
+
+.gestor-modal__fechar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--fundo-campo);
+  color: var(--texto-secundario);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transicao);
+}
+
+.gestor-modal__fechar:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--cor-erro);
+}
+
+.gestor-modal__corpo {
+  padding: 20px 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  flex: 1 1 auto;
+}
+
+.gestor-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.gestor-form-col-2 {
+  grid-column: span 2;
+}
+
+.gestor-form-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gestor-form-rotulo {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-principal);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gestor-rotulo-dica {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--texto-secundario);
+}
+
+.gestor-date-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.gestor-form-input,
+.gestor-form-select {
+  height: 42px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--texto-principal);
+  outline: none;
+  transition: all var(--transicao);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gestor-form-input--date {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
   font-family: inherit;
-  font-size:   inherit;
+  font-size: 13px;
+  color: var(--texto-principal);
+  cursor: pointer;
 }
 
-button::-moz-focus-inner {
-  border: 0;
+.gestor-form-input--date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+[data-theme="dark"] .gestor-form-input--date::-webkit-calendar-picker-indicator {
+  filter: invert(0.85);
+}
+
+.gestor-form-input:focus,
+.gestor-form-select:focus {
+  border-color: var(--borda-foco);
+  box-shadow: var(--sombra-foco);
+}
+
+.gestor-input-com-btn {
+  display: flex;
+  gap: 8px;
+}
+
+.gestor-btn-mini {
+  height: 42px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-principal);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transicao);
+}
+
+.gestor-btn-mini:hover {
+  border-color: var(--cor-marca);
+  color: var(--cor-marca);
+}
+
+.gestor-modal__footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--borda-cor);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+  background: var(--fundo-card);
+}
+
+/* ── MODAL DE CONFIRMAÇÃO DE NAVEGAÇÃO ──────────────────────────────── */
+.gestor-modal--alerta {
+  max-width: 480px;
+}
+
+.gestor-modal__header-alerta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gestor-alerta-icone-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gestor-alerta-texto {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--texto-principal);
+  margin-bottom: 16px;
+}
+
+.gestor-alerta-destino-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  padding: 12px 16px;
+}
+
+.gestor-alerta-destino-icone {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--raio-pequeno);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gestor-alerta-destino-icone--azul {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+.gestor-alerta-destino-icone--verde {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.gestor-alerta-destino-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gestor-alerta-destino-nome {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texto-principal);
+}
+
+.gestor-alerta-destino-sub {
+  font-size: 12px;
+  color: var(--texto-secundario);
+}
+
+/* ── BOTÃO DO MENU MÓVEL NO HEADER ────────────────────────────────── */
+.gestor-btn-menu-mobile {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+  padding: 0;
+  color: #ffffff;
+  flex-shrink: 0;
+  transition: all var(--transicao);
+}
+
+.gestor-btn-menu-mobile:hover,
+.gestor-btn-menu-mobile:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.45);
+  outline: none;
+}
+
+.gestor-hamburguer-linha {
+  width: 18px;
+  height: 2px;
+  background-color: #ffffff;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+.gestor-btn-menu-mobile.ativo .gestor-hamburguer-linha:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.gestor-btn-menu-mobile.ativo .gestor-hamburguer-linha:nth-child(2) {
+  opacity: 0;
+}
+.gestor-btn-menu-mobile.ativo .gestor-hamburguer-linha:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── BACKDROP & GAVETA MÓVEL ───────────────────────────────────────── */
+.gestor-menu-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 22, 40, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.gestor-menu-mobile-backdrop.ativo {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gestor-menu-mobile-gaveta {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 86%;
+  max-width: 360px;
+  background: var(--fundo-card);
+  border-left: 1px solid var(--borda-cor);
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.35);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gestor-menu-mobile-gaveta.ativo {
+  transform: translateX(0);
+}
+
+.gestor-menu-mobile__header {
+  padding: 16px 20px;
+  background: #0b1628;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.gestor-menu-mobile__logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gestor-menu-mobile__fechar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transicao);
+}
+
+.gestor-menu-mobile__fechar:hover {
+  background: rgba(220, 38, 38, 0.3);
+  color: #fca5a5;
+}
+
+.gestor-menu-mobile__corpo {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.gestor-menu-mobile__usuario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+}
+
+.gestor-menu-mobile__usuario-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gestor-menu-mobile__nome {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto-principal);
+}
+
+.gestor-menu-mobile__email {
+  font-size: 11px;
+  color: var(--texto-secundario);
+}
+
+.gestor-menu-mobile__status-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #10b981;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.gestor-menu-mobile__secao {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gestor-menu-mobile__secao-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-left: 2px;
+}
+
+.gestor-menu-mobile__link,
+.gestor-menu-mobile__link-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  text-decoration: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all var(--transicao);
+}
+
+.gestor-menu-mobile__link:hover,
+.gestor-menu-mobile__link-btn:hover {
+  background: var(--fundo-campo);
+  border-color: var(--cor-marca);
+  transform: translateX(2px);
+}
+
+.gestor-menu-mobile__link-icone {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--raio-pequeno);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--fundo-campo);
+  color: var(--texto-principal);
+}
+
+.gestor-menu-mobile__link-icone--azul {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+.gestor-menu-mobile__link-icone--verde {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.gestor-menu-mobile__link-icone--neutro {
+  background: rgba(100, 116, 139, 0.12);
+  color: var(--texto-principal);
+}
+
+.gestor-menu-mobile__link-textos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gestor-menu-mobile__link-titulo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto-principal);
+}
+
+.gestor-menu-mobile__link-sub {
+  font-size: 11px;
+  color: var(--texto-secundario);
+  line-height: 1.3;
+}
+
+.gestor-tag-modulo {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--cor-marca-clara);
+  color: var(--cor-marca);
+  letter-spacing: 0.3px;
+}
+
+.gestor-menu-mobile__footer {
+  padding: 16px;
+  border-top: 1px solid var(--borda-cor);
+  background: var(--fundo-card);
+  flex-shrink: 0;
+}
+
+.btn-gestor-sair-mobile {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--cor-erro);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: var(--raio-pequeno);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transicao);
+}
+
+.btn-gestor-sair-mobile:hover {
+  background: var(--cor-erro);
+  color: #ffffff;
+}
+
+/* ── TOAST DE FEEDBACK ──────────────────────────────────────────────── */
+.gestor-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: var(--raio-pequeno);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border-left: 4px solid var(--cor-sucesso);
+  z-index: 10000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gestor-toast.ativo {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ── CARDS DE MOTORISTAS PARA DISPOSITIVOS MÓVEIS ─────────────────── */
+.gestor-motoristas-cards-mobile {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gestor-card-motorista-mob {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all var(--transicao);
+}
+
+.gestor-card-motorista-mob__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gestor-card-motorista-mob__info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gestor-card-motorista-mob__detalhes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  background: var(--fundo-campo);
+  padding: 10px 12px;
+  border-radius: var(--raio-pequeno);
+  font-size: 12px;
+}
+
+.gestor-card-motorista-mob__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gestor-card-motorista-mob__item-full {
+  grid-column: span 2;
+}
+
+.gestor-card-motorista-mob__item-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+  letter-spacing: 0.4px;
+}
+
+.gestor-card-motorista-mob__item-valor {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-principal);
+  word-break: break-word;
+}
+
+.gestor-card-motorista-mob__acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--borda-cor);
+}
+
+.gestor-card-motorista-mob__acoes .gestor-btn-acao-tb {
+  width: 36px;
+  height: 36px;
+}
+
+/* ── RESPONSIVIDADE COMPLETA DO PAINEL DO GESTOR ────────────────────── */
+@media (max-width: 1080px) {
+  .gestor-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gestor-topbar {
+    padding: 8px 16px;
+    height: 60px;
+    min-height: 60px;
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+
+  .gestor-topbar__esquerda {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .gestor-topbar__direita {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  /* Oculta botões e cards extensos do topo para não estourar a tela */
+  .gestor-topbar__direita .gestor-btn-link,
+  .gestor-topbar__direita .gestor-usuario-card,
+  .gestor-topbar__direita .gestor-btn-sair,
+  .gestor-topbar__direita #btn-tema-gestor {
+    display: none !important;
+  }
+
+  /* Exibe o botão do menu hambúrguer garantindo que fique sempre visível */
+  .gestor-btn-menu-mobile {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .gestor-conteudo {
+    padding: 16px 12px;
+  }
+
+  .gestor-banner {
+    padding: 18px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .gestor-banner__acoes {
+    width: 100%;
+  }
+
+  .btn-gestor-primario {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+  }
+
+  .gestor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .gestor-toolbar__esquerda {
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .gestor-busca-wrapper {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .gestor-select-filtro {
+    width: 100%;
+  }
+
+  .gestor-toolbar__direita {
+    width: 100%;
+  }
+
+  .gestor-toolbar__direita .btn-gestor-secundario {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .gestor-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gestor-form-col-2 {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Alterna visualização da tabela para cards modernos no celular */
+  .gestor-tabela-container {
+    display: none;
+  }
+
+  .gestor-motoristas-cards-mobile {
+    display: flex;
+  }
+
+  .gestor-kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .gestor-kpi-card {
+    padding: 14px 16px;
+  }
+
+  .gestor-kpi-card__valor {
+    font-size: 24px;
+  }
+
+  .gestor-abas {
+    gap: 4px;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .gestor-aba-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .gestor-escala-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     MODAL RESPONSIVO PARA DISPOSITIVOS MÓVEIS (BOTTOM SHEET)
+     Garante exibição de 100% dos campos incluindo Validade da CNH
+     ═══════════════════════════════════════════════════════ */
+  .gestor-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .gestor-modal {
+    max-width: 100%;
+    width: 100%;
+    height: 94vh;
+    height: 94dvh;
+    max-height: 94vh;
+    max-height: 94dvh;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    margin: 0;
+    transform: translateY(100%);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .gestor-modal-overlay.ativo .gestor-modal {
+    transform: translateY(0);
+  }
+
+  .gestor-modal__pull-bar {
+    display: block;
+  }
+
+  .gestor-modal__header {
+    padding: 10px 18px 14px;
+  }
+
+  .gestor-modal__titulo {
+    font-size: 16px;
+  }
+
+  .gestor-modal__corpo {
+    padding: 16px 18px 24px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .gestor-form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .gestor-form-grupo {
+    gap: 6px;
+  }
+
+  .gestor-form-rotulo {
+    font-size: 13px;
+  }
+
+  .gestor-form-input,
+  .gestor-form-select {
+    height: 46px;
+    font-size: 14px;
+    border-radius: var(--raio-pequeno);
+  }
+
+  .gestor-form-input--date {
+    min-height: 46px;
+    height: 46px;
+    font-size: 14px;
+    width: 100%;
+    padding: 0 12px;
+  }
+
+  .gestor-btn-mini {
+    height: 46px;
+    padding: 0 16px;
+  }
+
+  /* Destaca a área da CNH para facilitar o preenchimento no celular */
+  .gestor-form-grupo--validade {
+    background: rgba(37, 99, 235, 0.05);
+    border: 1px dashed rgba(37, 99, 235, 0.3);
+    border-radius: var(--raio-pequeno);
+    padding: 10px 12px;
+  }
+
+  .gestor-modal__footer {
+    padding: 14px 18px;
+    flex-direction: row;
+    gap: 10px;
+    background: var(--fundo-card);
+    border-top: 1px solid var(--borda-cor);
+  }
+
+  .gestor-modal__footer .btn-gestor-secundario {
+    flex: 1;
+    height: 46px;
+    justify-content: center;
+  }
+
+  .gestor-modal__footer .btn-gestor-primario {
+    flex: 1.4;
+    height: 46px;
+    justify-content: center;
+  }
+
+  /* Modal de alerta de confirmação no celular */
+  .gestor-modal--alerta {
+    height: auto;
+    max-height: 85vh;
+    max-height: 85dvh;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .gestor-modal--alerta .gestor-modal__corpo {
+    padding: 16px 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .gestor-topbar {
+    padding: 8px 12px;
+    height: 56px;
+    min-height: 56px;
+  }
+
+  .gestor-logo__cidade {
+    display: none !important;
+  }
+
+  .gestor-logo__nome {
+    font-size: 15px;
+    gap: 6px;
+  }
+
+  .gestor-badge-pill {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .gestor-logo__icone {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+  }
+
+  .gestor-btn-menu-mobile {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (max-width: 520px) {
+  .gestor-banner__info h1 {
+    font-size: 18px;
+  }
+
+  .gestor-banner__info p {
+    font-size: 13px;
+  }
+
+  .gestor-toast {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    border-radius: var(--raio-pequeno);
+  }
+}
+
+@media (max-width: 360px) {
+  .gestor-topbar {
+    padding: 8px 10px;
+  }
+
+  .gestor-logo__nome {
+    font-size: 14px;
+  }
+
+  .gestor-badge-pill {
+    display: none;
+  }
 }

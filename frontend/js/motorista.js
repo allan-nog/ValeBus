@@ -25,7 +25,7 @@
     linhaCodigo: 'Linha Anchieta',
     linhaNome: 'Praça Urbana / Recanto',
     estacao: 'Praça Urbana Carolina',
-    veiculo: 'Ônibus #02 (Prefixo 102)',
+    veiculo: 'Ônibus #02',
     viagensHoje: 12,
     emRota: false,
     distanciaKm: 4.5,
@@ -61,7 +61,7 @@
             estadoMotorista.linhaCodigo = u.linha.includes('0') ? u.linha : 'Linha 01';
             estadoMotorista.linhaNome = u.linha;
           }
-          if (u.veiculo) estadoMotorista.veiculo = u.veiculo;
+          if (u.veiculo) estadoMotorista.veiculo = u.veiculo.replace(/\s*\(Prefixo\s*\d+\)/i, '').trim();
         }
       }
 
