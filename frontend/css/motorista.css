@@ -36,10 +36,59 @@
   stroke: var(--cor-marca);
 }
 
-.btn-recenter-mapa-valebus {
+.motorista-mapa-controles-flutuantes {
   position: absolute;
   top: 14px;
   right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 500;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.motorista-btn-flutuante {
+  background-color: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.16s ease;
+  backdrop-filter: blur(8px);
+  user-select: none;
+}
+
+.motorista-btn-flutuante:hover {
+  background-color: var(--fundo-campo);
+  border-color: #16a34a;
+  color: #16a34a;
+  transform: translateY(-1px);
+}
+
+.motorista-btn-flutuante--ativo {
+  background-color: #ffffff;
+  border-color: rgba(22, 163, 74, 0.6);
+  color: #16a34a;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.2);
+}
+
+.motorista-btn-flutuante__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.btn-recenter-mapa-valebus {
+  position: relative;
   background-color: var(--fundo-card);
   border: 1px solid var(--borda-cor);
   border-radius: 999px;
@@ -47,13 +96,13 @@
   font-size: 11.5px;
   font-weight: 700;
   color: var(--texto-principal);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  z-index: 500;
   transition: all 0.16s ease;
+  user-select: none;
 }
 
 .btn-recenter-mapa-valebus:hover {
@@ -290,6 +339,151 @@
   color: var(--cor-marca);
 }
 
+.cockpit-stepper-paradas {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.btn-parada-nav {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--texto-secundario);
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.btn-parada-nav:hover {
+  border-color: #16a34a;
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.parada-nav-indicador {
+  font-size: 9px;
+  font-weight: 800;
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.12);
+  padding: 1px 5px;
+  border-radius: 999px;
+}
+
+/* Itinerário detalhado da Linha Anchieta */
+.anchieta-itinerario-box {
+  margin-top: 16px;
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  padding: 16px;
+}
+
+.anchieta-itinerario-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--borda-cor);
+}
+
+.anchieta-itinerario-titulo {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--texto-principal);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anchieta-paradas-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.anchieta-parada-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.anchieta-parada-card:hover {
+  border-color: #16a34a;
+  background: rgba(22, 163, 74, 0.05);
+  transform: translateY(-1px);
+}
+
+.anchieta-parada-badge {
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 800;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.anchieta-parada-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.anchieta-parada-ref {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.anchieta-parada-end {
+  font-size: 11px;
+  color: var(--texto-secundario);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.anchieta-parada-btn-mapa {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #16a34a;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.anchieta-parada-btn-mapa:hover {
+  background: rgba(22, 163, 74, 0.15);
+}
+
 /* Linha 4: Botão de Ação */
 .cockpit-btn-acao {
   width: 100%;
@@ -356,6 +550,36 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* ── Conteúdo das Seções Modulares do Motorista (Escala e Perfil) ── */
+.motorista-secao-conteudo {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.motorista-secao-header {
+  margin-bottom: 24px;
+}
+
+.motorista-secao-titulo {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--texto-principal);
+  margin-bottom: 6px;
+}
+
+.motorista-secao-desc {
+  font-size: 13.5px;
+  color: var(--texto-secundario);
+}
+
+@media (max-width: 768px) {
+  .motorista-secao-conteudo {
+    padding: 16px 12px;
+  }
 }
 
 /* ── Modais de Ocorrência & Suporte com Padrão ValeBus ── */
@@ -515,6 +739,17 @@
 
 /* Responsividade do Cockpit */
 @media (max-width: 768px) {
+  .motorista-mapa-controles-flutuantes {
+    top: 10px;
+    right: 10px;
+    gap: 5px;
+    max-width: calc(100vw - 20px);
+  }
+  .motorista-btn-flutuante,
+  .btn-recenter-mapa-valebus {
+    padding: 5px 9px;
+    font-size: 10.5px;
+  }
   .motorista-cockpit-overlay-card {
     left: 10px;
     right: 10px;

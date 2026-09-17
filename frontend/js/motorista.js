@@ -22,15 +22,15 @@
   const estadoMotorista = {
     nome: 'João Silva',
     matricula: 'MOT-104',
-    linhaCodigo: 'Linha 01',
-    linhaNome: 'Centro / Bairro Industrial',
-    estacao: 'Inatel',
+    linhaCodigo: 'Linha Anchieta',
+    linhaNome: 'Praça Urbana / Recanto',
+    estacao: 'Praça Urbana Carolina',
     veiculo: 'Ônibus #02 (Prefixo 102)',
     viagensHoje: 12,
     emRota: false,
-    distanciaKm: 3.8,
-    tempoMin: 12,
-    proximaParada: 'Av. Inatel, Centro'
+    distanciaKm: 4.5,
+    tempoMin: 15,
+    proximaParada: '1. Praça Do Murilo'
   };
 
   function atualizarRelogio() {
@@ -106,6 +106,9 @@
   /* ──────────────────────────────────────────────────────────
      3. RENDERIZAÇÃO DOS DADOS DO MOTORISTA
      ────────────────────────────────────────────────────────── */
+  let indiceParadaAtual = 0;
+  const marcadoresParadasAnchieta = [];
+
   function renderizarDadosMotorista() {
     // Iniciais
     const partes = estadoMotorista.nome.trim().split(/\s+/).filter(Boolean);
@@ -155,10 +158,15 @@
     const elDistancia = document.getElementById('metrica-distancia');
     const elTempo = document.getElementById('metrica-tempo');
     const elParada = document.getElementById('metrica-parada');
+    const elIndicador = document.getElementById('parada-nav-indicador');
 
     if (elDistancia) elDistancia.textContent = `${estadoMotorista.distanciaKm.toFixed(1)} km`;
     if (elTempo) elTempo.textContent = `${estadoMotorista.tempoMin} min`;
     if (elParada) elParada.textContent = estadoMotorista.proximaParada;
+    if (elIndicador && window.VALEBUS_PARADAS && window.VALEBUS_PARADAS.paradasPorLinha && window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
+      const total = window.VALEBUS_PARADAS.paradasPorLinha.anchieta.length;
+      elIndicador.textContent = `${(indiceParadaAtual || 0) + 1}/${total}`;
+    }
 
     // Perfil
     const elPerfilNome = document.getElementById('perfil-nome-texto');
@@ -237,8 +245,8 @@
   };
 
   const FROTA = [
-    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.2575, -45.6965], velocidade: 28, isMeuOnibus: false },
-    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.2470, -45.7090], velocidade: 32, isMeuOnibus: true },
+    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.254164, -45.696709], velocidade: 28, isMeuOnibus: true },
+    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.2470, -45.7090], velocidade: 32, isMeuOnibus: false },
     { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              posicao: [-22.2445, -45.7060], velocidade: 25, isMeuOnibus: false },
     { chaveLinha: 'industrial',             linha: LINHAS.industrial,             posicao: [-22.2610, -45.7140], velocidade: 35, isMeuOnibus: false },
     { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          posicao: [-22.2660, -45.6880], velocidade: 30, isMeuOnibus: false },
@@ -253,6 +261,14 @@
   let map = null;
   let meuOnibusMarker = null;
   const marcadoresMap = new Map();
+
+  // Camadas vetoriais exclusivas da Linha Anchieta
+  const camadaTrajetoAnchieta = L.layerGroup();
+  const camadaParadasAnchieta = L.layerGroup();
+  let rotaAnchietaVisivel = true;
+  let paradasAnchietaVisiveis = true;
+  let polylineAnchieta = null;
+  let waypointAnchietaIndex = 0;
 
   function criarIconeBus(cor, isMeu = false) {
     const htmlIcone = `
@@ -305,16 +321,254 @@
     `;
   }
 
+  /* ──────────────────────────────────────────────────────────
+     5.1. PONTOS DE ÔNIBUS DA LINHA ANCHIETA (14 PARADAS)
+     ────────────────────────────────────────────────────────── */
+  function criarIconeParadaMotorista(ponto, index, total) {
+    const cor = '#16a34a';
+    const num = ponto.numero || (index + 1);
+    const htmlIcone = `
+      <div class="ponto-parada-container motorista-ponto-parada" data-linha="anchieta" data-num="${num}">
+        <div class="ponto-parada-pin" style="--cor-ponto: ${cor};">
+          <div class="ponto-parada-corpo" style="background-color: ${cor}; border: 2px solid #ffffff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.35);">
+            <span style="font-size: 11px; font-weight: 800; color: #ffffff; line-height: 1; font-family: system-ui, -apple-system, sans-serif;">${num}</span>
+          </div>
+          <div class="ponto-parada-ponteiro" style="border-top-color: ${cor};"></div>
+        </div>
+      </div>
+    `;
+
+    return L.divIcon({
+      html: htmlIcone,
+      className: 'leaflet-ponto-parada-wrapper',
+      iconSize: [28, 34],
+      iconAnchor: [14, 32],
+      popupAnchor: [0, -30]
+    });
+  }
+
+  function gerarHtmlPopupParadaMotorista(ponto, index, total) {
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${ponto.posicao[0]},${ponto.posicao[1]}`;
+    const num = ponto.numero || (index + 1);
+
+    return `
+      <div class="popup-ponto popup-ponto--motorista" style="min-width: 240px; padding: 4px;">
+        <div class="popup-ponto__topo" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+          <span style="font-size: 11px; font-weight: 800; color: #16a34a; text-transform: uppercase; letter-spacing: 0.04em;">
+            Parada #${num} de ${total} &bull; Linha Anchieta
+          </span>
+          <span style="font-size: 10px; font-weight: 700; background: rgba(22, 163, 74, 0.12); color: #16a34a; padding: 2px 7px; border-radius: 999px;">
+            ${ponto.sentido || 'Sentido Recanto'}
+          </span>
+        </div>
+
+        <div class="popup-ponto__corpo">
+          <div class="popup-ponto__item" style="margin-bottom: 6px;">
+            <span class="popup-ponto__rotulo" style="display: block; font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600;">Endereço</span>
+            <h4 class="popup-ponto__endereco" style="color: #0f172a; font-size: 12.5px; font-weight: 700; margin: 2px 0 0;">${ponto.endereco}</h4>
+          </div>
+          <div class="popup-ponto__item" style="margin-top: 4px;">
+            <span class="popup-ponto__rotulo" style="display: block; font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600;">Ponto de Referência</span>
+            <div class="popup-ponto__referencia" style="color: #16a34a; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 5px; margin-top: 2px;">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.5"/>
+              </svg>
+              <span>${ponto.referencia}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="popup-ponto__acoes" style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+          <button type="button" class="btn-definir-parada-alvo" data-indice="${index}" style="background: #16a34a; color: #ffffff; border: none; border-radius: 8px; padding: 7px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Definir como Próxima Parada no Cockpit</span>
+          </button>
+          <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="popup-ponto__btn-maps" style="display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 11px; color: #64748b; text-decoration: none; padding: 3px;">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <span>Ver no Google Maps</span>
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderizarParadasAnchieta() {
+    camadaParadasAnchieta.clearLayers();
+    marcadoresParadasAnchieta.length = 0;
+
+    if (!window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
+      return;
+    }
+
+    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.anchieta;
+
+    paradas.forEach((ponto, index) => {
+      const icone = criarIconeParadaMotorista(ponto, index, paradas.length);
+      const popupHtml = gerarHtmlPopupParadaMotorista(ponto, index, paradas.length);
+
+      const marker = L.marker(ponto.posicao, {
+        icon: icone,
+        title: `Parada #${ponto.numero || (index + 1)}: ${ponto.referencia}`
+      }).bindPopup(popupHtml, { maxWidth: 300, minWidth: 260 });
+
+      marker.bindTooltip(
+        `<strong>#${ponto.numero || (index + 1)} &bull; ${ponto.referencia}</strong><br><span style="font-size:11px;color:#cbd5e1;">${ponto.endereco}</span>`,
+        { direction: 'top', offset: [0, -28], opacity: 0.95 }
+      );
+
+      marcadoresParadasAnchieta.push(marker);
+      camadaParadasAnchieta.addLayer(marker);
+    });
+
+    if (paradasAnchietaVisiveis && map && !map.hasLayer(camadaParadasAnchieta)) {
+      camadaParadasAnchieta.addTo(map);
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     5.2. TRAÇADO VETORIAL DA ROTA DA LINHA ANCHIETA
+     ────────────────────────────────────────────────────────── */
+  function renderizarRotaAnchieta() {
+    camadaTrajetoAnchieta.clearLayers();
+    polylineAnchieta = null;
+
+    if (!window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.obterTrajeto) return;
+
+    const coords = window.VALEBUS_PARADAS.obterTrajeto('anchieta');
+    if (!coords || coords.length === 0) return;
+
+    // Halo escuro para legibilidade e contraste
+    const polyHalo = L.polyline(coords, {
+      color: '#052e16',
+      weight: 7.5,
+      opacity: 0.35,
+      lineCap: 'round',
+      lineJoin: 'round',
+      interactive: false
+    });
+
+    // Linha principal no verde oficial da Linha Anchieta
+    polylineAnchieta = L.polyline(coords, {
+      color: '#16a34a',
+      weight: 5,
+      opacity: 0.95,
+      lineCap: 'round',
+      lineJoin: 'round',
+      interactive: true
+    });
+
+    polylineAnchieta.bindTooltip(
+      `<strong>Linha Anchieta &bull; Rota Oficial</strong><br><span style="font-size:11px;color:#cbd5e1;">Itinerário: Praça Urbana Carolina ➔ Recanto (4,5 km &bull; 14 paradas)</span>`,
+      { sticky: true, opacity: 0.95 }
+    );
+
+    polylineAnchieta.on('mouseover', () => {
+      polylineAnchieta.setStyle({ weight: 7, opacity: 1 });
+    });
+    polylineAnchieta.on('mouseout', () => {
+      polylineAnchieta.setStyle({ weight: 5, opacity: 0.95 });
+    });
+
+    camadaTrajetoAnchieta.addLayer(polyHalo);
+    camadaTrajetoAnchieta.addLayer(polylineAnchieta);
+
+    if (rotaAnchietaVisivel && map && !map.hasLayer(camadaTrajetoAnchieta)) {
+      camadaTrajetoAnchieta.addTo(map);
+    }
+  }
+
+  function enquadrarRotaAnchieta() {
+    if (!map) return;
+    if (polylineAnchieta) {
+      map.fitBounds(polylineAnchieta.getBounds(), { padding: [40, 40], maxZoom: 16 });
+      mostrarToast('Rota da Linha Anchieta enquadrada no mapa.');
+    } else if (window.VALEBUS_PARADAS) {
+      const coords = window.VALEBUS_PARADAS.obterTrajeto('anchieta');
+      if (coords && coords.length > 0) {
+        map.fitBounds(L.polyline(coords).getBounds(), { padding: [40, 40] });
+      }
+    }
+  }
+
+  function selecionarParadaCockpit(indice, abrirPopupMapa = false) {
+    if (!window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
+      return;
+    }
+    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.anchieta;
+    if (indice < 0) indice = 0;
+    if (indice >= paradas.length) indice = paradas.length - 1;
+
+    indiceParadaAtual = indice;
+    const ponto = paradas[indiceParadaAtual];
+    const num = ponto.numero || (indiceParadaAtual + 1);
+
+    estadoMotorista.proximaParada = `${num}. ${ponto.referencia}`;
+    const fracaoRestante = (paradas.length - indiceParadaAtual) / paradas.length;
+    estadoMotorista.distanciaKm = parseFloat((4.5 * Math.max(0.1, fracaoRestante)).toFixed(1));
+    estadoMotorista.tempoMin = Math.max(1, Math.round(15 * Math.max(0.1, fracaoRestante)));
+
+    renderizarDadosMotorista();
+
+    const elIndicador = document.getElementById('parada-nav-indicador');
+    if (elIndicador) {
+      elIndicador.textContent = `${num}/${paradas.length}`;
+    }
+
+    if (abrirPopupMapa && map && marcadoresParadasAnchieta[indiceParadaAtual]) {
+      const marker = marcadoresParadasAnchieta[indiceParadaAtual];
+      map.panTo(marker.getLatLng(), { animate: true });
+      marker.openPopup();
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     5.3. LISTA EXPANSÍVEL DE ITINERÁRIO (TELA DE ROTAS)
+     ────────────────────────────────────────────────────────── */
+  function preencherListaParadasItinerario() {
+    const listaContainer = document.getElementById('lista-paradas-anchieta-container');
+    if (!listaContainer || !window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
+      return;
+    }
+
+    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.anchieta;
+    listaContainer.innerHTML = paradas.map((ponto, i) => {
+      const num = ponto.numero || (i + 1);
+      return `
+        <div class="anchieta-parada-card" data-indice="${i}" title="Clique para ver parada no mapa">
+          <span class="anchieta-parada-badge">${num}</span>
+          <div class="anchieta-parada-info">
+            <div class="anchieta-parada-ref">${ponto.referencia}</div>
+            <div class="anchieta-parada-end">${ponto.endereco}</div>
+          </div>
+          <button type="button" class="anchieta-parada-btn-mapa" aria-label="Localizar no mapa">Ver no Mapa</button>
+        </div>
+      `;
+    }).join('');
+
+    listaContainer.querySelectorAll('.anchieta-parada-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const idx = parseInt(card.getAttribute('data-indice'), 10);
+        trocarSecao('cockpit');
+        selecionarParadaCockpit(idx, true);
+      });
+    });
+  }
+
   if (mapaEl) {
     map = L.map('mapa-motorista', {
       zoomControl: true,
       attributionControl: false
-    }).setView([-22.2528, -45.7036], 14);
+    }).setView([-22.2505, -45.7005], 14.5);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
+
+    // Renderiza a rota e paradas da Linha Anchieta
+    renderizarRotaAnchieta();
+    renderizarParadasAnchieta();
 
     // Renderiza marcadores da frota
     FROTA.forEach(bus => {
@@ -332,13 +586,54 @@
       marcadoresMap.set(bus.chaveLinha, { marker, bus });
     });
 
+    // Event listener para cliques dentro de popups (ex: Definir como Próxima Parada)
+    map.on('popupopen', (e) => {
+      const popupEl = e.popup.getElement();
+      if (!popupEl) return;
+      const btnAlvo = popupEl.querySelector('.btn-definir-parada-alvo');
+      if (btnAlvo) {
+        btnAlvo.onclick = () => {
+          const idx = parseInt(btnAlvo.getAttribute('data-indice'), 10);
+          selecionarParadaCockpit(idx);
+          map.closePopup();
+          mostrarToast(`Parada #${idx + 1} definida como destino imediato no cockpit.`);
+        };
+      }
+    });
+
     // Simulação contínua de movimentação GPS da frota
     setInterval(() => {
+      // Se estiver em rota na Linha Anchieta, o veículo do motorista navega fielmente pelos 53 waypoints
+      if (meuOnibusMarker && estadoMotorista.emRota && estadoMotorista.linhaCodigo.includes('Anchieta') && window.VALEBUS_PARADAS) {
+        const coords = window.VALEBUS_PARADAS.obterTrajeto('anchieta');
+        if (coords && coords.length > 0) {
+          waypointAnchietaIndex = (waypointAnchietaIndex + 1) % coords.length;
+          const novoPonto = coords[waypointAnchietaIndex];
+          meuOnibusMarker.setLatLng(novoPonto);
+
+          // Checa proximidade com as 14 paradas da Linha Anchieta para avanço automático suave
+          const paradas = window.VALEBUS_PARADAS.paradasPorLinha.anchieta || [];
+          for (let i = 0; i < paradas.length; i++) {
+            const dLat = Math.abs(novoPonto[0] - paradas[i].posicao[0]);
+            const dLng = Math.abs(novoPonto[1] - paradas[i].posicao[1]);
+            if (dLat < 0.0012 && dLng < 0.0012 && i !== indiceParadaAtual) {
+              selecionarParadaCockpit(i);
+              break;
+            }
+          }
+        }
+      }
+
       marcadoresMap.forEach(({ marker, bus }) => {
+        // Se for o ônibus do motorista e estiver seguindo o traçado da Anchieta, não aplica desvio aleatório
+        if (bus.isMeuOnibus && estadoMotorista.emRota && estadoMotorista.linhaCodigo.includes('Anchieta')) {
+          return;
+        }
+
         const latAtual = marker.getLatLng().lat;
         const lngAtual = marker.getLatLng().lng;
 
-        // Deslocamento simulado
+        // Deslocamento simulado para os demais ônibus da frota
         const fator = (bus.isMeuOnibus && estadoMotorista.emRota) ? 0.0006 : 0.0004;
         const deltaLat = (Math.random() - 0.49) * fator;
         const deltaLng = (Math.random() - 0.49) * fator;
@@ -359,6 +654,92 @@
       });
     }, 3000);
   }
+
+  /* ──────────────────────────────────────────────────────────
+     5.4. CONTROLES FLUTUANTES DO MAPA & STEPPER DE PARADAS
+     ────────────────────────────────────────────────────────── */
+  const btnToggleRotaAnchieta = document.getElementById('btn-toggle-rota-anchieta');
+  if (btnToggleRotaAnchieta) {
+    btnToggleRotaAnchieta.addEventListener('click', () => {
+      rotaAnchietaVisivel = !rotaAnchietaVisivel;
+      btnToggleRotaAnchieta.classList.toggle('motorista-btn-flutuante--ativo', rotaAnchietaVisivel);
+      btnToggleRotaAnchieta.setAttribute('aria-pressed', String(rotaAnchietaVisivel));
+
+      if (rotaAnchietaVisivel) {
+        if (map && !map.hasLayer(camadaTrajetoAnchieta)) {
+          camadaTrajetoAnchieta.addTo(map);
+        }
+        mostrarToast('Traçado da Linha Anchieta exibido no mapa.');
+      } else {
+        if (map && map.hasLayer(camadaTrajetoAnchieta)) {
+          map.removeLayer(camadaTrajetoAnchieta);
+        }
+        mostrarToast('Traçado da Linha Anchieta ocultado.');
+      }
+    });
+  }
+
+  const btnToggleParadasAnchieta = document.getElementById('btn-toggle-paradas-anchieta');
+  if (btnToggleParadasAnchieta) {
+    btnToggleParadasAnchieta.addEventListener('click', () => {
+      paradasAnchietaVisiveis = !paradasAnchietaVisiveis;
+      btnToggleParadasAnchieta.classList.toggle('motorista-btn-flutuante--ativo', paradasAnchietaVisiveis);
+      btnToggleParadasAnchieta.setAttribute('aria-pressed', String(paradasAnchietaVisiveis));
+
+      if (paradasAnchietaVisiveis) {
+        if (map && !map.hasLayer(camadaParadasAnchieta)) {
+          camadaParadasAnchieta.addTo(map);
+        }
+        mostrarToast('14 Paradas da Linha Anchieta exibidas no mapa.');
+      } else {
+        if (map && map.hasLayer(camadaParadasAnchieta)) {
+          map.removeLayer(camadaParadasAnchieta);
+        }
+        mostrarToast('Pontos de parada ocultados.');
+      }
+    });
+  }
+
+  const btnEnquadrarRotaAnchieta = document.getElementById('btn-enquadrar-rota-anchieta');
+  if (btnEnquadrarRotaAnchieta) {
+    btnEnquadrarRotaAnchieta.addEventListener('click', enquadrarRotaAnchieta);
+  }
+
+  // Stepper de navegação entre paradas no Cockpit
+  const btnParadaAnterior = document.getElementById('btn-parada-anterior');
+  const btnParadaProxima = document.getElementById('btn-parada-proxima');
+
+  if (btnParadaAnterior) {
+    btnParadaAnterior.addEventListener('click', () => {
+      selecionarParadaCockpit(indiceParadaAtual - 1, true);
+    });
+  }
+
+  if (btnParadaProxima) {
+    btnParadaProxima.addEventListener('click', () => {
+      selecionarParadaCockpit(indiceParadaAtual + 1, true);
+    });
+  }
+
+  // Caixa expansível de itinerário da Linha Anchieta
+  const btnToggleListaParadas = document.getElementById('btn-toggle-lista-paradas');
+  const boxParadasAnchieta = document.getElementById('box-paradas-anchieta');
+  const listaParadasContainer = document.getElementById('lista-paradas-anchieta-container');
+
+  if (btnToggleListaParadas && boxParadasAnchieta) {
+    btnToggleListaParadas.addEventListener('click', () => {
+      const estaVisivel = boxParadasAnchieta.style.display !== 'none';
+      boxParadasAnchieta.style.display = estaVisivel ? 'none' : 'block';
+      btnToggleListaParadas.textContent = estaVisivel ? '📋 Ver 14 Paradas' : '✕ Ocultar Paradas';
+      if (!estaVisivel && listaParadasContainer && listaParadasContainer.children.length === 0) {
+        preencherListaParadasItinerario();
+      }
+    });
+  }
+
+  // Preenche inicialmente o itinerário
+  preencherListaParadasItinerario();
+  selecionarParadaCockpit(0, false);
 
   /* ──────────────────────────────────────────────────────────
      6. RECENTRALIZAR GPS NO MEU ÔNIBUS
@@ -580,14 +961,46 @@
       if (l === 'anchieta') {
         estadoMotorista.linhaCodigo = 'Linha Anchieta';
         estadoMotorista.linhaNome = 'Praça Urbana / Recanto';
-        estadoMotorista.proximaParada = 'Rua José Ribeiro de Barros';
+        selecionarParadaCockpit(0);
+
+        if (meuOnibusMarker && window.VALEBUS_PARADAS) {
+          const coords = window.VALEBUS_PARADAS.obterTrajeto('anchieta');
+          if (coords && coords.length > 0) {
+            meuOnibusMarker.setLatLng(coords[0]);
+          }
+        }
+
+        if (map) {
+          if (!map.hasLayer(camadaTrajetoAnchieta)) {
+            camadaTrajetoAnchieta.addTo(map);
+            rotaAnchietaVisivel = true;
+          }
+          if (!map.hasLayer(camadaParadasAnchieta)) {
+            camadaParadasAnchieta.addTo(map);
+            paradasAnchietaVisiveis = true;
+          }
+        }
+
+        if (btnToggleRotaAnchieta) {
+          btnToggleRotaAnchieta.classList.add('motorista-btn-flutuante--ativo');
+          btnToggleRotaAnchieta.setAttribute('aria-pressed', 'true');
+        }
+        if (btnToggleParadasAnchieta) {
+          btnToggleParadasAnchieta.classList.add('motorista-btn-flutuante--ativo');
+          btnToggleParadasAnchieta.setAttribute('aria-pressed', 'true');
+        }
+
+        enquadrarRotaAnchieta();
+        mostrarToast('Linha Anchieta ativada com traçado de 4,5 km e 14 paradas.');
       } else {
         estadoMotorista.linhaCodigo = 'Linha 01';
         estadoMotorista.linhaNome = 'Centro / Bairro Industrial';
+        estadoMotorista.distanciaKm = 3.8;
+        estadoMotorista.tempoMin = 12;
         estadoMotorista.proximaParada = 'Av. Inatel, Centro';
+        mostrarToast('Linha 01 ativada.');
       }
       renderizarDadosMotorista();
-      mostrarToast(`Linha atual alterada para: ${estadoMotorista.linhaCodigo}`);
       trocarSecao('cockpit');
     });
   });
