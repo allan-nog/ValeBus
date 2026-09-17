@@ -464,20 +464,33 @@
             </div>
           </div>
 
-          <!-- Botão Flutuante de Controle de Paradas de Ônibus -->
-          <button type="button" class="mapa-btn-paradas mapa-btn-paradas--ativo" id="btn-toggle-paradas" aria-pressed="true" title="Alternar visibilidade das paradas no mapa">
-            <span class="mapa-btn-paradas__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3">
-                <rect x="4" y="3" width="16" height="13" rx="2"></rect>
-                <path d="M4 10h16"></path>
-                <path d="M7 16v3"></path>
-                <path d="M17 16v3"></path>
-                <circle cx="8" cy="13" r="1" fill="currentColor"></circle>
-                <circle cx="16" cy="13" r="1" fill="currentColor"></circle>
-              </svg>
-            </span>
-            <span class="mapa-btn-paradas__texto">Paradas</span>
-          </button>
+          <!-- Controles Flutuantes do Mapa (Trajeto e Paradas) -->
+          <div class="mapa-controles-flutuantes">
+            <button type="button" class="mapa-btn-flutuante mapa-btn-flutuante--ativo" id="btn-toggle-trajeto" aria-pressed="true" title="Alternar visibilidade do trajeto no mapa">
+              <span class="mapa-btn-flutuante__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="5" cy="19" r="2.5"></circle>
+                  <path d="M7.5 19h7a3.5 3.5 0 0 0 0-7h-5a3.5 3.5 0 0 1 0-7H16.5"></path>
+                  <circle cx="19" cy="5" r="2.5"></circle>
+                </svg>
+              </span>
+              <span class="mapa-btn-flutuante__texto">Trajeto</span>
+            </button>
+
+            <button type="button" class="mapa-btn-flutuante mapa-btn-flutuante--ativo" id="btn-toggle-paradas" aria-pressed="true" title="Alternar visibilidade das paradas no mapa">
+              <span class="mapa-btn-flutuante__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <rect x="4" y="3" width="16" height="13" rx="2"></rect>
+                  <path d="M4 10h16"></path>
+                  <path d="M7 16v3"></path>
+                  <path d="M17 16v3"></path>
+                  <circle cx="8" cy="13" r="1" fill="currentColor"></circle>
+                  <circle cx="16" cy="13" r="1" fill="currentColor"></circle>
+                </svg>
+              </span>
+              <span class="mapa-btn-flutuante__texto">Paradas</span>
+            </button>
+          </div>
 
           <!-- Legenda com Filtro Interativo por Linha em Carrossel -->
           <div class="mapa-legenda">

@@ -158,7 +158,7 @@
   };
 
   const FROTA = [
-    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.2575, -45.6965], velocidade: 28 },
+    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.254186, -45.696698], velocidade: 28 },
     { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.2470, -45.7090], velocidade: 32 },
     { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              posicao: [-22.2445, -45.7060], velocidade: 25 },
     { chaveLinha: 'industrial',             linha: LINHAS.industrial,             posicao: [-22.2610, -45.7140], velocidade: 35 },
@@ -426,6 +426,7 @@
   if (btnToggleParadas) {
     btnToggleParadas.addEventListener('click', () => {
       paradasVisiveis = !paradasVisiveis;
+      btnToggleParadas.classList.toggle('mapa-btn-flutuante--ativo', paradasVisiveis);
       btnToggleParadas.classList.toggle('mapa-btn-paradas--ativo', paradasVisiveis);
       btnToggleParadas.setAttribute('aria-pressed', String(paradasVisiveis));
 
@@ -434,6 +435,113 @@
       } else {
         if (map.hasLayer(camadaParadas)) {
           map.removeLayer(camadaParadas);
+        }
+      }
+    });
+  }
+
+
+  /* ──────────────────────────────────────────────────────────
+     4.2. TRAJETOS VETORIAIS (POLYLINES) DAS LINHAS
+     Traçado vetorial fiel à malha viária real de Santa Rita do Sapucaí
+     ────────────────────────────────────────────────────────── */
+  const camadaTrajetos = L.layerGroup();
+  let trajetosVisiveis = true; // Ativo por padrão
+  let polylineAnchietaRef = null;
+
+  function renderizarTrajetos(linhaSelecionada = linhaAtivaFiltro) {
+    camadaTrajetos.clearLayers();
+    polylineAnchietaRef = null;
+
+    if (!window.VALEBUS_PARADAS) return;
+
+    // Se 'todas' ou uma linha com trajeto cadastrado (ex: 'anchieta')
+    const linhasParaDesenhar = (linhaSelecionada === 'todas')
+      ? ['anchieta']
+      : (window.VALEBUS_PARADAS.temTrajeto(linhaSelecionada) ? [linhaSelecionada] : []);
+
+    linhasParaDesenhar.forEach(chave => {
+      const coords = window.VALEBUS_PARADAS.obterTrajeto(chave);
+      if (!coords || coords.length === 0) return;
+
+      const meta = window.VALEBUS_PARADAS.metadadosLinhas[chave] || {
+        nome: 'Linha ' + chave,
+        cor: '#16a34a'
+      };
+
+      // 1. Linha de contraste inferior (halo escuro para legibilidade perfeita dia/noite)
+      const polyHalo = L.polyline(coords, {
+        color: '#052e16',
+        weight: 7.5,
+        opacity: 0.35,
+        lineCap: 'round',
+        lineJoin: 'round',
+        interactive: false
+      });
+
+      // 2. Traçado principal na cor oficial da Linha (Verde esmeralda para Linha Anchieta)
+      const polyPrincipal = L.polyline(coords, {
+        color: meta.cor,
+        weight: 4.5,
+        opacity: 0.95,
+        lineCap: 'round',
+        lineJoin: 'round',
+        interactive: true
+      });
+
+      polyPrincipal.bindTooltip(
+        `<strong>${meta.nome}</strong><br><span style="font-size:11px;color:#cbd5e1;">Itinerário completo &bull; 4,5 km (14 paradas)</span>`,
+        { sticky: true, opacity: 0.95 }
+      );
+
+      // Efeito de destaque suave ao passar o cursor
+      polyPrincipal.on('mouseover', () => {
+        polyPrincipal.setStyle({ weight: 6.5, opacity: 1 });
+      });
+      polyPrincipal.on('mouseout', () => {
+        polyPrincipal.setStyle({ weight: 4.5, opacity: 0.95 });
+      });
+
+      camadaTrajetos.addLayer(polyHalo);
+      camadaTrajetos.addLayer(polyPrincipal);
+
+      if (chave === 'anchieta') {
+        polylineAnchietaRef = polyPrincipal;
+      }
+    });
+
+    if (trajetosVisiveis && !map.hasLayer(camadaTrajetos)) {
+      camadaTrajetos.addTo(map);
+    }
+  }
+
+  function atualizarVisibilidadeTrajetos(linhaSelecionada = linhaAtivaFiltro) {
+    if (!trajetosVisiveis) {
+      if (map.hasLayer(camadaTrajetos)) {
+        map.removeLayer(camadaTrajetos);
+      }
+      return;
+    }
+
+    renderizarTrajetos(linhaSelecionada);
+  }
+
+  // Renderização inicial dos trajetos
+  renderizarTrajetos();
+
+  // Controle de alternar visibilidade do trajeto via botão flutuante
+  const btnToggleTrajeto = document.getElementById('btn-toggle-trajeto');
+  if (btnToggleTrajeto) {
+    btnToggleTrajeto.addEventListener('click', () => {
+      trajetosVisiveis = !trajetosVisiveis;
+      btnToggleTrajeto.classList.toggle('mapa-btn-flutuante--ativo', trajetosVisiveis);
+      btnToggleTrajeto.setAttribute('aria-pressed', String(trajetosVisiveis));
+
+      if (trajetosVisiveis) {
+        renderizarTrajetos(linhaAtivaFiltro);
+      } else {
+        if (map.hasLayer(camadaTrajetos)) {
+          map.removeLayer(camadaTrajetos);
         }
       }
     });
@@ -595,8 +703,9 @@
         }
       });
 
-      // Atualiza visibilidade dos pontos de parada conforme a linha
+      // Atualiza visibilidade dos pontos de parada e trajetos conforme a linha
       atualizarVisibilidadeParadas(linhaSelecionada);
+      atualizarVisibilidadeTrajetos(linhaSelecionada);
 
       // Atualiza o contador no resumo do painel
       const elTotal = document.getElementById('total-onibus-ativo');
@@ -659,15 +768,29 @@
         map.addLayer(marker);
       }
 
-      // Atualiza visibilidade dos pontos de parada para a linha focada
+      // Atualiza visibilidade dos pontos de parada e trajetos para a linha focada
       atualizarVisibilidadeParadas(chaveLinha);
+      atualizarVisibilidadeTrajetos(chaveLinha);
 
       // Atualiza popup antes de abrir
       marker.setPopupContent(gerarHtmlPopup(bus));
 
-      // Faz o mapa voar suavemente até o ônibus selecionado
-      map.flyTo(latLng, 16, { animate: true, duration: 1.2 });
-      marker.openPopup();
+      // Se for a Linha Anchieta e tiver traçado com múltiplos pontos, enquadra o trajeto
+      if (chaveLinha === 'anchieta' && polylineAnchietaRef && trajetosVisiveis) {
+        map.fitBounds(polylineAnchietaRef.getBounds(), {
+          padding: [50, 50],
+          maxZoom: 15,
+          animate: true,
+          duration: 1.2
+        });
+        setTimeout(() => {
+          marker.openPopup();
+        }, 1250);
+      } else {
+        // Faz o mapa voar suavemente até o ônibus selecionado
+        map.flyTo(latLng, 16, { animate: true, duration: 1.2 });
+        marker.openPopup();
+      }
 
       // Atualiza o contador no resumo do painel
       const elTotal = document.getElementById('total-onibus-ativo');
