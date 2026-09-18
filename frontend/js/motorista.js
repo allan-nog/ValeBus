@@ -127,7 +127,6 @@
     const dropNome = document.getElementById('dropdown-usuario-nome');
     const dropEmail = document.getElementById('dropdown-usuario-email');
     const dropCargo = document.getElementById('dropdown-usuario-cargo');
-    const btnGestor = document.getElementById('dropdown-motorista-btn-gestor');
 
     if (topAvatar) topAvatar.textContent = iniciais;
     if (topNome) topNome.textContent = estadoMotorista.nome;
@@ -135,10 +134,9 @@
     if (dropNome) dropNome.textContent = estadoMotorista.nome;
 
     if (estadoMotorista.ehGestor) {
-      if (topCargo) topCargo.textContent = 'Gestor CCO (Supervisão)';
+      if (topCargo) topCargo.textContent = 'Operação & Supervisão';
       if (dropEmail) dropEmail.textContent = `${estadoMotorista.email} • Matrícula ${estadoMotorista.matricula}`;
-      if (dropCargo) dropCargo.textContent = 'Gestor CCO & Frotas Master';
-      if (btnGestor) btnGestor.style.display = 'flex';
+      if (dropCargo) dropCargo.textContent = 'Supervisão de Linha & Frota';
     }
 
     // Cockpit Card
@@ -147,12 +145,71 @@
     const elNumViagens = document.getElementById('motorista-num-viagens');
     const elLinhaDisplay = document.getElementById('motorista-linha-display');
     const elDestinoDisplay = document.getElementById('motorista-destino-display');
+    const elMobileBadge = document.getElementById('cockpit-mobile-badge');
+    const elMobileDestino = document.getElementById('cockpit-mobile-destino');
 
     if (elNome) elNome.textContent = estadoMotorista.nome;
     if (elEstacao) elEstacao.textContent = estadoMotorista.estacao;
     if (elNumViagens) elNumViagens.textContent = `${estadoMotorista.viagensHoje} viagens`;
     if (elLinhaDisplay) elLinhaDisplay.textContent = estadoMotorista.linhaCodigo;
     if (elDestinoDisplay) elDestinoDisplay.textContent = estadoMotorista.linhaNome;
+    if (elMobileBadge) elMobileBadge.textContent = estadoMotorista.linhaCodigo;
+    if (elMobileDestino) elMobileDestino.textContent = estadoMotorista.linhaNome;
+
+    // Sincronizar estado visual dos botões da escala
+    const btnEscalaIndustrial = document.getElementById('btn-escala-industrial');
+    const btnEscalaAnchieta = document.getElementById('btn-escala-anchieta');
+    const tagStatusLinha01 = document.getElementById('tag-status-linha01');
+    const tagStatusAnchieta = document.getElementById('tag-status-anchieta');
+    const cardLinha01 = document.getElementById('card-escala-linha01');
+    const cardAnchieta = document.getElementById('card-escala-anchieta');
+
+    const ehAnchieta = estadoMotorista.linhaCodigo && estadoMotorista.linhaCodigo.toLowerCase().includes('anchieta');
+    if (ehAnchieta) {
+      if (btnEscalaAnchieta) {
+        btnEscalaAnchieta.className = 'btn-rota-acao btn-rota-acao--ativo rota-card__btn-trocar';
+        btnEscalaAnchieta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Ativa no Cockpit</span>';
+      }
+      if (tagStatusAnchieta) {
+        tagStatusAnchieta.textContent = 'Ativa no Cockpit';
+        tagStatusAnchieta.style.backgroundColor = 'rgba(22, 163, 74, 0.15)';
+        tagStatusAnchieta.style.color = '#16a34a';
+      }
+      if (cardAnchieta) cardAnchieta.style.border = '2px solid #16a34a';
+
+      if (btnEscalaIndustrial) {
+        btnEscalaIndustrial.className = 'btn-rota-acao btn-rota-acao--verde rota-card__btn-trocar';
+        btnEscalaIndustrial.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Ativar Linha 01</span>';
+      }
+      if (tagStatusLinha01) {
+        tagStatusLinha01.textContent = 'Disponível na Escala';
+        tagStatusLinha01.style.backgroundColor = 'rgba(100, 116, 139, 0.12)';
+        tagStatusLinha01.style.color = 'var(--texto-secundario)';
+      }
+      if (cardLinha01) cardLinha01.style.border = '1px solid var(--borda-cor)';
+    } else {
+      if (btnEscalaIndustrial) {
+        btnEscalaIndustrial.className = 'btn-rota-acao btn-rota-acao--ativo rota-card__btn-trocar';
+        btnEscalaIndustrial.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Ativa no Cockpit</span>';
+      }
+      if (tagStatusLinha01) {
+        tagStatusLinha01.textContent = 'Em Operação';
+        tagStatusLinha01.style.backgroundColor = 'rgba(37, 99, 235, 0.15)';
+        tagStatusLinha01.style.color = 'var(--cor-marca)';
+      }
+      if (cardLinha01) cardLinha01.style.border = '2px solid var(--cor-marca)';
+
+      if (btnEscalaAnchieta) {
+        btnEscalaAnchieta.className = 'btn-rota-acao btn-rota-acao--verde rota-card__btn-trocar';
+        btnEscalaAnchieta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Ativar Rota Anchieta</span>';
+      }
+      if (tagStatusAnchieta) {
+        tagStatusAnchieta.textContent = '14 Paradas • 4,5 km';
+        tagStatusAnchieta.style.backgroundColor = 'rgba(22, 163, 74, 0.15)';
+        tagStatusAnchieta.style.color = '#16a34a';
+      }
+      if (cardAnchieta) cardAnchieta.style.border = '1px solid var(--borda-cor)';
+    }
 
     // Métricas do Cockpit
     const elDistancia = document.getElementById('metrica-distancia');
@@ -1004,6 +1061,25 @@
       trocarSecao('cockpit');
     });
   });
+
+  // Alternar visualização compacta/minimizado do Cockpit Flutuante
+  const btnColapsarCockpit = document.getElementById('btn-colapsar-cockpit');
+  const cockpitCard = document.getElementById('cockpit-overlay-card');
+  const btnColapsarTexto = document.getElementById('btn-colapsar-texto');
+
+  if (btnColapsarCockpit && cockpitCard) {
+    btnColapsarCockpit.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const estaMinimizado = cockpitCard.classList.toggle('motorista-cockpit-overlay-card--minimizado');
+      if (btnColapsarTexto) {
+        btnColapsarTexto.textContent = estaMinimizado ? 'Detalhes' : 'Minimizar';
+      }
+      btnColapsarCockpit.setAttribute('aria-expanded', !estaMinimizado);
+      if (map) {
+        setTimeout(() => map.invalidateSize(), 200);
+      }
+    });
+  }
 
   /* ──────────────────────────────────────────────────────────
      8. GAVETAS MOBILE (SIDEBAR E PAINEL LATERAL)

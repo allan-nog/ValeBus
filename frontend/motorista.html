@@ -325,21 +325,6 @@
                   <span class="usuario-dropdown__item-desc">Visualização CCO de Santa Rita</span>
                 </div>
               </a>
-
-              <a href="gestor.html" class="usuario-dropdown__item" id="dropdown-motorista-btn-gestor" role="menuitem" style="text-decoration:none;">
-                <div class="usuario-dropdown__item-icone" style="color: #7c3aed;" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                </div>
-                <div class="usuario-dropdown__item-texto">
-                  <span class="usuario-dropdown__item-titulo" style="color: #7c3aed; font-weight: 700;">Painel CCO do Gestor</span>
-                  <span class="usuario-dropdown__item-desc">Central de Gestão e Despacho</span>
-                </div>
-              </a>
             </div>
 
             <div class="usuario-dropdown__divisor" role="separator" aria-hidden="true"></div>
@@ -417,64 +402,79 @@
             <span class="motorista-banner-em-rota__txt">VIAGEM EM ANDAMENTO &bull; TRANSMITINDO TELEMETRIA AO VIVO AO CCO</span>
           </div>
 
-          <!-- Card Cockpit Flutuante do Motorista (Centralizado) -->
+          <!-- Card Cockpit Flutuante do Motorista (Compacto, Responsivo e Colapsável) -->
           <div class="motorista-cockpit-overlay-card" id="cockpit-overlay-card">
             
-            <!-- Linha 1: Perfil do Motorista, Status e Viagens Hoje -->
-            <div class="cockpit-card__topo">
-              <div class="cockpit-card__perfil">
-                <div class="cockpit-avatar-wrap">
-                  <div class="cockpit-avatar-img">JS</div>
-                  <span class="cockpit-status-dot" title="Online" aria-hidden="true"></span>
-                </div>
-                <div class="cockpit-perfil-dados">
-                  <h3 class="cockpit-perfil-nome" id="motorista-nome-display">João Silva</h3>
-                  <div class="cockpit-perfil-status">
-                    <span class="status-bolinha">●</span>
-                    <span id="motorista-status-texto">Conectado</span>
-                    <span class="status-separador">&bull;</span>
-                    <span id="motorista-estacao-texto">Inatel</span>
-                  </div>
-                </div>
+            <!-- Linha de Resumo Mobile & Alternância de Visualização -->
+            <div class="cockpit-card__mobile-bar">
+              <div class="cockpit-card__mobile-info">
+                <span class="cockpit-card__mobile-badge" id="cockpit-mobile-badge">Linha 01</span>
+                <span class="cockpit-card__mobile-destino" id="cockpit-mobile-destino">Centro / Bairro Industrial</span>
               </div>
-
-              <div class="cockpit-badge-viagens" id="motorista-badge-viagens">
-                <span class="cockpit-badge-viagens__rotulo">Hoje:</span>
-                <strong class="cockpit-badge-viagens__num" id="motorista-num-viagens">12 viagens</strong>
-              </div>
+              <button type="button" class="cockpit-card__btn-colapsar" id="btn-colapsar-cockpit" aria-label="Minimizar ou expandir card de rota" title="Alternar visão compacta">
+                <span class="btn-colapsar-txt" id="btn-colapsar-texto">Minimizar</span>
+                <svg class="btn-colapsar-icone" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
             </div>
 
-            <!-- Linha 2: Rota Atribuída -->
-            <div class="cockpit-card__rota">
-              <div class="cockpit-rota-header">
-                <span class="cockpit-rota-tag">ROTA ATRIBUÍDA</span>
-                <span class="cockpit-rota-codigo" id="motorista-linha-display">Linha 01</span>
-              </div>
-              <h4 class="cockpit-rota-nome" id="motorista-destino-display">Centro / Bairro Industrial</h4>
-            </div>
-
-            <!-- Linha 3: Métricas em 3 Colunas -->
-            <div class="cockpit-metricas-grid">
-              <div class="cockpit-metrica-item">
-                <span class="cockpit-metrica-label">DISTÂNCIA</span>
-                <strong class="cockpit-metrica-val" id="metrica-distancia">3.8 km</strong>
-              </div>
-
-              <div class="cockpit-metrica-item">
-                <span class="cockpit-metrica-label">TEMPO EST.</span>
-                <strong class="cockpit-metrica-val" id="metrica-tempo">12 min</strong>
-              </div>
-
-              <div class="cockpit-metrica-item cockpit-metrica-item--destaque">
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                  <span class="cockpit-metrica-label">PRÓXIMA PARADA</span>
-                  <div class="cockpit-stepper-paradas" id="cockpit-stepper-paradas" title="Navegar entre as paradas da rota">
-                    <button type="button" class="btn-parada-nav" id="btn-parada-anterior" title="Parada anterior" aria-label="Parada anterior">‹</button>
-                    <span class="parada-nav-indicador" id="parada-nav-indicador">1/14</span>
-                    <button type="button" class="btn-parada-nav" id="btn-parada-proxima" title="Próxima parada" aria-label="Próxima parada">›</button>
+            <!-- Corpo Expansível / Retrátil do Card -->
+            <div class="cockpit-card__corpo" id="cockpit-card-corpo">
+              <!-- Linha 1: Perfil do Motorista, Status e Viagens Hoje (Exibido no Desktop/Tablet) -->
+              <div class="cockpit-card__topo">
+                <div class="cockpit-card__perfil">
+                  <div class="cockpit-avatar-wrap">
+                    <div class="cockpit-avatar-img">JS</div>
+                    <span class="cockpit-status-dot" title="Online" aria-hidden="true"></span>
+                  </div>
+                  <div class="cockpit-perfil-dados">
+                    <h3 class="cockpit-perfil-nome" id="motorista-nome-display">João Silva</h3>
+                    <div class="cockpit-perfil-status">
+                      <span class="status-bolinha">●</span>
+                      <span id="motorista-status-texto">Conectado</span>
+                      <span class="status-separador">&bull;</span>
+                      <span id="motorista-estacao-texto">Inatel</span>
+                    </div>
                   </div>
                 </div>
-                <strong class="cockpit-metrica-val cockpit-metrica-val--parada" id="metrica-parada">1. Praça Do Murilo</strong>
+
+                <div class="cockpit-badge-viagens" id="motorista-badge-viagens">
+                  <span class="cockpit-badge-viagens__rotulo">Hoje:</span>
+                  <strong class="cockpit-badge-viagens__num" id="motorista-num-viagens">12 viagens</strong>
+                </div>
+              </div>
+
+              <!-- Linha 2: Rota Atribuída (Desktop) -->
+              <div class="cockpit-card__rota">
+                <div class="cockpit-rota-header">
+                  <span class="cockpit-rota-tag">ROTA ATRIBUÍDA</span>
+                  <span class="cockpit-rota-codigo" id="motorista-linha-display">Linha 01</span>
+                </div>
+                <h4 class="cockpit-rota-nome" id="motorista-destino-display">Centro / Bairro Industrial</h4>
+              </div>
+
+              <!-- Linha 3: Métricas da Rota e Próxima Parada -->
+              <div class="cockpit-metricas-grid">
+                <div class="cockpit-metrica-item">
+                  <span class="cockpit-metrica-label">DISTÂNCIA</span>
+                  <strong class="cockpit-metrica-val" id="metrica-distancia">3.8 km</strong>
+                </div>
+
+                <div class="cockpit-metrica-item">
+                  <span class="cockpit-metrica-label">TEMPO EST.</span>
+                  <strong class="cockpit-metrica-val" id="metrica-tempo">12 min</strong>
+                </div>
+
+                <div class="cockpit-metrica-item cockpit-metrica-item--destaque">
+                  <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <span class="cockpit-metrica-label">PRÓXIMA PARADA</span>
+                    <div class="cockpit-stepper-paradas" id="cockpit-stepper-paradas" title="Navegar entre as paradas da rota">
+                      <button type="button" class="btn-parada-nav" id="btn-parada-anterior" title="Parada anterior" aria-label="Parada anterior">‹</button>
+                      <span class="parada-nav-indicador" id="parada-nav-indicador">1/14</span>
+                      <button type="button" class="btn-parada-nav" id="btn-parada-proxima" title="Próxima parada" aria-label="Próxima parada">›</button>
+                    </div>
+                  </div>
+                  <strong class="cockpit-metrica-val cockpit-metrica-val--parada" id="metrica-parada">1. Praça Do Murilo</strong>
+                </div>
               </div>
             </div>
 
@@ -499,11 +499,11 @@
 
           <div class="linhas-grid">
             <!-- Linha Ativa Atual -->
-            <article class="linha-card" style="border: 2px solid var(--cor-marca);">
+            <article class="linha-card" id="card-escala-linha01" style="border: 2px solid var(--cor-marca);">
               <div class="linha-card__topo">
                 <span class="linha-card__dot" style="background-color: var(--cor-marca);"></span>
                 <h3 class="linha-card__titulo">Linha 01 &mdash; Centro &rarr; Bairro Industrial</h3>
-                <span class="linha-card__status-tag" style="background-color: rgba(37,99,235,0.15); color: var(--cor-marca);">Em Operação</span>
+                <span class="linha-card__status-tag" id="tag-status-linha01" style="background-color: rgba(37,99,235,0.15); color: var(--cor-marca);">Em Operação</span>
               </div>
               <div class="linha-card__conteudo">
                 <div class="linha-card__dado">
@@ -520,8 +520,14 @@
                 </div>
               </div>
               <div class="rota-card-acoes-bar">
-                <span class="status-badge status-badge--horario">● Pontualidade 98%</span>
-                <button type="button" class="btn-acao-rota-card rota-card__btn-trocar" data-linha="industrial">Definida no Cockpit</button>
+                <span class="rota-card-status-badge">
+                  <span class="rota-card-status-dot"></span>
+                  <span>Pontualidade 98%</span>
+                </span>
+                <button type="button" class="btn-rota-acao btn-rota-acao--ativo rota-card__btn-trocar" id="btn-escala-industrial" data-linha="industrial">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Ativa no Cockpit</span>
+                </button>
               </div>
             </article>
 
@@ -530,7 +536,7 @@
               <div class="linha-card__topo">
                 <span class="linha-card__dot" style="background-color: #16a34a;"></span>
                 <h3 class="linha-card__titulo">Linha Anchieta &mdash; Praça Urbana / Recanto</h3>
-                <span class="linha-card__status-tag" style="background-color: rgba(22, 163, 74, 0.15); color: #16a34a;">14 Paradas • 4,5 km</span>
+                <span class="linha-card__status-tag" id="tag-status-anchieta" style="background-color: rgba(22, 163, 74, 0.15); color: #16a34a;">14 Paradas • 4,5 km</span>
               </div>
               <div class="linha-card__conteudo">
                 <div class="linha-card__dado">
@@ -547,11 +553,13 @@
                 </div>
               </div>
               <div class="rota-card-acoes-bar">
-                <button type="button" class="btn-acao-rota-card" id="btn-toggle-lista-paradas" style="background: var(--fundo-campo); border: 1px solid var(--borda-cor); color: var(--texto-principal);">
-                  📋 Ver 14 Paradas
+                <button type="button" class="btn-rota-acao btn-rota-acao--secundario" id="btn-toggle-lista-paradas">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  <span>Ver 14 Paradas</span>
                 </button>
-                <button type="button" class="btn-acao-rota-card rota-card__btn-trocar" data-linha="anchieta" style="background: #16a34a; color: #ffffff;">
-                  Ativar Rota Anchieta
+                <button type="button" class="btn-rota-acao btn-rota-acao--verde rota-card__btn-trocar" id="btn-escala-anchieta" data-linha="anchieta">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Ativar Rota Anchieta</span>
                 </button>
               </div>
 

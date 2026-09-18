@@ -15,6 +15,9 @@
   color: var(--texto-principal);
   font-family: var(--fonte-principal);
   transition: background-color var(--transicao), color var(--transicao);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* ── TOPBAR EXECUTIVA ───────────────────────────────────────────────── */
@@ -25,18 +28,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
 .gestor-topbar__esquerda {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .gestor-logo {
@@ -45,11 +54,14 @@
   gap: 10px;
   text-decoration: none;
   color: #ffffff;
+  min-width: 0;
 }
 
 .gestor-logo__icone {
   width: 38px;
   height: 38px;
+  min-width: 38px;
+  flex-shrink: 0;
   background: linear-gradient(135deg, #1a6fd4, #2563eb);
   border-radius: var(--raio-pequeno);
   display: flex;
@@ -68,15 +80,18 @@
   display: flex;
   flex-direction: column;
   line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .gestor-logo__nome {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: -0.3px;
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .gestor-badge-pill {
@@ -88,43 +103,23 @@
   color: #ffffff;
   padding: 2px 8px;
   border-radius: 999px;
+  flex-shrink: 0;
 }
 
 .gestor-logo__cidade {
   font-size: 11px;
   color: #94a3b8;
-}
-
-.gestor-topbar__status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #cbd5e1;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.gestor-topbar__status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--cor-sucesso);
-  box-shadow: 0 0 8px var(--cor-sucesso);
-  animation: pulsoOnline 2s infinite ease-in-out;
-}
-
-@keyframes pulsoOnline {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.85); }
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .gestor-topbar__direita {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .gestor-btn-link {
@@ -988,9 +983,25 @@
   color: var(--texto-secundario);
 }
 
+.gestor-form-grupo--validade {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  background: rgba(37, 99, 235, 0.05);
+  border: 1px dashed rgba(37, 99, 235, 0.35);
+  border-radius: var(--raio-pequeno);
+  padding: 8px 10px;
+  overflow: hidden;
+}
+
 .gestor-date-input-wrap {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .gestor-form-input,
@@ -1009,18 +1020,36 @@
 }
 
 .gestor-form-input--date {
+  display: block;
+  height: 42px;
   min-height: 42px;
-  display: flex;
-  align-items: center;
   font-family: inherit;
   font-size: 13px;
   color: var(--texto-principal);
   cursor: pointer;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 0 10px !important;
+  overflow: hidden;
+}
+
+.gestor-form-input--date::-webkit-datetime-edit {
+  display: inline-flex;
+  padding: 0;
+  max-width: calc(100% - 28px);
+  overflow: hidden;
+}
+
+.gestor-form-input--date::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
 }
 
 .gestor-form-input--date::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  padding: 4px;
+  padding: 2px;
+  margin: 0;
   border-radius: 4px;
   opacity: 0.8;
 }
@@ -1147,6 +1176,61 @@
   color: var(--texto-secundario);
 }
 
+/* ── BOTÃO DE TEMA CLARO / ESCURO (DISCRETO, ANTES DO MENU) ───────── */
+.topbar__btn-tema {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: var(--raio-pequeno);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e1;
+  transition: all var(--transicao);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.topbar__btn-tema:hover,
+.topbar__btn-tema:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  outline: none;
+}
+
+.topbar__btn-tema svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+}
+
+/* Modo Claro: Exibe Lua */
+.topbar__btn-tema .icone-tema-sol {
+  display: none;
+}
+
+.topbar__btn-tema .icone-tema-lua {
+  display: block;
+  color: #cbd5e1;
+}
+
+/* Modo Escuro: Exibe Sol Dourado */
+[data-theme="dark"] .topbar__btn-tema .icone-tema-sol {
+  display: block;
+  color: #fbbf24;
+}
+
+[data-theme="dark"] .topbar__btn-tema .icone-tema-lua {
+  display: none;
+}
+
 /* ── BOTÃO DO MENU MÓVEL NO HEADER ────────────────────────────────── */
 .gestor-btn-menu-mobile {
   display: none;
@@ -1154,19 +1238,25 @@
   justify-content: center;
   align-items: center;
   gap: 5px;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: var(--raio-pequeno);
   cursor: pointer;
   padding: 0;
   color: #ffffff;
+  flex-shrink: 0;
   transition: all var(--transicao);
 }
 
-.gestor-btn-menu-mobile:hover {
-  background: rgba(255, 255, 255, 0.18);
+.gestor-btn-menu-mobile:hover,
+.gestor-btn-menu-mobile:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.45);
+  outline: none;
 }
 
 .gestor-hamburguer-linha {
@@ -1541,15 +1631,13 @@
 }
 
 /* ── RESPONSIVIDADE COMPLETA DO PAINEL DO GESTOR ────────────────────── */
-@media (max-width: 1024px) {
+@media (max-width: 1080px) {
   .gestor-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-}
 
-@media (max-width: 900px) {
   .gestor-topbar {
-    padding: 10px 16px;
+    padding: 8px 16px;
     height: 60px;
     min-height: 60px;
     flex-wrap: nowrap;
@@ -1558,23 +1646,36 @@
 
   .gestor-topbar__esquerda {
     width: auto;
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     justify-content: flex-start;
   }
 
-  /* Oculta links com ícones sem legenda no topo para não confundir o usuário */
+  .gestor-topbar__direita {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  /* Oculta botões e cards extensos do topo para não estourar a tela */
   .gestor-topbar__direita .gestor-btn-link,
   .gestor-topbar__direita .gestor-usuario-card,
-  .gestor-topbar__direita .gestor-btn-sair,
-  .gestor-topbar__direita #btn-tema-gestor {
+  .gestor-topbar__direita .gestor-btn-sair {
     display: none !important;
   }
 
-  /* Exibe o botão do menu hambúrguer */
-  .gestor-btn-menu-mobile {
-    display: flex;
+  /* O botão de tema permanece visível imediatamente antes do botão de menu */
+  .topbar__btn-tema,
+  #btn-tema-gestor {
+    display: flex !important;
   }
 
+  /* Exibe o botão do menu hambúrguer garantindo que fique sempre visível */
+  .gestor-btn-menu-mobile {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 900px) {
   .gestor-conteudo {
     padding: 16px 12px;
   }
@@ -1747,8 +1848,12 @@
     min-height: 46px;
     height: 46px;
     font-size: 14px;
-    width: 100%;
-    padding: 0 12px;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 0 10px !important;
+    overflow: hidden;
   }
 
   .gestor-btn-mini {
@@ -1758,10 +1863,15 @@
 
   /* Destaca a área da CNH para facilitar o preenchimento no celular */
   .gestor-form-grupo--validade {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     background: rgba(37, 99, 235, 0.05);
-    border: 1px dashed rgba(37, 99, 235, 0.3);
+    border: 1px dashed rgba(37, 99, 235, 0.35);
     border-radius: var(--raio-pequeno);
     padding: 10px 12px;
+    overflow: hidden;
   }
 
   .gestor-modal__footer {
@@ -1797,23 +1907,41 @@
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 640px) {
+  .gestor-topbar {
+    padding: 8px 12px;
+    height: 56px;
+    min-height: 56px;
+  }
+
   .gestor-logo__cidade {
-    display: none;
+    display: none !important;
   }
 
-  .gestor-topbar__status {
-    padding: 3px 8px;
-    font-size: 11px;
+  .gestor-logo__nome {
+    font-size: 15px;
+    gap: 6px;
   }
 
-  #gestor-status-texto {
-    max-width: 130px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .gestor-badge-pill {
+    font-size: 9px;
+    padding: 2px 6px;
   }
 
+  .gestor-logo__icone {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+  }
+
+  .gestor-btn-menu-mobile {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (max-width: 520px) {
   .gestor-banner__info h1 {
     font-size: 18px;
   }
@@ -1827,5 +1955,19 @@
     right: 12px;
     bottom: 12px;
     border-radius: var(--raio-pequeno);
+  }
+}
+
+@media (max-width: 360px) {
+  .gestor-topbar {
+    padding: 8px 10px;
+  }
+
+  .gestor-logo__nome {
+    font-size: 14px;
+  }
+
+  .gestor-badge-pill {
+    display: none;
   }
 }

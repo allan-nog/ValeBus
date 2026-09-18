@@ -1100,7 +1100,7 @@
       }
     }
 
-    // Badge na Sidebar (Item Alertas da Frota)
+    // Badge na Sidebar (Item Alertas)
     const sidebarBadgeAlertas = document.querySelector('.sidebar__nav .nav__item[data-secao="alertas"] .nav__badge');
     if (sidebarBadgeAlertas) {
       sidebarBadgeAlertas.textContent = String(naoLidos || ativos);

@@ -851,6 +851,11 @@
 
   function aplicarTema(tema) {
     document.documentElement.setAttribute('data-theme', tema);
+    if (btnTema) {
+      const isDark = tema === 'dark';
+      btnTema.setAttribute('aria-label', isDark ? 'Alternar para tema claro' : 'Alternar para tema escuro');
+      btnTema.setAttribute('title', isDark ? 'Alternar para tema claro' : 'Alternar para tema escuro');
+    }
     try {
       localStorage.setItem('valebus_tema', tema);
     } catch (e) {
