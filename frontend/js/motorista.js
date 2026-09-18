@@ -870,7 +870,7 @@
 
         if (bannerEmRota) bannerEmRota.style.display = 'none';
         if (elStatusTexto) elStatusTexto.textContent = 'Conectado';
-        if (elTopStatus) elTopStatus.textContent = 'Telemetria Online • Santa Rita do Sapucaí';
+        if (elTopStatus) elTopStatus.textContent = 'Telemetria Online';
 
         if (intervaloContador) clearInterval(intervaloContador);
 
