@@ -1,0 +1,15 @@
+{
+  "name": "valebus-front",
+  "version": "1.0.0",
+  "description": "Plataforma de monitoramento de ônibus e frotas em tempo real para Santa Rita do Sapucaí",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node -e \"process.exit(0)\"",
+    "lint": "node -e \"process.exit(0)\""
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "ValeBus",
+  "description": "Plataforma de monitoramento de ônibus em tempo real para Santa Rita do Sapucaí.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
