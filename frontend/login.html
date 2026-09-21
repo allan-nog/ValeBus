@@ -56,7 +56,6 @@
       </div>
 
       <h2 class="form-titulo">Bem-vindo</h2>
-      <p class="form-subtitulo">Acesse o painel de monitoramento em tempo real</p>
 
       <form id="form-login" novalidate>
 
@@ -266,57 +265,179 @@
           <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
+
       <div class="modal-padrao__header">
-        <div class="modal-padrao__icone-topo modal-padrao__icone-topo--recuperacao" aria-hidden="true">
+        <div class="modal-padrao__icone-topo modal-padrao__icone-topo--recuperacao" id="esqueceu-icone-topo" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
         </div>
         <h3 id="modal-esqueceu-titulo" class="modal-padrao__titulo">Recuperar senha</h3>
-        <p class="modal-padrao__subtitulo">Informe o e-mail cadastrado para enviarmos as instruções de redefinição de acesso.</p>
+        <p id="modal-esqueceu-subtitulo" class="modal-padrao__subtitulo">Informe o e-mail cadastrado para enviarmos as instruções de redefinição de acesso.</p>
       </div>
 
+      <!-- PASSO 1: Informar E-mail -->
       <form id="form-recuperar-senha" class="modal-padrao__corpo" novalidate>
-        <div class="campo" style="margin-bottom: 12px;">
-          <label class="campo__label" for="input-recuperar-email">Seu e-mail</label>
-          <div class="campo__wrapper">
-            <svg class="campo__icone" aria-hidden="true">
-              <use href="#icone-email"/>
+        <div id="esqueceu-etapa-1">
+          <div class="campo" style="margin-bottom: 12px;">
+            <label class="campo__label" for="input-recuperar-email">Seu e-mail cadastrado</label>
+            <div class="campo__wrapper">
+              <svg class="campo__icone" aria-hidden="true">
+                <use href="#icone-email"/>
+              </svg>
+              <input class="campo__input"
+                     type="email" id="input-recuperar-email"
+                     placeholder="seu@email.com"
+                     autocomplete="email" required>
+            </div>
+          </div>
+
+          <div class="modal-alerta modal-alerta--erro" id="recuperar-erro-1" style="display:none;" role="alert">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
-            <input class="campo__input"
-                   type="email" id="input-recuperar-email"
-                   placeholder="seu@email.com"
-                   autocomplete="email" required>
+            <span id="recuperar-erro-texto-1">Informe um e-mail válido.</span>
+          </div>
+
+          <div class="modal-padrao__acoes">
+            <button type="button" class="modal-btn-secundario" id="btn-cancelar-recuperar">Cancelar</button>
+            <button type="submit" class="modal-btn-primario" id="btn-enviar-recuperar">
+              <span id="texto-btn-recuperar">Continuar</span>
+            </button>
           </div>
         </div>
 
-        <div class="modal-alerta modal-alerta--sucesso" id="recuperar-sucesso" style="display:none;" role="alert">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          <span>Instruções enviadas! Verifique sua caixa de entrada e spam.</span>
+        <!-- PASSO 2: Código de 6 dígitos -->
+        <div id="esqueceu-etapa-2" style="display: none;">
+          <div class="codigo-email-badge">
+            <span class="codigo-email-badge__texto">Código enviado para: <strong id="esqueceu-destinatario-email">seu@email.com</strong></span>
+            <button type="button" class="btn-trocar-email" id="btn-trocar-email-esqueceu" title="Corrigir e-mail">Alterar</button>
+          </div>
+
+          <!-- Inputs numéricos segmentados (6 dígitos) -->
+          <div class="codigo-segmentado" id="codigo-segmentado-esqueceu" aria-label="Digite o código de 6 dígitos">
+            <input type="text" class="codigo-digito" data-grupo="esqueceu" data-index="0" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 1">
+            <input type="text" class="codigo-digito" data-grupo="esqueceu" data-index="1" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 2">
+            <input type="text" class="codigo-digito" data-grupo="esqueceu" data-index="2" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 3">
+            <span class="codigo-segmentado__divisor" aria-hidden="true">&ndash;</span>
+            <input type="text" class="codigo-digito" data-grupo="esqueceu" data-index="3" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 4">
+            <input type="text" class="codigo-digito" data-grupo="esqueceu" data-index="4" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 5">
+            <input type="text" class="codigo-digito" data-grupo="esqueceu" data-index="5" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 6">
+          </div>
+
+          <!-- Temporizador regressivo de reenvio -->
+          <div class="codigo-temporizador">
+            <span id="esqueceu-temporizador-wrap">Reenviar código em <strong id="esqueceu-tempo-regressivo">60s</strong></span>
+            <button type="button" class="btn-reenviar-codigo" id="btn-reenviar-esqueceu" disabled>Reenviar código</button>
+          </div>
+
+          <div class="modal-alerta modal-alerta--erro" id="recuperar-erro-2" style="display:none;" role="alert">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="recuperar-erro-texto-2">Código incorreto. Digite os 6 dígitos corretamente.</span>
+          </div>
+
+          <div class="modal-padrao__acoes">
+            <button type="button" class="modal-btn-secundario" id="btn-voltar-esqueceu-2">Voltar</button>
+            <button type="button" class="modal-btn-primario" id="btn-validar-codigo-esqueceu">
+              <span id="texto-btn-validar-esqueceu">Validar Código</span>
+            </button>
+          </div>
         </div>
 
-        <div class="modal-alerta modal-alerta--erro" id="recuperar-erro" style="display:none;" role="alert">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span id="recuperar-erro-texto">Informe um e-mail válido.</span>
-        </div>
+        <!-- PASSO 3: Criar Nova Senha -->
+        <div id="esqueceu-etapa-3" style="display: none;">
+          <div class="campo" style="margin-bottom: 12px;">
+            <label class="campo__label" for="input-nova-senha">Nova Senha</label>
+            <div class="campo__wrapper">
+              <svg class="campo__icone" aria-hidden="true">
+                <use href="#icone-cadeado"/>
+              </svg>
+              <input class="campo__input campo__input--com-botao"
+                     type="password" id="input-nova-senha"
+                     placeholder="Digite a nova senha" required minlength="8">
+              <button type="button" class="campo__botao-olho" id="botao-olho-novasenha" aria-label="Mostrar senha">
+                <svg class="campo__icone-olho" aria-hidden="true">
+                  <use href="#icone-olho"/>
+                </svg>
+              </button>
+            </div>
 
-        <div class="modal-padrao__acoes">
-          <button type="button" class="modal-btn-secundario" id="btn-cancelar-recuperar">Cancelar</button>
-          <button type="submit" class="modal-btn-primario" id="btn-enviar-recuperar">
-            <span id="texto-btn-recuperar">Enviar link</span>
-          </button>
+            <!-- Requisitos de senha -->
+            <div class="requisitos-senha" id="esqueceu-requisitos-senha" aria-live="polite">
+              <div class="requisito-item" id="req-nova-min-chars">
+                <span class="requisito-item__icone" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+                <span class="requisito-item__texto">Mínimo de 8 caracteres</span>
+              </div>
+              <div class="requisito-item" id="req-nova-maiuscula">
+                <span class="requisito-item__icone" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+                <span class="requisito-item__texto">Pelo menos 1 letra maiúscula</span>
+              </div>
+              <div class="requisito-item" id="req-nova-simbolo">
+                <span class="requisito-item__icone" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+                <span class="requisito-item__texto">Pelo menos 1 símbolo (ex: @, #, $, !)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="campo" style="margin-bottom: 14px;">
+            <label class="campo__label" for="input-confirma-nova-senha">Confirmar Nova Senha</label>
+            <div class="campo__wrapper">
+              <svg class="campo__icone" aria-hidden="true">
+                <use href="#icone-cadeado"/>
+              </svg>
+              <input class="campo__input campo__input--com-botao"
+                     type="password" id="input-confirma-nova-senha"
+                     placeholder="Repita a nova senha" required minlength="8">
+              <button type="button" class="campo__botao-olho" id="botao-olho-confirma-novasenha" aria-label="Mostrar senha">
+                <svg class="campo__icone-olho" aria-hidden="true">
+                  <use href="#icone-olho"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="modal-alerta modal-alerta--erro" id="recuperar-erro-3" style="display:none;" role="alert">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="recuperar-erro-texto-3">As senhas não coincidem ou não atendem aos requisitos.</span>
+          </div>
+
+          <div class="modal-alerta modal-alerta--sucesso" id="recuperar-sucesso-final" style="display:none;" role="alert">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Senha alterada com sucesso! Redirecionando para o login...</span>
+          </div>
+
+          <div class="modal-padrao__acoes">
+            <button type="button" class="modal-btn-secundario" id="btn-cancelar-novasenha">Cancelar</button>
+            <button type="button" class="modal-btn-primario" id="btn-salvar-novasenha">
+              <span id="texto-btn-salvar-novasenha">Salvar Nova Senha</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════
-       MODAL DE CADASTRO / CRIAR CONTA (SIMULAÇÃO ÁGIL)
+       MODAL DE CADASTRO / CRIAR CONTA COM VERIFICAÇÃO 6 DÍGITOS
        ═══════════════════════════════════════════════════════ -->
   <div class="modal-padrao-overlay" id="modal-cadastro" aria-hidden="true">
     <div class="modal-padrao" role="dialog" aria-modal="true" aria-labelledby="modal-cadastro-titulo">
@@ -326,8 +447,9 @@
           <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
+
       <div class="modal-padrao__header">
-        <div class="modal-padrao__icone-topo modal-padrao__icone-topo--cadastro" aria-hidden="true">
+        <div class="modal-padrao__icone-topo modal-padrao__icone-topo--cadastro" id="cadastro-icone-topo" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
             <circle cx="8.5" cy="7" r="4"/>
@@ -336,103 +458,145 @@
           </svg>
         </div>
         <h3 id="modal-cadastro-titulo" class="modal-padrao__titulo">Criar nova conta</h3>
-        <p class="modal-padrao__subtitulo">Cadastre-se rapidamente para acompanhar linhas e alertas em tempo real.</p>
+        <p id="modal-cadastro-subtitulo" class="modal-padrao__subtitulo">Cadastre-se rapidamente para acompanhar linhas e alertas em tempo real.</p>
       </div>
 
+      <!-- PASSO 1: Dados do Cadastro -->
       <form id="form-cadastro-rapido" class="modal-padrao__corpo" novalidate>
-        <div class="campo" style="margin-bottom: 12px;">
-          <label class="campo__label" for="input-cadastro-nome">Nome completo</label>
-          <div class="campo__wrapper">
-            <svg class="campo__icone" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-            <input class="campo__input"
-                   type="text" id="input-cadastro-nome"
-                   placeholder="Ex: Amanda Silva" required>
-          </div>
-        </div>
-
-        <div class="campo" style="margin-bottom: 12px;">
-          <label class="campo__label" for="input-cadastro-email">E-mail</label>
-          <div class="campo__wrapper">
-            <svg class="campo__icone" aria-hidden="true">
-              <use href="#icone-email"/>
-            </svg>
-            <input class="campo__input"
-                   type="email" id="input-cadastro-email"
-                   placeholder="amanda@email.com"
-                   autocomplete="email" required>
-          </div>
-        </div>
-
-        <div class="campo" style="margin-bottom: 14px;">
-          <label class="campo__label" for="input-cadastro-senha">Criar senha</label>
-          <div class="campo__wrapper">
-            <svg class="campo__icone" aria-hidden="true">
-              <use href="#icone-cadeado"/>
-            </svg>
-            <input class="campo__input campo__input--com-botao"
-                   type="password" id="input-cadastro-senha"
-                   placeholder="Digite sua senha" required minlength="8">
-            <button
-                type="button"
-                class="campo__botao-olho"
-                id="botao-olho-cadastro"
-                aria-label="Mostrar senha">
-              <svg class="campo__icone-olho" aria-hidden="true">
-                <use href="#icone-olho"/>
+        <div id="cadastro-etapa-1">
+          <div class="campo" style="margin-bottom: 12px;">
+            <label class="campo__label" for="input-cadastro-nome">Nome completo</label>
+            <div class="campo__wrapper">
+              <svg class="campo__icone" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
               </svg>
+              <input class="campo__input"
+                     type="text" id="input-cadastro-nome"
+                     placeholder="Ex: Amanda Silva" required>
+            </div>
+          </div>
+
+          <div class="campo" style="margin-bottom: 12px;">
+            <label class="campo__label" for="input-cadastro-email">E-mail</label>
+            <div class="campo__wrapper">
+              <svg class="campo__icone" aria-hidden="true">
+                <use href="#icone-email"/>
+              </svg>
+              <input class="campo__input"
+                     type="email" id="input-cadastro-email"
+                     placeholder="amanda@email.com"
+                     autocomplete="email" required>
+            </div>
+          </div>
+
+          <div class="campo" style="margin-bottom: 14px;">
+            <label class="campo__label" for="input-cadastro-senha">Criar senha</label>
+            <div class="campo__wrapper">
+              <svg class="campo__icone" aria-hidden="true">
+                <use href="#icone-cadeado"/>
+              </svg>
+              <input class="campo__input campo__input--com-botao"
+                     type="password" id="input-cadastro-senha"
+                     placeholder="Digite sua senha" required minlength="8">
+              <button
+                  type="button"
+                  class="campo__botao-olho"
+                  id="botao-olho-cadastro"
+                  aria-label="Mostrar senha">
+                <svg class="campo__icone-olho" aria-hidden="true">
+                  <use href="#icone-olho"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Indicador fixo de requisitos de senha em tempo real -->
+            <div class="requisitos-senha" id="cadastro-requisitos-senha" aria-live="polite">
+              <div class="requisito-item" id="req-min-chars">
+                <span class="requisito-item__icone" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+                <span class="requisito-item__texto">Mínimo de 8 caracteres</span>
+              </div>
+              <div class="requisito-item" id="req-maiuscula">
+                <span class="requisito-item__icone" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+                <span class="requisito-item__texto">Pelo menos 1 letra maiúscula</span>
+              </div>
+              <div class="requisito-item" id="req-simbolo">
+                <span class="requisito-item__icone" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+                <span class="requisito-item__texto">Pelo menos 1 símbolo (ex: @, #, $, !)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-alerta modal-alerta--erro" id="cadastro-erro" style="display:none;" role="alert">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="cadastro-erro-texto">Preencha todos os campos corretamente.</span>
+          </div>
+
+          <div class="modal-padrao__acoes">
+            <button type="button" class="modal-btn-secundario" id="btn-cancelar-cadastro">Cancelar</button>
+            <button type="submit" class="modal-btn-primario" id="btn-avancar-cadastro">
+              <span id="texto-btn-avancar-cad">Cadastrar</span>
             </button>
           </div>
+        </div>
 
-          <!-- Indicador fixo de requisitos de senha em tempo real -->
-          <div class="requisitos-senha" id="cadastro-requisitos-senha" aria-live="polite">
-            <div class="requisito-item" id="req-min-chars">
-              <span class="requisito-item__icone" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </span>
-              <span class="requisito-item__texto">Mínimo de 8 caracteres</span>
-            </div>
-            <div class="requisito-item" id="req-maiuscula">
-              <span class="requisito-item__icone" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </span>
-              <span class="requisito-item__texto">Pelo menos 1 letra maiúscula</span>
-            </div>
-            <div class="requisito-item" id="req-simbolo">
-              <span class="requisito-item__icone" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </span>
-              <span class="requisito-item__texto">Pelo menos 1 símbolo (ex: @, #, $, !)</span>
-            </div>
+        <!-- PASSO 2: Verificação do Código de 6 dígitos para o Cadastro -->
+        <div id="cadastro-etapa-2" style="display: none;">
+          <div class="codigo-email-badge">
+            <span class="codigo-email-badge__texto">Código enviado para: <strong id="cadastro-destinatario-email">seu@email.com</strong></span>
+            <button type="button" class="btn-trocar-email" id="btn-trocar-email-cadastro" title="Corrigir e-mail">Corrigir</button>
           </div>
-        </div>
 
-        <div class="modal-alerta modal-alerta--erro" id="cadastro-erro" style="display:none;" role="alert">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span id="cadastro-erro-texto">Preencha todos os campos corretamente.</span>
-        </div>
+          <!-- Inputs segmentados do cadastro -->
+          <div class="codigo-segmentado" id="codigo-segmentado-cadastro" aria-label="Digite o código de verificação de 6 dígitos">
+            <input type="text" class="codigo-digito" data-grupo="cadastro" data-index="0" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 1">
+            <input type="text" class="codigo-digito" data-grupo="cadastro" data-index="1" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 2">
+            <input type="text" class="codigo-digito" data-grupo="cadastro" data-index="2" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 3">
+            <span class="codigo-segmentado__divisor" aria-hidden="true">&ndash;</span>
+            <input type="text" class="codigo-digito" data-grupo="cadastro" data-index="3" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 4">
+            <input type="text" class="codigo-digito" data-grupo="cadastro" data-index="4" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 5">
+            <input type="text" class="codigo-digito" data-grupo="cadastro" data-index="5" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 6">
+          </div>
 
-        <div class="modal-alerta modal-alerta--sucesso" id="cadastro-sucesso" style="display:none;" role="alert">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          <span>Conta criada com sucesso! Acessando o sistema...</span>
-        </div>
+          <!-- Temporizador regressivo de reenvio -->
+          <div class="codigo-temporizador">
+            <span id="cadastro-temporizador-wrap">Reenviar código em <strong id="cadastro-tempo-regressivo">60s</strong></span>
+            <button type="button" class="btn-reenviar-codigo" id="btn-reenviar-cadastro" disabled>Reenviar código</button>
+          </div>
 
-        <div class="modal-padrao__acoes">
-          <button type="button" class="modal-btn-secundario" id="btn-cancelar-cadastro">Cancelar</button>
-          <button type="submit" class="modal-btn-primario" id="btn-confirmar-cadastro">
-            <span id="texto-btn-cadastro">Cadastrar e Entrar</span>
-          </button>
+          <div class="modal-alerta modal-alerta--erro" id="cadastro-erro-codigo" style="display:none;" role="alert">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="cadastro-erro-codigo-texto">Código de verificação incorreto. Tente novamente.</span>
+          </div>
+
+          <div class="modal-alerta modal-alerta--sucesso" id="cadastro-sucesso" style="display:none;" role="alert">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Conta verificada e criada com sucesso! Acessando o sistema...</span>
+          </div>
+
+          <div class="modal-padrao__acoes">
+            <button type="button" class="modal-btn-secundario" id="btn-voltar-cadastro-2">Voltar</button>
+            <button type="button" class="modal-btn-primario" id="btn-confirmar-cadastro">
+              <span id="texto-btn-cadastro">Confirmar e Cadastrar</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -508,19 +672,6 @@
                    type="text" id="input-motorista-id"
                    placeholder="Ex: MOT-104 ou 2048"
                    autocomplete="username" required>
-          </div>
-        </div>
-
-        <!-- Campo: Nome do Motorista (Opcional/Auto-preenchido) -->
-        <div class="campo" style="margin-bottom: 12px;">
-          <label class="campo__label" for="input-motorista-nome">Nome do Operador</label>
-          <div class="campo__wrapper">
-            <svg class="campo__icone" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-            <input class="campo__input"
-                   type="text" id="input-motorista-nome"
-                   placeholder="Ex: Carlos Mendes" required>
           </div>
         </div>
 

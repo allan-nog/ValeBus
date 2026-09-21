@@ -631,6 +631,73 @@ body.tema-noite .modal-padrao__texto-legal h4 {
   color: #f8fafc;
 }
 
+body.tema-noite .modal-alerta--info {
+  background: rgba(30, 58, 138, 0.35);
+  border-color: rgba(96, 165, 250, 0.4);
+  color: #93c5fd;
+}
+
+body.tema-noite .codigo-email-badge {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.tema-noite .codigo-email-badge strong {
+  color: #f8fafc;
+}
+
+body.tema-noite .codigo-demo-box {
+  background: rgba(6, 78, 59, 0.35);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #a7f3d0;
+}
+
+body.tema-noite .codigo-demo-box strong {
+  color: #6ee7b7;
+}
+
+body.tema-noite .btn-preencher-codigo {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #6ee7b7;
+}
+
+body.tema-noite .codigo-digito {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.tema-noite .codigo-digito:focus {
+  border-color: #38bdf8;
+  background: #0f172a;
+  box-shadow: 0 0 0 3.5px rgba(56, 189, 248, 0.25);
+}
+
+body.tema-noite .codigo-digito.preenchido {
+  border-color: #475569;
+  background: #1e293b;
+}
+
+body.tema-noite .codigo-digito.com-erro {
+  border-color: #f87171 !important;
+  background-color: rgba(127, 29, 29, 0.4) !important;
+  color: #fca5a5 !important;
+}
+
+body.tema-noite .codigo-temporizador {
+  color: #94a3b8;
+}
+
+body.tema-noite .codigo-temporizador strong {
+  color: #f8fafc;
+}
+
+body.tema-noite .btn-reenviar-codigo {
+  color: #38bdf8;
+}
+
 @keyframes subir-card {
   from {
     opacity: 0;
@@ -1485,6 +1552,190 @@ body.tema-noite .modal-padrao__texto-legal h4 {
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: #b91c1c;
+}
+
+.modal-alerta--info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+/* Indicador de destinatário de e-mail */
+.codigo-email-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 12px;
+}
+
+.codigo-email-badge strong {
+  color: #0f172a;
+  word-break: break-all;
+}
+
+.btn-trocar-email {
+  background: transparent;
+  border: none;
+  color: var(--cor-marca);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-decoration: underline;
+  transition: background-color var(--transicao);
+}
+
+.btn-trocar-email:hover {
+  background-color: rgba(26, 111, 212, 0.08);
+}
+
+/* Caixa com código de demonstração / teste */
+.codigo-demo-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #f0fdf4;
+  border: 1px dashed #86efac;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #166534;
+  margin-bottom: 14px;
+}
+
+.codigo-demo-box strong {
+  font-family: monospace;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: #14532d;
+}
+
+.btn-preencher-codigo {
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transicao);
+}
+
+.btn-preencher-codigo:hover {
+  background: #bbf7d0;
+  color: #14532d;
+}
+
+/* Inputs numéricos segmentados (6 dígitos) */
+.codigo-segmentado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0 14px;
+}
+
+.codigo-segmentado__divisor {
+  font-size: 20px;
+  font-weight: 700;
+  color: #94a3b8;
+  user-select: none;
+  line-height: 1;
+}
+
+.codigo-digito {
+  width: 44px;
+  height: 52px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  font-family: "SF Mono", Consolas, monospace;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: border-color var(--transicao), box-shadow var(--transicao), transform var(--transicao);
+  box-sizing: border-box;
+}
+
+.codigo-digito:focus {
+  outline: none;
+  border-color: var(--cor-marca);
+  box-shadow: 0 0 0 3.5px rgba(26, 111, 212, 0.18);
+  transform: translateY(-1px);
+}
+
+.codigo-digito.preenchido {
+  border-color: #94a3b8;
+  background-color: #f8fafc;
+}
+
+.codigo-digito.com-erro {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+  color: #b91c1c !important;
+  animation: animarErro 0.25s ease-out;
+}
+
+@media (max-width: 420px) {
+  .codigo-digito {
+    width: 38px;
+    height: 48px;
+    font-size: 19px;
+  }
+  .codigo-segmentado {
+    gap: 4px;
+  }
+}
+
+/* Temporizador regressivo e botão de reenvio */
+.codigo-temporizador {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.codigo-temporizador strong {
+  color: #1e293b;
+}
+
+.btn-reenviar-codigo {
+  background: transparent;
+  border: none;
+  color: var(--cor-marca);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-decoration: underline;
+  transition: all var(--transicao);
+}
+
+.btn-reenviar-codigo:hover:not(:disabled) {
+  background-color: rgba(26, 111, 212, 0.08);
+  color: var(--cor-marca-escura);
+}
+
+.btn-reenviar-codigo:disabled {
+  display: none;
 }
 
 .modal-padrao__texto-legal {

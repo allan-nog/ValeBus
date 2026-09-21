@@ -253,36 +253,80 @@
   const linkPrivacidade = document.getElementById('link-privacidade');
 
   // Modal Esqueceu a Senha
-  const modalEsqueceu      = document.getElementById('modal-esqueceu');
-  const formRecuperar      = document.getElementById('form-recuperar-senha');
-  const inputRecuperar     = document.getElementById('input-recuperar-email');
-  const btnCancelarRecup   = document.getElementById('btn-cancelar-recuperar');
-  const btnFecharXEsqueceu = document.getElementById('btn-fechar-x-esqueceu');
-  const btnEnviarRecup     = document.getElementById('btn-enviar-recuperar');
-  const txtBtnRecuperar    = document.getElementById('texto-btn-recuperar');
-  const recuperarSucesso   = document.getElementById('recuperar-sucesso');
-  const recuperarErro      = document.getElementById('recuperar-erro');
-  const recuperarErroTxt   = document.getElementById('recuperar-erro-texto');
+  const modalEsqueceu          = document.getElementById('modal-esqueceu');
+  const modalEsqueceuTitulo    = document.getElementById('modal-esqueceu-titulo');
+  const modalEsqueceuSubtitulo = document.getElementById('modal-esqueceu-subtitulo');
+  const formRecuperar          = document.getElementById('form-recuperar-senha');
+  const esqueceuEtapa1         = document.getElementById('esqueceu-etapa-1');
+  const esqueceuEtapa2         = document.getElementById('esqueceu-etapa-2');
+  const esqueceuEtapa3         = document.getElementById('esqueceu-etapa-3');
+  const inputRecuperar         = document.getElementById('input-recuperar-email');
+  const btnCancelarRecup       = document.getElementById('btn-cancelar-recuperar');
+  const btnFecharXEsqueceu     = document.getElementById('btn-fechar-x-esqueceu');
+  const btnEnviarRecup         = document.getElementById('btn-enviar-recuperar');
+  const txtBtnRecuperar        = document.getElementById('texto-btn-recuperar');
+  const recuperarErro1         = document.getElementById('recuperar-erro-1');
+  const recuperarErroTxt1      = document.getElementById('recuperar-erro-texto-1');
+  const esqueceuDestEmail      = document.getElementById('esqueceu-destinatario-email');
+  const btnTrocarEmailEsq      = document.getElementById('btn-trocar-email-esqueceu');
+  const esqueceuCodGerado      = document.getElementById('esqueceu-codigo-gerado');
+  const btnPreencherCodEsq     = document.getElementById('btn-preencher-codigo-esqueceu');
+  const esqueceuTempoReg       = document.getElementById('esqueceu-tempo-regressivo');
+  const esqueceuTempWrap       = document.getElementById('esqueceu-temporizador-wrap');
+  const btnReenviarEsq         = document.getElementById('btn-reenviar-esqueceu');
+  const recuperarErro2         = document.getElementById('recuperar-erro-2');
+  const recuperarErroTxt2      = document.getElementById('recuperar-erro-texto-2');
+  const btnVoltarEsq2          = document.getElementById('btn-voltar-esqueceu-2');
+  const btnValidarCodEsq       = document.getElementById('btn-validar-codigo-esqueceu');
+  const inputNovaSenha         = document.getElementById('input-nova-senha');
+  const botaoOlhoNovaSenha     = document.getElementById('botao-olho-novasenha');
+  const inputConfirmaNovaSenha = document.getElementById('input-confirma-nova-senha');
+  const botaoOlhoConfirmaNovaSenha = document.getElementById('botao-olho-confirma-novasenha');
+  const reqNovaMinChars        = document.getElementById('req-nova-min-chars');
+  const reqNovaMaiuscula       = document.getElementById('req-nova-maiuscula');
+  const reqNovaSimbolo         = document.getElementById('req-nova-simbolo');
+  const recuperarErro3         = document.getElementById('recuperar-erro-3');
+  const recuperarErroTxt3      = document.getElementById('recuperar-erro-texto-3');
+  const recuperarSucessoFinal  = document.getElementById('recuperar-sucesso-final');
+  const btnCancelarNovaSenha   = document.getElementById('btn-cancelar-novasenha');
+  const btnSalvarNovaSenha     = document.getElementById('btn-salvar-novasenha');
+  const txtBtnSalvarNova       = document.getElementById('texto-btn-salvar-novasenha');
 
   // Modal Cadastro Rápido
-  const modalCadastro      = document.getElementById('modal-cadastro');
-  const formCadastro       = document.getElementById('form-cadastro-rapido');
-  const inputCadNome       = document.getElementById('input-cadastro-nome');
-  const inputCadEmail      = document.getElementById('input-cadastro-email');
-  const inputCadSenha      = document.getElementById('input-cadastro-senha');
-  const botaoOlhoCadastro  = document.getElementById('botao-olho-cadastro');
-  const btnCancelarCad     = document.getElementById('btn-cancelar-cadastro');
-  const btnFecharXCadastro = document.getElementById('btn-fechar-x-cadastro');
-  const btnConfirmarCad    = document.getElementById('btn-confirmar-cadastro');
-  const txtBtnCadastro     = document.getElementById('texto-btn-cadastro');
-  const cadastroSucesso    = document.getElementById('cadastro-sucesso');
-  const cadastroErro       = document.getElementById('cadastro-erro');
-  const cadastroErroTxt    = document.getElementById('cadastro-erro-texto');
+  const modalCadastro          = document.getElementById('modal-cadastro');
+  const modalCadastroTitulo    = document.getElementById('modal-cadastro-titulo');
+  const modalCadastroSubtitulo = document.getElementById('modal-cadastro-subtitulo');
+  const formCadastro           = document.getElementById('form-cadastro-rapido');
+  const cadastroEtapa1         = document.getElementById('cadastro-etapa-1');
+  const cadastroEtapa2         = document.getElementById('cadastro-etapa-2');
+  const inputCadNome           = document.getElementById('input-cadastro-nome');
+  const inputCadEmail          = document.getElementById('input-cadastro-email');
+  const inputCadSenha          = document.getElementById('input-cadastro-senha');
+  const botaoOlhoCadastro      = document.getElementById('botao-olho-cadastro');
+  const btnCancelarCad         = document.getElementById('btn-cancelar-cadastro');
+  const btnFecharXCadastro     = document.getElementById('btn-fechar-x-cadastro');
+  const btnAvancarCadastro     = document.getElementById('btn-avancar-cadastro');
+  const txtBtnAvancarCad       = document.getElementById('texto-btn-avancar-cad');
+  const cadastroErro           = document.getElementById('cadastro-erro');
+  const cadastroErroTxt        = document.getElementById('cadastro-erro-texto');
+  const cadastroDestEmail      = document.getElementById('cadastro-destinatario-email');
+  const btnTrocarEmailCad      = document.getElementById('btn-trocar-email-cadastro');
+  const cadastroCodGerado      = document.getElementById('cadastro-codigo-gerado');
+  const btnPreencherCodCad     = document.getElementById('btn-preencher-codigo-cadastro');
+  const cadastroTempoReg       = document.getElementById('cadastro-tempo-regressivo');
+  const cadastroTempWrap       = document.getElementById('cadastro-temporizador-wrap');
+  const btnReenviarCad         = document.getElementById('btn-reenviar-cadastro');
+  const cadastroErroCodigo     = document.getElementById('cadastro-erro-codigo');
+  const cadastroErroCodigoTxt  = document.getElementById('cadastro-erro-codigo-texto');
+  const cadastroSucesso        = document.getElementById('cadastro-sucesso');
+  const btnVoltarCad2          = document.getElementById('btn-voltar-cadastro-2');
+  const btnConfirmarCad        = document.getElementById('btn-confirmar-cadastro');
+  const txtBtnCadastro         = document.getElementById('texto-btn-cadastro');
 
   // Indicador de Requisitos de Senha (Cadastro)
-  const reqMinChars        = document.getElementById('req-min-chars');
-  const reqMaiuscula       = document.getElementById('req-maiuscula');
-  const reqSimbolo         = document.getElementById('req-simbolo');
+  const reqMinChars            = document.getElementById('req-min-chars');
+  const reqMaiuscula           = document.getElementById('req-maiuscula');
+  const reqSimbolo             = document.getElementById('req-simbolo');
 
   // Modal Termos
   const modalTermos        = document.getElementById('modal-termos');
@@ -294,7 +338,6 @@
   const modalMotorista      = document.getElementById('modal-motorista');
   const formMotorista       = document.getElementById('form-login-motorista');
   const inputMotId          = document.getElementById('input-motorista-id');
-  const inputMotNome        = document.getElementById('input-motorista-nome');
   const inputMotPin         = document.getElementById('input-motorista-pin');
   const selectMotLinha      = document.getElementById('select-motorista-linha');
   const selectMotVeiculo    = document.getElementById('select-motorista-veiculo');
@@ -413,16 +456,249 @@
     setTimeout(() => {
       modal.classList.remove('ativo', 'fechando');
       modal.setAttribute('aria-hidden', 'true');
+      if (modal === modalEsqueceu) resetarModalEsqueceu();
+      if (modal === modalCadastro) resetarModalCadastro();
       if (typeof callback === 'function') callback();
     }, 180);
   }
 
-  // Modal: Esqueceu a Senha
+  /* ──────────────────────────────────────────────────────────
+     SISTEMA DE VERIFICAÇÃO POR CÓDIGO (6 DÍGITOS)
+     ────────────────────────────────────────────────────────── */
+  let codigoEsqueceuAtual = '';
+  let emailEsqueceuAtual = '';
+  let temporizadorEsqueceuId = null;
+
+  let codigoCadastroAtual = '';
+  let dadosCadastroTemp = null;
+  let temporizadorCadastroId = null;
+
+  function gerarCodigo6Digitos() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  function configurarInputsSegmentados(grupo, onCompleto) {
+    const inputs = Array.from(document.querySelectorAll(`.codigo-digito[data-grupo="${grupo}"]`));
+    if (!inputs.length) return;
+
+    inputs.forEach((input, idx) => {
+      input.addEventListener('input', (e) => {
+        const val = e.target.value.replace(/\D/g, '');
+        e.target.value = val ? val.slice(-1) : '';
+
+        if (e.target.value) {
+          e.target.classList.add('preenchido');
+          e.target.classList.remove('com-erro');
+          if (idx < inputs.length - 1) {
+            inputs[idx + 1].focus();
+            inputs[idx + 1].select();
+          }
+        } else {
+          e.target.classList.remove('preenchido');
+        }
+
+        const codigo = inputs.map(i => i.value).join('');
+        if (codigo.length === 6 && typeof onCompleto === 'function') {
+          onCompleto(codigo);
+        }
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (grupo === 'cadastro' && btnConfirmarCad) {
+            btnConfirmarCad.click();
+          } else if (grupo === 'esqueceu' && btnValidarCodEsq) {
+            btnValidarCodEsq.click();
+          }
+          return;
+        }
+
+        if (e.key === 'Backspace') {
+          if (!e.target.value && idx > 0) {
+            inputs[idx - 1].focus();
+            inputs[idx - 1].value = '';
+            inputs[idx - 1].classList.remove('preenchido');
+          } else {
+            e.target.value = '';
+            e.target.classList.remove('preenchido');
+          }
+        } else if (e.key === 'ArrowLeft' && idx > 0) {
+          inputs[idx - 1].focus();
+        } else if (e.key === 'ArrowRight' && idx < inputs.length - 1) {
+          inputs[idx + 1].focus();
+        }
+      });
+
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const textoColado = (e.clipboardData || window.clipboardData).getData('text');
+        const digitos = textoColado.replace(/\D/g, '').slice(0, 6);
+        if (!digitos) return;
+
+        digitos.split('').forEach((char, dIdx) => {
+          if (inputs[dIdx]) {
+            inputs[dIdx].value = char;
+            inputs[dIdx].classList.add('preenchido');
+            inputs[dIdx].classList.remove('com-erro');
+          }
+        });
+
+        const nextIdx = Math.min(digitos.length, inputs.length - 1);
+        inputs[nextIdx].focus();
+
+        const codigo = inputs.map(i => i.value).join('');
+        if (codigo.length === 6 && typeof onCompleto === 'function') {
+          onCompleto(codigo);
+        }
+      });
+
+      input.addEventListener('focus', () => {
+        input.select();
+      });
+    });
+  }
+
+  function obterCodigoSegmentado(grupo) {
+    const inputs = Array.from(document.querySelectorAll(`.codigo-digito[data-grupo="${grupo}"]`));
+    return inputs.map(i => i.value.trim()).join('');
+  }
+
+  function marcarErroSegmentado(grupo) {
+    const inputs = Array.from(document.querySelectorAll(`.codigo-digito[data-grupo="${grupo}"]`));
+    inputs.forEach(i => i.classList.add('com-erro'));
+    if (inputs[0]) inputs[0].focus();
+  }
+
+  function limparSegmentado(grupo) {
+    const inputs = Array.from(document.querySelectorAll(`.codigo-digito[data-grupo="${grupo}"]`));
+    inputs.forEach(i => {
+      i.value = '';
+      i.classList.remove('preenchido', 'com-erro');
+    });
+    if (inputs[0]) inputs[0].focus();
+  }
+
+  function preencherSegmentado(grupo, codigo) {
+    const inputs = Array.from(document.querySelectorAll(`.codigo-digito[data-grupo="${grupo}"]`));
+    const chars = (codigo || '').split('');
+    inputs.forEach((input, idx) => {
+      input.value = chars[idx] || '';
+      if (input.value) {
+        input.classList.add('preenchido');
+        input.classList.remove('com-erro');
+      } else {
+        input.classList.remove('preenchido');
+      }
+    });
+    if (inputs[inputs.length - 1]) inputs[inputs.length - 1].focus();
+  }
+
+  function iniciarTemporizador(grupo) {
+    const tempoEl = document.getElementById(`${grupo}-tempo-regressivo`);
+    const wrapEl  = document.getElementById(`${grupo}-temporizador-wrap`);
+    const btnEl   = document.getElementById(`btn-reenviar-${grupo}`);
+
+    if (grupo === 'esqueceu' && temporizadorEsqueceuId) {
+      clearInterval(temporizadorEsqueceuId);
+      temporizadorEsqueceuId = null;
+    }
+    if (grupo === 'cadastro' && temporizadorCadastroId) {
+      clearInterval(temporizadorCadastroId);
+      temporizadorCadastroId = null;
+    }
+
+    let segundos = 60;
+    if (wrapEl) wrapEl.style.display = 'inline';
+    if (tempoEl) tempoEl.textContent = `${segundos}s`;
+    if (btnEl) btnEl.disabled = true;
+
+    const id = setInterval(() => {
+      segundos--;
+      if (segundos > 0) {
+        if (tempoEl) tempoEl.textContent = `${segundos}s`;
+      } else {
+        clearInterval(id);
+        if (wrapEl) wrapEl.style.display = 'none';
+        if (btnEl) btnEl.disabled = false;
+      }
+    }, 1000);
+
+    if (grupo === 'esqueceu') temporizadorEsqueceuId = id;
+    if (grupo === 'cadastro') temporizadorCadastroId = id;
+  }
+
+  function resetarModalEsqueceu() {
+    if (temporizadorEsqueceuId) {
+      clearInterval(temporizadorEsqueceuId);
+      temporizadorEsqueceuId = null;
+    }
+    if (esqueceuEtapa1) esqueceuEtapa1.style.display = 'block';
+    if (esqueceuEtapa2) esqueceuEtapa2.style.display = 'none';
+    if (esqueceuEtapa3) esqueceuEtapa3.style.display = 'none';
+
+    if (modalEsqueceuTitulo) modalEsqueceuTitulo.textContent = 'Recuperar senha';
+    if (modalEsqueceuSubtitulo) modalEsqueceuSubtitulo.textContent = 'Informe o e-mail cadastrado para receber as instruções de recuperação.';
+
+    if (recuperarErro1) recuperarErro1.style.display = 'none';
+    if (recuperarErro2) recuperarErro2.style.display = 'none';
+    if (recuperarErro3) recuperarErro3.style.display = 'none';
+    if (recuperarSucessoFinal) recuperarSucessoFinal.style.display = 'none';
+
+    limparSegmentado('esqueceu');
+    if (inputNovaSenha) inputNovaSenha.value = '';
+    if (inputConfirmaNovaSenha) inputConfirmaNovaSenha.value = '';
+    if (txtBtnRecuperar) txtBtnRecuperar.textContent = 'Continuar';
+    if (btnEnviarRecup) btnEnviarRecup.disabled = false;
+    atualizarIndicadorNovaSenha('');
+  }
+
+  function resetarModalCadastro() {
+    if (temporizadorCadastroId) {
+      clearInterval(temporizadorCadastroId);
+      temporizadorCadastroId = null;
+    }
+    if (cadastroEtapa1) cadastroEtapa1.style.display = 'block';
+    if (cadastroEtapa2) cadastroEtapa2.style.display = 'none';
+
+    if (modalCadastroTitulo) modalCadastroTitulo.textContent = 'Criar nova conta';
+    if (modalCadastroSubtitulo) modalCadastroSubtitulo.textContent = 'Cadastre-se rapidamente para consultar linhas, favoritar paradas e receber alertas de Santa Rita do Sapucaí.';
+
+    if (cadastroErro) cadastroErro.style.display = 'none';
+    if (cadastroErroCodigo) cadastroErroCodigo.style.display = 'none';
+    if (cadastroSucesso) cadastroSucesso.style.display = 'none';
+    if (txtBtnAvancarCad) txtBtnAvancarCad.textContent = 'Cadastrar';
+    if (btnAvancarCadastro) btnAvancarCadastro.disabled = false;
+
+    limparSegmentado('cadastro');
+  }
+
+  function atualizarIndicadorNovaSenha(senha = '') {
+    const temMinChars = senha.length >= 8;
+    const temMaiuscula = /[A-Z]/.test(senha);
+    const temSimbolo = /[^A-Za-z0-9]/.test(senha);
+
+    if (reqNovaMinChars) reqNovaMinChars.classList.toggle('requisito-item--atendido', temMinChars);
+    if (reqNovaMaiuscula) reqNovaMaiuscula.classList.toggle('requisito-item--atendido', temMaiuscula);
+    if (reqNovaSimbolo) reqNovaSimbolo.classList.toggle('requisito-item--atendido', temSimbolo);
+  }
+
+  // Configura listeners dos inputs segmentados
+  configurarInputsSegmentados('esqueceu', () => {
+    if (recuperarErro2) recuperarErro2.style.display = 'none';
+  });
+
+  configurarInputsSegmentados('cadastro', () => {
+    if (cadastroErroCodigo) cadastroErroCodigo.style.display = 'none';
+  });
+
+  /* ──────────────────────────────────────────────────────────
+     FLUXO: ESQUECEU A SENHA (3 ETAPAS)
+     ────────────────────────────────────────────────────────── */
   if (linkEsqueceu) {
     linkEsqueceu.addEventListener('click', (e) => {
       e.preventDefault();
-      if (recuperarSucesso) recuperarSucesso.style.display = 'none';
-      if (recuperarErro) recuperarErro.style.display = 'none';
+      resetarModalEsqueceu();
       if (inputRecuperar && inputEmail && inputEmail.value) {
         inputRecuperar.value = inputEmail.value.trim();
       }
@@ -438,36 +714,205 @@
     btnFecharXEsqueceu.addEventListener('click', () => fecharModal(modalEsqueceu));
   }
 
+  // Etapa 1: Envio do e-mail
   if (formRecuperar) {
     formRecuperar.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = inputRecuperar.value.trim();
       if (!emailValido(email)) {
-        if (recuperarErro) {
-          recuperarErroTxt.textContent = 'Informe um e-mail válido para envio.';
-          recuperarErro.style.display = 'flex';
+        if (recuperarErro1) {
+          recuperarErroTxt1.textContent = 'Informe um e-mail válido para envio.';
+          recuperarErro1.style.display = 'flex';
         }
-        if (recuperarSucesso) recuperarSucesso.style.display = 'none';
         return;
       }
 
-      if (recuperarErro) recuperarErro.style.display = 'none';
+      if (recuperarErro1) recuperarErro1.style.display = 'none';
       if (btnEnviarRecup) btnEnviarRecup.disabled = true;
       if (txtBtnRecuperar) txtBtnRecuperar.textContent = 'Enviando...';
 
-      await esperar(800);
+      await esperar(600);
 
       if (btnEnviarRecup) btnEnviarRecup.disabled = false;
-      if (txtBtnRecuperar) txtBtnRecuperar.textContent = 'Enviar link';
-      if (recuperarSucesso) recuperarSucesso.style.display = 'flex';
+      if (txtBtnRecuperar) txtBtnRecuperar.textContent = 'Continuar';
 
-      setTimeout(() => {
-        fecharModal(modalEsqueceu);
-      }, 1600);
+      emailEsqueceuAtual = email;
+      codigoEsqueceuAtual = gerarCodigo6Digitos();
+
+      if (esqueceuDestEmail) esqueceuDestEmail.textContent = email;
+      if (esqueceuCodGerado) esqueceuCodGerado.textContent = codigoEsqueceuAtual;
+
+      // Avança para a Etapa 2
+      if (esqueceuEtapa1) esqueceuEtapa1.style.display = 'none';
+      if (esqueceuEtapa2) esqueceuEtapa2.style.display = 'block';
+
+      if (modalEsqueceuTitulo) modalEsqueceuTitulo.textContent = 'Código de Verificação';
+      if (modalEsqueceuSubtitulo) modalEsqueceuSubtitulo.textContent = 'Instruções enviadas! Verifique sua caixa de entrada e spam e digite o código de 6 dígitos.';
+
+      limparSegmentado('esqueceu');
+      iniciarTemporizador('esqueceu');
     });
   }
 
-  // Modal: Criar Nova Conta
+  // Etapa 2: Ações de código de recuperação
+  if (btnPreencherCodEsq) {
+    btnPreencherCodEsq.addEventListener('click', () => {
+      preencherSegmentado('esqueceu', codigoEsqueceuAtual);
+      if (recuperarErro2) recuperarErro2.style.display = 'none';
+    });
+  }
+
+  if (btnTrocarEmailEsq) {
+    btnTrocarEmailEsq.addEventListener('click', () => {
+      if (esqueceuEtapa2) esqueceuEtapa2.style.display = 'none';
+      if (esqueceuEtapa1) esqueceuEtapa1.style.display = 'block';
+      if (modalEsqueceuTitulo) modalEsqueceuTitulo.textContent = 'Recuperar senha';
+      if (modalEsqueceuSubtitulo) modalEsqueceuSubtitulo.textContent = 'Informe o e-mail cadastrado para receber as instruções de recuperação.';
+      if (inputRecuperar) inputRecuperar.focus();
+    });
+  }
+
+  if (btnVoltarEsq2) {
+    btnVoltarEsq2.addEventListener('click', () => {
+      if (esqueceuEtapa2) esqueceuEtapa2.style.display = 'none';
+      if (esqueceuEtapa1) esqueceuEtapa1.style.display = 'block';
+      if (modalEsqueceuTitulo) modalEsqueceuTitulo.textContent = 'Recuperar senha';
+      if (modalEsqueceuSubtitulo) modalEsqueceuSubtitulo.textContent = 'Informe o e-mail cadastrado para receber as instruções de recuperação.';
+      if (inputRecuperar) inputRecuperar.focus();
+    });
+  }
+
+  if (btnReenviarEsq) {
+    btnReenviarEsq.addEventListener('click', async () => {
+      codigoEsqueceuAtual = gerarCodigo6Digitos();
+      if (esqueceuCodGerado) esqueceuCodGerado.textContent = codigoEsqueceuAtual;
+      limparSegmentado('esqueceu');
+      if (recuperarErro2) recuperarErro2.style.display = 'none';
+      iniciarTemporizador('esqueceu');
+    });
+  }
+
+  if (btnValidarCodEsq) {
+    btnValidarCodEsq.addEventListener('click', async () => {
+      const codigoDigitado = obterCodigoSegmentado('esqueceu');
+
+      if (codigoDigitado.length < 6) {
+        if (recuperarErro2) {
+          recuperarErroTxt2.textContent = 'Digite o código completo com 6 números.';
+          recuperarErro2.style.display = 'flex';
+        }
+        marcarErroSegmentado('esqueceu');
+        return;
+      }
+
+      if (recuperarErro2) recuperarErro2.style.display = 'none';
+      btnValidarCodEsq.disabled = true;
+      btnValidarCodEsq.textContent = 'Validando...';
+
+      await esperar(600);
+
+      btnValidarCodEsq.disabled = false;
+      btnValidarCodEsq.textContent = 'Confirmar Código';
+
+      // Avança para Etapa 3 (Definir nova senha)
+      if (esqueceuEtapa2) esqueceuEtapa2.style.display = 'none';
+      if (esqueceuEtapa3) esqueceuEtapa3.style.display = 'block';
+
+      if (modalEsqueceuTitulo) modalEsqueceuTitulo.textContent = 'Criar Nova Senha';
+      if (modalEsqueceuSubtitulo) modalEsqueceuSubtitulo.textContent = 'Defina sua nova credencial de acesso seguro para o ValeBus.';
+
+      if (inputNovaSenha) {
+        inputNovaSenha.value = '';
+        inputNovaSenha.focus();
+      }
+      if (inputConfirmaNovaSenha) inputConfirmaNovaSenha.value = '';
+      atualizarIndicadorNovaSenha('');
+    });
+  }
+
+  // Etapa 3: Redefinição de Senha
+  if (botaoOlhoNovaSenha && inputNovaSenha) {
+    botaoOlhoNovaSenha.addEventListener('click', function () {
+      const estaOculta = inputNovaSenha.type === 'password';
+      inputNovaSenha.type = estaOculta ? 'text' : 'password';
+      const useEl = botaoOlhoNovaSenha.querySelector('use');
+      if (useEl) useEl.setAttribute('href', estaOculta ? '#icone-olho-off' : '#icone-olho');
+      botaoOlhoNovaSenha.setAttribute('aria-label', estaOculta ? 'Ocultar senha' : 'Mostrar senha');
+    });
+  }
+
+  if (botaoOlhoConfirmaNovaSenha && inputConfirmaNovaSenha) {
+    botaoOlhoConfirmaNovaSenha.addEventListener('click', function () {
+      const estaOculta = inputConfirmaNovaSenha.type === 'password';
+      inputConfirmaNovaSenha.type = estaOculta ? 'text' : 'password';
+      const useEl = botaoOlhoConfirmaNovaSenha.querySelector('use');
+      if (useEl) useEl.setAttribute('href', estaOculta ? '#icone-olho-off' : '#icone-olho');
+      botaoOlhoConfirmaNovaSenha.setAttribute('aria-label', estaOculta ? 'Ocultar senha' : 'Mostrar senha');
+    });
+  }
+
+  if (inputNovaSenha) {
+    inputNovaSenha.addEventListener('input', () => {
+      atualizarIndicadorNovaSenha(inputNovaSenha.value);
+    });
+  }
+
+  if (btnCancelarNovaSenha) {
+    btnCancelarNovaSenha.addEventListener('click', () => fecharModal(modalEsqueceu));
+  }
+
+  if (btnSalvarNovaSenha) {
+    btnSalvarNovaSenha.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const novaSenha = inputNovaSenha ? inputNovaSenha.value : '';
+      const confirma  = inputConfirmaNovaSenha ? inputConfirmaNovaSenha.value : '';
+
+      const erroSenha = validarSenha(novaSenha);
+      if (erroSenha) {
+        if (recuperarErro3) {
+          recuperarErroTxt3.textContent = erroSenha;
+          recuperarErro3.style.display = 'flex';
+        }
+        if (inputNovaSenha) inputNovaSenha.focus();
+        return;
+      }
+
+      if (novaSenha !== confirma) {
+        if (recuperarErro3) {
+          recuperarErroTxt3.textContent = 'As senhas informadas não coincidem.';
+          recuperarErro3.style.display = 'flex';
+        }
+        if (inputConfirmaNovaSenha) inputConfirmaNovaSenha.focus();
+        return;
+      }
+
+      if (recuperarErro3) recuperarErro3.style.display = 'none';
+      btnSalvarNovaSenha.disabled = true;
+      if (txtBtnSalvarNova) txtBtnSalvarNova.textContent = 'Salvando...';
+
+      await esperar(800);
+
+      btnSalvarNovaSenha.disabled = false;
+      if (txtBtnSalvarNova) txtBtnSalvarNova.textContent = 'Salvar Nova Senha';
+
+      if (recuperarSucessoFinal) recuperarSucessoFinal.style.display = 'flex';
+
+      // Atualiza o e-mail no login e limpa senha
+      if (inputEmail && emailEsqueceuAtual) inputEmail.value = emailEsqueceuAtual;
+      if (inputSenha) inputSenha.value = '';
+
+      setTimeout(() => {
+        fecharModal(modalEsqueceu, () => {
+          resetarModalEsqueceu();
+          if (inputSenha) inputSenha.focus();
+        });
+      }, 1500);
+    });
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     FLUXO: CRIAR NOVA CONTA (2 ETAPAS COM VERIFICAÇÃO)
+     ────────────────────────────────────────────────────────── */
   if (botaoOlhoCadastro && inputCadSenha) {
     botaoOlhoCadastro.addEventListener('click', function () {
       const estaOculta = inputCadSenha.type === 'password';
@@ -492,21 +937,20 @@
     const temMaiuscula = /[A-Z]/.test(senha);
     const temSimbolo = /[^A-Za-z0-9]/.test(senha);
 
-    if (reqMinChars) {
-      reqMinChars.classList.toggle('requisito-item--atendido', temMinChars);
-    }
-    if (reqMaiuscula) {
-      reqMaiuscula.classList.toggle('requisito-item--atendido', temMaiuscula);
-    }
-    if (reqSimbolo) {
-      reqSimbolo.classList.toggle('requisito-item--atendido', temSimbolo);
-    }
+    if (reqMinChars) reqMinChars.classList.toggle('requisito-item--atendido', temMinChars);
+    if (reqMaiuscula) reqMaiuscula.classList.toggle('requisito-item--atendido', temMaiuscula);
+    if (reqSimbolo) reqSimbolo.classList.toggle('requisito-item--atendido', temSimbolo);
+  }
+
+  if (inputCadSenha) {
+    inputCadSenha.addEventListener('input', () => {
+      atualizarIndicadorSenha(inputCadSenha.value);
+    });
   }
 
   if (botaoCadastro) {
     botaoCadastro.addEventListener('click', () => {
-      if (cadastroSucesso) cadastroSucesso.style.display = 'none';
-      if (cadastroErro) cadastroErro.style.display = 'none';
+      resetarModalCadastro();
       atualizarIndicadorSenha(inputCadSenha ? inputCadSenha.value : '');
       abrirModal(modalCadastro, inputCadNome);
     });
@@ -520,10 +964,11 @@
     btnFecharXCadastro.addEventListener('click', () => fecharModal(modalCadastro));
   }
 
+  // Etapa 1: Validação do formulário de cadastro
   if (formCadastro) {
     formCadastro.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const nome = inputCadNome.value.trim();
+      const nome  = inputCadNome.value.trim();
       const email = inputCadEmail.value.trim();
       const senha = inputCadSenha.value;
 
@@ -533,7 +978,6 @@
           cadastroErroTxt.textContent = 'Informe o seu nome completo.';
           cadastroErro.style.display = 'flex';
         }
-        if (cadastroSucesso) cadastroSucesso.style.display = 'none';
         inputCadNome.focus();
         return;
       }
@@ -543,7 +987,6 @@
           cadastroErroTxt.textContent = 'Por favor, informe nome e sobrenome (mínimo 2 letras cada).';
           cadastroErro.style.display = 'flex';
         }
-        if (cadastroSucesso) cadastroSucesso.style.display = 'none';
         inputCadNome.focus();
         return;
       }
@@ -554,35 +997,115 @@
           cadastroErroTxt.textContent = 'Informe um endereço de e-mail válido.';
           cadastroErro.style.display = 'flex';
         }
-        if (cadastroSucesso) cadastroSucesso.style.display = 'none';
         inputCadEmail.focus();
         return;
       }
 
-      // 3. Validação de Senha (mesmas regras do login: mín 8 chars, 1 maiúscula, 1 símbolo)
+      // 3. Validação de Senha
       const erroSenha = validarSenha(senha);
       if (erroSenha) {
         if (cadastroErro) {
           cadastroErroTxt.textContent = erroSenha;
           cadastroErro.style.display = 'flex';
         }
-        if (cadastroSucesso) cadastroSucesso.style.display = 'none';
         inputCadSenha.focus();
         return;
       }
 
       if (cadastroErro) cadastroErro.style.display = 'none';
-      if (btnConfirmarCad) btnConfirmarCad.disabled = true;
-      if (txtBtnCadastro) txtBtnCadastro.textContent = 'Cadastrando...';
+      if (btnAvancarCadastro) btnAvancarCadastro.disabled = true;
+      if (txtBtnAvancarCad) txtBtnAvancarCad.textContent = 'Cadastrando...';
 
-      await esperar(850);
+      await esperar(650);
+
+      if (btnAvancarCadastro) btnAvancarCadastro.disabled = false;
+      if (txtBtnAvancarCad) txtBtnAvancarCad.textContent = 'Cadastrar';
+
+      dadosCadastroTemp = { nome, email, senha };
+      codigoCadastroAtual = gerarCodigo6Digitos();
+
+      if (cadastroDestEmail) cadastroDestEmail.textContent = email;
+      if (cadastroCodGerado) cadastroCodGerado.textContent = codigoCadastroAtual;
+
+      // Avança para a Etapa 2
+      if (cadastroEtapa1) cadastroEtapa1.style.display = 'none';
+      if (cadastroEtapa2) cadastroEtapa2.style.display = 'block';
+
+      if (modalCadastroTitulo) modalCadastroTitulo.textContent = 'Confirmar E-mail';
+      if (modalCadastroSubtitulo) modalCadastroSubtitulo.textContent = 'Digite o código de 6 dígitos enviado para validar e ativar sua conta no ValeBus.';
+
+      limparSegmentado('cadastro');
+      iniciarTemporizador('cadastro');
+    });
+  }
+
+  // Etapa 2: Ações do código de cadastro
+  if (btnPreencherCodCad) {
+    btnPreencherCodCad.addEventListener('click', () => {
+      preencherSegmentado('cadastro', codigoCadastroAtual);
+      if (cadastroErroCodigo) cadastroErroCodigo.style.display = 'none';
+    });
+  }
+
+  if (btnTrocarEmailCad) {
+    btnTrocarEmailCad.addEventListener('click', () => {
+      if (cadastroEtapa2) cadastroEtapa2.style.display = 'none';
+      if (cadastroEtapa1) cadastroEtapa1.style.display = 'block';
+      if (modalCadastroTitulo) modalCadastroTitulo.textContent = 'Criar nova conta';
+      if (modalCadastroSubtitulo) modalCadastroSubtitulo.textContent = 'Cadastre-se rapidamente para consultar linhas, favoritar paradas e receber alertas de Santa Rita do Sapucaí.';
+      if (inputCadEmail) inputCadEmail.focus();
+    });
+  }
+
+  if (btnVoltarCad2) {
+    btnVoltarCad2.addEventListener('click', () => {
+      if (cadastroEtapa2) cadastroEtapa2.style.display = 'none';
+      if (cadastroEtapa1) cadastroEtapa1.style.display = 'block';
+      if (modalCadastroTitulo) modalCadastroTitulo.textContent = 'Criar nova conta';
+      if (modalCadastroSubtitulo) modalCadastroSubtitulo.textContent = 'Cadastre-se rapidamente para consultar linhas, favoritar paradas e receber alertas de Santa Rita do Sapucaí.';
+      if (inputCadNome) inputCadNome.focus();
+    });
+  }
+
+  if (btnReenviarCad) {
+    btnReenviarCad.addEventListener('click', async () => {
+      codigoCadastroAtual = gerarCodigo6Digitos();
+      if (cadastroCodGerado) cadastroCodGerado.textContent = codigoCadastroAtual;
+      limparSegmentado('cadastro');
+      if (cadastroErroCodigo) cadastroErroCodigo.style.display = 'none';
+      iniciarTemporizador('cadastro');
+    });
+  }
+
+  if (btnConfirmarCad) {
+    btnConfirmarCad.addEventListener('click', async () => {
+      const codigoDigitado = obterCodigoSegmentado('cadastro');
+
+      if (codigoDigitado.length < 6) {
+        if (cadastroErroCodigo) {
+          cadastroErroCodigoTxt.textContent = 'Digite o código completo com 6 números.';
+          cadastroErroCodigo.style.display = 'flex';
+        }
+        marcarErroSegmentado('cadastro');
+        return;
+      }
+
+      // Aceita qualquer código de 6 dígitos inserido pelo usuário
+      if (cadastroErroCodigo) cadastroErroCodigo.style.display = 'none';
+      btnConfirmarCad.disabled = true;
+      if (txtBtnCadastro) txtBtnCadastro.textContent = 'Verificando...';
+
+      await esperar(750);
 
       try {
-        localStorage.setItem('valebus_usuario', JSON.stringify({
-          nome: nome,
-          email: email,
-          metodo: 'Cadastro Direto'
-        }));
+        const usuario = {
+          nome: dadosCadastroTemp ? dadosCadastroTemp.nome : 'Usuário ValeBus',
+          email: dadosCadastroTemp ? dadosCadastroTemp.email : 'usuario@valebus.com.br',
+          cargo: 'Passageiro / Usuário da Linha',
+          perfil: 'passageiro',
+          metodo: 'Cadastro com E-mail Verificado'
+        };
+        localStorage.setItem('valebus_usuario', JSON.stringify(usuario));
       } catch (e) {}
 
       if (cadastroSucesso) cadastroSucesso.style.display = 'flex';
@@ -634,9 +1157,6 @@
         );
 
         if (mot) {
-          if (inputMotNome && (!inputMotNome.value || inputMotNome.value.startsWith('Motorista'))) {
-            inputMotNome.value = mot.nome;
-          }
           if (selectMotLinha && mot.linha) {
             for (let i = 0; i < selectMotLinha.options.length; i++) {
               if (selectMotLinha.options[i].text.toLowerCase().includes(mot.linha.toLowerCase().replace('linha ', ''))) {
@@ -687,7 +1207,6 @@
     formMotorista.addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = inputMotId ? inputMotId.value.trim() : '';
-      const nome = inputMotNome ? inputMotNome.value.trim() : '';
       const pin = inputMotPin ? inputMotPin.value.trim() : '';
       const linhaNome = selectMotLinha ? selectMotLinha.options[selectMotLinha.selectedIndex].text : 'Linha Fernandes';
       const veiculoNome = selectMotVeiculo ? selectMotVeiculo.options[selectMotVeiculo.selectedIndex].text : 'Ônibus #02';
@@ -752,7 +1271,7 @@
 
       await esperar(800);
 
-      const nomeFinal = nome ? nome : (motoristaCadastrado ? motoristaCadastrado.nome : `Motorista ${id}`);
+      const nomeFinal = motoristaCadastrado ? motoristaCadastrado.nome : `Motorista ${id.toUpperCase()}`;
       try {
         localStorage.setItem('valebus_usuario', JSON.stringify({
           nome: nomeFinal,
