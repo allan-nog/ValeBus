@@ -1570,9 +1570,15 @@
   /* Oculta botões e cards extensos do topo para não estourar a tela */
   .gestor-topbar__direita .gestor-btn-link,
   .gestor-topbar__direita .gestor-usuario-card,
-  .gestor-topbar__direita .gestor-btn-sair,
-  .gestor-topbar__direita #btn-tema-gestor {
+  .gestor-topbar__direita .gestor-btn-sair {
     display: none !important;
+  }
+
+  /* O botão de tema permanece visível imediatamente antes do botão de menu */
+  .gestor-topbar__direita #btn-tema-gestor,
+  #btn-tema-gestor,
+  .topbar__btn-tema {
+    display: flex !important;
   }
 
   /* Exibe o botão do menu hambúrguer garantindo que fique sempre visível */

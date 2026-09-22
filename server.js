@@ -13,9 +13,21 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', app: 'ValeBus' });
 });
 
-// Redirect root directly to frontend/login.html
-app.get('/', (req, res) => {
+// Route aliases
+app.get(['/', '/login', '/login.html'], (req, res) => {
   res.redirect('/frontend/login.html');
+});
+
+app.get(['/dashboard', '/dashboard.html'], (req, res) => {
+  res.redirect('/frontend/dashboard.html');
+});
+
+app.get(['/gestor', '/gestor.html'], (req, res) => {
+  res.redirect('/frontend/gestor.html');
+});
+
+app.get(['/motorista', '/motorista.html'], (req, res) => {
+  res.redirect('/frontend/motorista.html');
 });
 
 // Serve static assets from project root (serves /frontend/..., /index.html, etc.)

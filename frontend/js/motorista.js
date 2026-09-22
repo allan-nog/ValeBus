@@ -219,7 +219,10 @@
 
     if (elDistancia) elDistancia.textContent = `${estadoMotorista.distanciaKm.toFixed(1)} km`;
     if (elTempo) elTempo.textContent = `${estadoMotorista.tempoMin} min`;
-    if (elParada) elParada.textContent = estadoMotorista.proximaParada;
+    if (elParada) {
+      elParada.textContent = estadoMotorista.proximaParada;
+      elParada.title = estadoMotorista.proximaParada;
+    }
     if (elIndicador && window.VALEBUS_PARADAS && window.VALEBUS_PARADAS.paradasPorLinha && window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
       const total = window.VALEBUS_PARADAS.paradasPorLinha.anchieta.length;
       elIndicador.textContent = `${(indiceParadaAtual || 0) + 1}/${total}`;

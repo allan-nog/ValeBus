@@ -90,6 +90,12 @@
       if (elModAvatar) elModAvatar.textContent = iniciais;
       if (elModMetodo) elModMetodo.textContent = metodo;
 
+      // 4. Garante botão de adicionar alerta visível
+      const btnNovoAlerta = document.getElementById('btn-abrir-modal-novo-alerta');
+      if (btnNovoAlerta) {
+        btnNovoAlerta.style.display = 'inline-flex';
+      }
+
     } catch (e) {
       console.warn('Erro ao carregar usuário autenticado:', e);
     }
@@ -1240,10 +1246,10 @@
 
     if (lista.length === 0) {
       feedAlertasContainer.innerHTML = `
-        <div class="notif-vazio-estado" style="background: var(--fundo-card); border-radius: 14px; border: 1.5px solid var(--borda-cor); padding: 40px 20px;">
-          <div class="notif-vazio-estado__icone">🔍</div>
-          <span class="notif-vazio-estado__titulo">Nenhum alerta encontrado com este filtro</span>
-          <span class="notif-vazio-estado__desc">Tente alterar os termos da busca ou emitir um novo comunicado CCO.</span>
+        <div class="notif-vazio-estado" style="background: var(--fundo-card); border-radius: 14px; border: 1.5px solid var(--borda-cor); padding: 36px 20px; text-align: center;">
+          <div class="notif-vazio-estado__icone" style="font-size: 32px; margin-bottom: 8px;">✨</div>
+          <span class="notif-vazio-estado__titulo" style="font-size: 15px; font-weight: 700; color: var(--texto-principal); display: block; margin-bottom: 4px;">Nenhum aviso encontrado</span>
+          <span class="notif-vazio-estado__desc" style="font-size: 13px; color: var(--texto-secundario);">Todas as linhas de Santa Rita do Sapucaí estão operando normalmente ou nenhum registro corresponde à sua busca.</span>
         </div>
       `;
       return;
@@ -1255,42 +1261,49 @@
       const temOnibusNoMapa = alerta.linha && alerta.linha !== 'todas' && LINHAS[alerta.linha];
       const isResolvido = alerta.resolvido || alerta.tipo === 'sucesso';
 
+      let statusTexto = '📢 Aviso';
+      if (isResolvido) {
+        statusTexto = '✅ Normalizado';
+      } else if (alerta.tipo === 'atencao' || alerta.tipo === 'critico') {
+        statusTexto = '⚠️ Atraso / Trânsito';
+      }
+
       return `
         <article class="alerta-card-principal alerta-card-principal--${alerta.tipo}" data-id="${alerta.id}">
           <div class="alerta-card-principal__topo">
-            <span class="alerta-card-principal__linha-tag" style="background-color: ${corLinha};">
-              🚍 ${nomeLinha}
-            </span>
-            <span class="alerta-card-principal__status-tag ${isResolvido ? 'alerta-card-principal__status-tag--resolvido' : 'alerta-card-principal__status-tag--ativo'}">
-              ${isResolvido ? '✅ Operação Normalizada' : '⚠️ Ocorrência Ativa'}
-            </span>
+            <div class="alerta-card-principal__tags">
+              <span class="alerta-card-principal__linha-tag" style="background-color: ${corLinha};">
+                🚍 ${nomeLinha}
+              </span>
+              <span class="alerta-card-principal__status-tag ${isResolvido ? 'alerta-card-principal__status-tag--resolvido' : 'alerta-card-principal__status-tag--ativo'}">
+                ${statusTexto}
+              </span>
+            </div>
             <time class="alerta-card-principal__hora">${alerta.horario}</time>
           </div>
 
-          <h4 class="alerta-card-principal__titulo">${alerta.titulo}</h4>
-          <p class="alerta-card-principal__desc">${alerta.mensagem}</p>
+          <div class="alerta-card-principal__corpo">
+            <h4 class="alerta-card-principal__titulo">${alerta.titulo}</h4>
+            <p class="alerta-card-principal__desc">${alerta.mensagem}</p>
+          </div>
 
           <div class="alerta-card-principal__rodape">
-            <span class="alerta-card-principal__origem">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icone-usuario"/></svg>
-              ${alerta.origem}
-            </span>
+            ${temOnibusNoMapa ? `
+              <button type="button" class="btn-alerta-acao btn-alerta-acao--mapa btn-feed-mapa" data-linha="${alerta.linha}" title="Localizar linha no mapa ao vivo">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icone-mapa"/></svg>
+                <span>Ver no Mapa</span>
+              </button>
+            ` : '<span></span>'}
 
             <div class="alerta-card-principal__acoes">
-              ${temOnibusNoMapa ? `
-                <button type="button" class="btn-alerta-acao btn-feed-mapa" data-linha="${alerta.linha}">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icone-mapa"/></svg>
-                  <span>Localizar Ônibus</span>
-                </button>
-              ` : ''}
               ${!isResolvido ? `
-                <button type="button" class="btn-alerta-acao btn-alerta-acao--resolver btn-feed-resolver" data-id="${alerta.id}">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icone-check"/></svg>
-                  <span>Resolver</span>
+                <button type="button" class="btn-alerta-acao btn-alerta-acao--resolver btn-feed-resolver" data-id="${alerta.id}" title="Marcar como normalizada">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icone-check"/></svg>
+                  <span>Normalizar</span>
                 </button>
               ` : ''}
-              <button type="button" class="btn-alerta-acao btn-alerta-acao--remover btn-feed-remover" data-id="${alerta.id}" title="Remover alerta">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icone-lixeira"/></svg>
+              <button type="button" class="btn-alerta-acao btn-alerta-acao--remover btn-feed-remover" data-id="${alerta.id}" title="Excluir alerta">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#icone-lixeira"/></svg>
               </button>
             </div>
           </div>

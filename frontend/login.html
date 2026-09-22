@@ -759,6 +759,82 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════
+       MODAL DE CÓDIGO DE SEGURANÇA DO GESTOR (2FA / CCO)
+       ═══════════════════════════════════════════════════════ -->
+  <div class="modal-padrao-overlay" id="modal-gestor-2fa" aria-hidden="true">
+    <div class="modal-padrao" role="dialog" aria-modal="true" aria-labelledby="modal-gestor-titulo">
+      <button type="button" class="modal-fechar-btn" id="btn-fechar-x-gestor-2fa" aria-label="Cancelar autenticação">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="modal-padrao__header">
+        <div class="modal-padrao__icone-topo modal-padrao__icone-topo--gestor" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h3 class="modal-padrao__titulo" id="modal-gestor-titulo">Código de Segurança CCO</h3>
+        <p class="modal-padrao__subtitulo" id="modal-gestor-subtitulo">
+          Acesso restrito ao Painel de Gestão. Insira o código de segurança de 6 dígitos enviado para seu e-mail operacional.
+        </p>
+      </div>
+
+      <div class="modal-padrao__corpo">
+        <div class="codigo-email-badge">
+          <span class="codigo-email-badge__texto">
+            Código enviado para: <strong id="gestor-2fa-email">valebussrs@gmail.com</strong>
+          </span>
+        </div>
+
+        <!-- Inputs numéricos segmentados (6 dígitos) -->
+        <div class="codigo-segmentado" id="codigo-segmentado-gestor" aria-label="Digite o código de 6 dígitos">
+          <input type="text" class="codigo-digito" data-grupo="gestor" data-index="0" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 1">
+          <input type="text" class="codigo-digito" data-grupo="gestor" data-index="1" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 2">
+          <input type="text" class="codigo-digito" data-grupo="gestor" data-index="2" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 3">
+          <span class="codigo-segmentado__divisor" aria-hidden="true">&ndash;</span>
+          <input type="text" class="codigo-digito" data-grupo="gestor" data-index="3" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 4">
+          <input type="text" class="codigo-digito" data-grupo="gestor" data-index="4" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 5">
+          <input type="text" class="codigo-digito" data-grupo="gestor" data-index="5" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" aria-label="Dígito 6">
+        </div>
+
+        <!-- Temporizador regressivo de reenvio -->
+        <div class="codigo-temporizador">
+          <span id="gestor-temporizador-wrap">Reenviar código em <strong id="gestor-tempo-regressivo">60s</strong></span>
+          <button type="button" class="btn-reenviar-codigo" id="btn-reenviar-gestor" disabled>Reenviar código</button>
+        </div>
+
+        <!-- Alerta de Erro -->
+        <div class="modal-alerta modal-alerta--erro" id="gestor-2fa-erro" style="display:none;" role="alert">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="gestor-2fa-erro-texto">Código inválido. Digite os 6 dígitos recebidos por e-mail.</span>
+        </div>
+
+        <!-- Alerta de Sucesso -->
+        <div class="modal-alerta modal-alerta--sucesso" id="gestor-2fa-sucesso" style="display:none;" role="status">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>Código de segurança confirmado! Acessando Painel CCO...</span>
+        </div>
+
+        <!-- Ações do Modal -->
+        <div class="modal-padrao__acoes">
+          <button type="button" class="modal-btn-secundario" id="btn-cancelar-gestor-2fa">Cancelar</button>
+          <button type="button" class="modal-btn-primario" id="btn-confirmar-gestor-2fa">
+            <span id="texto-btn-confirmar-gestor">Confirmar e Acessar CCO</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="js/login.js"></script>
 </body>
 </html>

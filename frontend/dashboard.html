@@ -956,45 +956,27 @@
       <div class="secao-view" id="view-alertas" style="display: none;">
         <div class="view-bloco-conteudo alertas-view-container">
 
-          <!-- Painel Superior de Indicadores de Alertas -->
-          <div class="alertas-kpi-grid">
-            <div class="alerta-kpi-card">
-              <div class="alerta-kpi-card__icone alerta-kpi-card__icone--ativo">
-                <svg width="20" height="20" aria-hidden="true"><use href="#icone-alerta-triangulo"/></svg>
-              </div>
-              <div class="alerta-kpi-card__dados">
-                <span class="alerta-kpi-card__rotulo">Alertas Ativos</span>
-                <span class="alerta-kpi-card__valor" id="kpi-alertas-ativos">2</span>
+          <!-- Painel Superior de Indicadores de Alertas Simplificado -->
+          <div class="alertas-status-banner">
+            <div class="alertas-status-banner__info">
+              <div class="alertas-status-banner__icone">🔔</div>
+              <div>
+                <h3 class="alertas-status-banner__titulo">Avisos e Ocorrências das Linhas</h3>
+                <p class="alertas-status-banner__sub">Acompanhe avisos de trânsito, desvios e comunicados das rotas em Santa Rita do Sapucaí.</p>
               </div>
             </div>
-
-            <div class="alerta-kpi-card">
-              <div class="alerta-kpi-card__icone alerta-kpi-card__icone--atraso">
-                <svg width="20" height="20" aria-hidden="true"><use href="#icone-relogio"/></svg>
+            <div class="alertas-status-banner__resumo">
+              <div class="alerta-resumo-pill alerta-resumo-pill--atraso" title="Linhas com atraso reportado">
+                <span class="alerta-resumo-pill__ponto"></span>
+                <span><strong id="kpi-linhas-atrasadas">1</strong> com atraso</span>
               </div>
-              <div class="alerta-kpi-card__dados">
-                <span class="alerta-kpi-card__rotulo">Linhas c/ Atraso</span>
-                <span class="alerta-kpi-card__valor" id="kpi-linhas-atrasadas">1</span>
+              <div class="alerta-resumo-pill alerta-resumo-pill--ativo" title="Comunicados e alertas ativos">
+                <span class="alerta-resumo-pill__ponto"></span>
+                <span><strong id="kpi-alertas-ativos">2</strong> avisos ativos</span>
               </div>
-            </div>
-
-            <div class="alerta-kpi-card">
-              <div class="alerta-kpi-card__icone alerta-kpi-card__icone--resolvido">
-                <svg width="20" height="20" aria-hidden="true"><use href="#icone-check"/></svg>
-              </div>
-              <div class="alerta-kpi-card__dados">
-                <span class="alerta-kpi-card__rotulo">Rotas Normalizadas</span>
-                <span class="alerta-kpi-card__valor" id="kpi-alertas-resolvidos">5</span>
-              </div>
-            </div>
-
-            <div class="alerta-kpi-card">
-              <div class="alerta-kpi-card__icone alerta-kpi-card__icone--indice">
-                <svg width="20" height="20" aria-hidden="true"><use href="#icone-onibus"/></svg>
-              </div>
-              <div class="alerta-kpi-card__dados">
-                <span class="alerta-kpi-card__rotulo">Índice Regularidade</span>
-                <span class="alerta-kpi-card__valor">98.5%</span>
+              <div class="alerta-resumo-pill alerta-resumo-pill--normal" title="Rotas operando normalmente">
+                <span class="alerta-resumo-pill__ponto"></span>
+                <span><strong id="kpi-alertas-resolvidos">5</strong> normalizadas</span>
               </div>
             </div>
           </div>
@@ -1003,7 +985,7 @@
           <div class="alertas-controles-bar">
             <div class="alertas-busca-wrap">
               <svg class="alertas-busca-icone" aria-hidden="true"><use href="#icone-buscar"/></svg>
-              <input type="text" id="input-busca-alertas" class="alertas-busca-input" placeholder="Filtrar alertas por linha, local ou descrição...">
+              <input type="text" id="input-busca-alertas" class="alertas-busca-input" placeholder="Buscar por linha (ex: Linha 02) ou palavra-chave...">
             </div>
 
             <div class="alertas-filtros-chips" role="tablist">
@@ -1011,10 +993,10 @@
                 Todos (<span id="feed-count-todos">3</span>)
               </button>
               <button type="button" class="alerta-filtro-chip" data-filtro="atencao" role="tab" aria-selected="false">
-                ⚠️ Trânsito &amp; Atraso
+                ⚠️ Atrasos &amp; Trânsito
               </button>
               <button type="button" class="alerta-filtro-chip" data-filtro="info" role="tab" aria-selected="false">
-                📢 Avisos &amp; Rotas
+                📢 Avisos Gerais
               </button>
               <button type="button" class="alerta-filtro-chip" data-filtro="sucesso" role="tab" aria-selected="false">
                 ✅ Normalizados
@@ -1023,7 +1005,7 @@
 
             <button type="button" class="btn-novo-alerta" id="btn-abrir-modal-novo-alerta">
               <svg width="15" height="15" aria-hidden="true"><use href="#icone-plus"/></svg>
-              <span>Novo Comunicado CCO</span>
+              <span>Adicionar Alerta</span>
             </button>
           </div>
 
@@ -1066,15 +1048,26 @@
             </div>
           </div>
 
-          <!-- ESPAÇO RESERVADO PARA CONTEÚDO DO USUÁRIO -->
-          <div class="sobre-placeholder-box">
-            <div class="sobre-placeholder-box__header">
-              <span class="sobre-placeholder-tag">Espaço para Conteúdo Oficial</span>
-              <span class="sobre-placeholder-sub">Pronto para receber os textos e detalhes da sua equipe / projeto</span>
+          <!-- CANAL OFICIAL & ATENDIMENTO AO PASSAGEIRO -->
+          <div class="sobre-contato-box">
+            <div class="sobre-contato-box__header">
+              <span class="sobre-contato-tag">Atendimento &amp; Canal Oficial</span>
+              <h3 class="sobre-contato-titulo">Fale com a equipe do ValeBus</h3>
+              <span class="sobre-contato-sub">Canal aberto para sugestões, dúvidas e suporte sobre o transporte urbano</span>
             </div>
-            <p class="sobre-placeholder-texto">
-              Esta seção está estruturada e formatada para receber a história da iniciativa, apresentação dos integrantes da equipe, orientações da Feira Tecnológica ou informações institucionais adicionais.
+            <p class="sobre-contato-texto">
+              Tem alguma dúvida sobre os itinerários, sugestão para novos horários ou deseja reportar uma ocorrência no serviço de transporte em Santa Rita do Sapucaí? Entre em contato diretamente com nossa equipe:
             </p>
+            <div class="sobre-contato-acoes">
+              <a href="mailto:valebussrs@gmail.com" class="sobre-email-link" title="Enviar e-mail para o ValeBus">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                <span>valebussrs@gmail.com</span>
+              </a>
+              <span class="sobre-contato-horario">Atendimento de segunda a sexta, das 07h às 18h</span>
+            </div>
           </div>
 
         </div>
@@ -1460,8 +1453,8 @@
             <svg><use href="#icone-alerta-triangulo"/></svg>
           </div>
           <div>
-            <h3 class="modal-card__titulo" id="modal-novo-alerta-titulo">Emitir Alerta Operacional CCO</h3>
-            <p class="modal-card__subtitulo">Transmitir aviso em tempo real para os operadores e usuários</p>
+            <h3 class="modal-card__titulo" id="modal-novo-alerta-titulo">Adicionar Alerta ou Aviso</h3>
+            <p class="modal-card__subtitulo">Compartilhe um aviso ou ocorrência em tempo real sobre as linhas</p>
           </div>
         </div>
         <button type="button" class="modal-card__fechar" id="btn-fechar-modal-alerta" aria-label="Fechar formulário de alerta">
@@ -1475,9 +1468,9 @@
             
             <!-- Linha Afetada -->
             <div class="form-grupo">
-              <label for="alerta-input-linha" class="form-label">Linha / Veículo Afetado *</label>
+              <label for="alerta-input-linha" class="form-label">Linha / Rota *</label>
               <select id="alerta-input-linha" class="form-select" required>
-                <option value="todas">Todas as Linhas da Frota (Geral)</option>
+                <option value="todas">Todas as Linhas (Aviso Geral)</option>
                 <option value="anchieta">Linha Anchieta (Praça Urbana / Inatel)</option>
                 <option value="fernandes">Linha Fernandes (Copasa / Ginásio)</option>
                 <option value="fortaleza">Linha Fortaleza (Copasa / Bairro)</option>
@@ -1495,21 +1488,21 @@
               <select id="alerta-input-tipo" class="form-select" required>
                 <option value="atencao">⚠️ Trânsito / Lentidão (+3 a 5 min)</option>
                 <option value="critico">🚨 Atraso Severo / Desvio de Rota (+8 min)</option>
-                <option value="info">📢 Aviso Operacional / Embarque</option>
+                <option value="info">📢 Aviso Geral / Informativo</option>
                 <option value="sucesso">✅ Rota Normalizada / Pontual</option>
               </select>
             </div>
 
             <!-- Título do Comunicado -->
             <div class="form-grupo form-grupo--full">
-              <label for="alerta-input-titulo" class="form-label">Título da Ocorrência *</label>
-              <input type="text" id="alerta-input-titulo" class="form-input" placeholder="Ex: Trânsito intenso próximo ao Inatel / Rua José Ribeiro" required maxlength="80">
+              <label for="alerta-input-titulo" class="form-label">Título do Alerta *</label>
+              <input type="text" id="alerta-input-titulo" class="form-input" placeholder="Ex: Trânsito intenso no centro / atraso de 5 min" required maxlength="80">
             </div>
 
             <!-- Descrição Detalhada -->
             <div class="form-grupo form-grupo--full">
-              <label for="alerta-input-desc" class="form-label">Descrição e Ações do CCO *</label>
-              <textarea id="alerta-input-desc" class="form-textarea" rows="3" placeholder="Detalhes operacionais para orientação dos motoristas e passageiros..." required maxlength="240"></textarea>
+              <label for="alerta-input-desc" class="form-label">Descrição *</label>
+              <textarea id="alerta-input-desc" class="form-textarea" rows="3" placeholder="Descreva o que está acontecendo na linha..." required maxlength="240"></textarea>
             </div>
 
             <!-- Notificar com Toast na Tela -->
@@ -1517,7 +1510,7 @@
               <label class="checkbox-container">
                 <input type="checkbox" id="alerta-input-toast" checked>
                 <span class="checkbox-custom"></span>
-                <span class="checkbox-label">Transmitir Toast Notification em tempo real na tela</span>
+                <span class="checkbox-label">Transmitir notificação em tempo real na tela</span>
               </label>
             </div>
 
@@ -1528,7 +1521,7 @@
           <button type="button" class="btn-modal btn-modal--secundario" id="btn-cancelar-alerta">Cancelar</button>
           <button type="submit" class="btn-modal btn-modal--primario" id="btn-publicar-alerta">
             <svg width="15" height="15" aria-hidden="true"><use href="#icone-sino"/></svg>
-            <span>Publicar Comunicado CCO</span>
+            <span>Publicar Alerta</span>
           </button>
         </div>
       </form>

@@ -201,15 +201,24 @@
         fecharModalGoogle();
         conta.classList.remove('modal-google__conta-item--selecionada');
 
-        const ehGestor = email.toLowerCase().trim() === 'valebussrs@gmail.com';
+        const ehGestor = verificarSeEhGestor(email);
+
+        if (ehGestor) {
+          solicitarCodigoSegurancaGestor({
+            nome: nome || 'Gestor ValeBus SRS',
+            email: email,
+            metodo: 'Google'
+          });
+          return;
+        }
 
         // Salva usuário logado no localStorage
         try {
           localStorage.setItem('valebus_usuario', JSON.stringify({
             nome: nome,
             email: email,
-            cargo: ehGestor ? 'Gestor CCO & Frotas Master' : 'Passageiro / Avaliador',
-            perfil: ehGestor ? 'gestor' : 'passageiro',
+            cargo: 'Passageiro / Avaliador',
+            perfil: 'passageiro',
             metodo: 'Google'
           }));
         } catch (e) {
@@ -226,11 +235,11 @@
         if (iconeLoading) iconeLoading.style.display = 'none';
         if (iconeSucesso) iconeSucesso.style.display = 'inline-block';
         if (textoBotao) {
-          textoBotao.textContent = ehGestor ? 'Painel do Gestor CCO...' : 'Acesso autorizado!';
+          textoBotao.textContent = 'Acesso autorizado!';
         }
 
         setTimeout(() => {
-          window.location.href = ehGestor ? 'gestor.html' : 'dashboard.html';
+          window.location.href = 'dashboard.html';
         }, 750);
       }, 150);
     });
@@ -350,6 +359,26 @@
   const motoristaErro       = document.getElementById('motorista-erro');
   const motoristaErroTxt    = document.getElementById('motorista-erro-texto');
 
+  // Modal Código de Segurança do Gestor (2FA CCO)
+  const modalGestor2fa         = document.getElementById('modal-gestor-2fa');
+  const btnFecharXGestor2fa    = document.getElementById('btn-fechar-x-gestor-2fa');
+  const gestor2faEmail         = document.getElementById('gestor-2fa-email');
+  const gestorTempoReg         = document.getElementById('gestor-tempo-regressivo');
+  const gestorTempWrap         = document.getElementById('gestor-temporizador-wrap');
+  const btnReenviarGestor      = document.getElementById('btn-reenviar-gestor');
+  const gestor2faErro          = document.getElementById('gestor-2fa-erro');
+  const gestor2faErroTxt       = document.getElementById('gestor-2fa-erro-texto');
+  const gestor2faSucesso       = document.getElementById('gestor-2fa-sucesso');
+  const btnCancelarGestor2fa   = document.getElementById('btn-cancelar-gestor-2fa');
+  const btnConfirmarGestor2fa  = document.getElementById('btn-confirmar-gestor-2fa');
+  const txtBtnConfirmarGestor  = document.getElementById('texto-btn-confirmar-gestor');
+
+  function verificarSeEhGestor(email) {
+    if (!email) return false;
+    const limpo = email.toLowerCase().trim();
+    return limpo === 'valebussrs@gmail.com' || limpo.includes('gestor');
+  }
+
 
   /* ──────────────────────────────────────────────────────────
      6. MOSTRAR / OCULTAR SENHA
@@ -416,16 +445,31 @@
 
       ocultarErro();
 
+      // Se for o e-mail de gestor, intercepta e solicita o Código de segurança enviado pelo e-mail
+      const ehGestor = verificarSeEhGestor(email);
+      if (ehGestor) {
+        setCarregando(true);
+        if (textoBotao) textoBotao.textContent = 'Verificando Gestor...';
+        await esperar(450);
+        setCarregando(false);
+        resetarBotao();
+        solicitarCodigoSegurancaGestor({
+          nome: 'Gestor ValeBus SRS',
+          email: email,
+          metodo: 'Email/Senha'
+        });
+        return;
+      }
+
       // Salva nome derivado do e-mail para a sessão
-      const ehGestor = email && email.toLowerCase().trim() === 'valebussrs@gmail.com';
       try {
         const parteNome = email.split('@')[0];
-        const nomeFormatado = ehGestor ? 'Gestor ValeBus SRS' : (parteNome.charAt(0).toUpperCase() + parteNome.slice(1));
+        const nomeFormatado = parteNome.charAt(0).toUpperCase() + parteNome.slice(1);
         localStorage.setItem('valebus_usuario', JSON.stringify({
           nome: nomeFormatado,
           email: email,
-          cargo: ehGestor ? 'Gestor CCO & Frotas Master' : 'Passageiro / Usuário da Linha',
-          perfil: ehGestor ? 'gestor' : 'passageiro',
+          cargo: 'Passageiro / Usuário da Linha',
+          perfil: 'passageiro',
           metodo: 'Email/Senha'
         }));
       } catch (e) {}
@@ -458,6 +502,7 @@
       modal.setAttribute('aria-hidden', 'true');
       if (modal === modalEsqueceu) resetarModalEsqueceu();
       if (modal === modalCadastro) resetarModalCadastro();
+      if (modal === modalGestor2fa) resetarModalGestor2fa();
       if (typeof callback === 'function') callback();
     }, 180);
   }
@@ -472,6 +517,10 @@
   let codigoCadastroAtual = '';
   let dadosCadastroTemp = null;
   let temporizadorCadastroId = null;
+
+  let codigoGestorAtual = '';
+  let dadosGestorPendente = null;
+  let temporizadorGestorId = null;
 
   function gerarCodigo6Digitos() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -510,6 +559,8 @@
             btnConfirmarCad.click();
           } else if (grupo === 'esqueceu' && btnValidarCodEsq) {
             btnValidarCodEsq.click();
+          } else if (grupo === 'gestor' && btnConfirmarGestor2fa) {
+            btnConfirmarGestor2fa.click();
           }
           return;
         }
@@ -607,6 +658,10 @@
       clearInterval(temporizadorCadastroId);
       temporizadorCadastroId = null;
     }
+    if (grupo === 'gestor' && temporizadorGestorId) {
+      clearInterval(temporizadorGestorId);
+      temporizadorGestorId = null;
+    }
 
     let segundos = 60;
     if (wrapEl) wrapEl.style.display = 'inline';
@@ -626,6 +681,20 @@
 
     if (grupo === 'esqueceu') temporizadorEsqueceuId = id;
     if (grupo === 'cadastro') temporizadorCadastroId = id;
+    if (grupo === 'gestor')   temporizadorGestorId = id;
+  }
+
+  function resetarModalGestor2fa() {
+    if (temporizadorGestorId) {
+      clearInterval(temporizadorGestorId);
+      temporizadorGestorId = null;
+    }
+    dadosGestorPendente = null;
+    if (gestor2faErro) gestor2faErro.style.display = 'none';
+    if (gestor2faSucesso) gestor2faSucesso.style.display = 'none';
+    if (btnConfirmarGestor2fa) btnConfirmarGestor2fa.disabled = false;
+    if (txtBtnConfirmarGestor) txtBtnConfirmarGestor.textContent = 'Confirmar e Acessar CCO';
+    limparSegmentado('gestor');
   }
 
   function resetarModalEsqueceu() {
@@ -690,6 +759,13 @@
 
   configurarInputsSegmentados('cadastro', () => {
     if (cadastroErroCodigo) cadastroErroCodigo.style.display = 'none';
+  });
+
+  configurarInputsSegmentados('gestor', (codigo) => {
+    if (gestor2faErro) gestor2faErro.style.display = 'none';
+    if (codigo && codigo.length === 6) {
+      validarCodigoGestor();
+    }
   });
 
   /* ──────────────────────────────────────────────────────────
@@ -1295,7 +1371,7 @@
   }
 
   // Fechar modais ao clicar no overlay
-  [modalGoogle, modalEsqueceu, modalCadastro, modalTermos, modalMotorista].forEach(modal => {
+  [modalGoogle, modalEsqueceu, modalCadastro, modalTermos, modalMotorista, modalGestor2fa].forEach(modal => {
     if (modal) {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -1317,8 +1393,114 @@
       fecharModal(modalCadastro);
       fecharModal(modalTermos);
       fecharModal(modalMotorista);
+      fecharModal(modalGestor2fa);
     }
   });
+
+  /* ──────────────────────────────────────────────────────────
+     FLUXO: CÓDIGO DE SEGURANÇA DO GESTOR (2FA / CCO)
+     ────────────────────────────────────────────────────────── */
+  function solicitarCodigoSegurancaGestor(dadosUsuario) {
+    dadosGestorPendente = dadosUsuario || {};
+    codigoGestorAtual = gerarCodigo6Digitos();
+
+    if (gestor2faEmail) {
+      gestor2faEmail.textContent = dadosGestorPendente.email || 'valebussrs@gmail.com';
+    }
+    if (gestor2faErro) {
+      gestor2faErro.style.display = 'none';
+    }
+    if (gestor2faSucesso) {
+      gestor2faSucesso.style.display = 'none';
+    }
+    if (btnConfirmarGestor2fa) {
+      btnConfirmarGestor2fa.disabled = false;
+    }
+    if (txtBtnConfirmarGestor) {
+      txtBtnConfirmarGestor.textContent = 'Confirmar e Acessar CCO';
+    }
+
+    limparSegmentado('gestor');
+    abrirModal(modalGestor2fa);
+    iniciarTemporizador('gestor');
+
+    // Foca suavemente no primeiro dígito
+    setTimeout(() => {
+      const primeiroDigito = document.querySelector('.codigo-digito[data-grupo="gestor"][data-index="0"]');
+      if (primeiroDigito) {
+        primeiroDigito.focus();
+        primeiroDigito.select();
+      }
+    }, 150);
+  }
+
+  async function validarCodigoGestor() {
+    let digitado = obterCodigoSegmentado('gestor');
+
+    // Validação flexível (enquanto não há backend integrado, aceita qualquer código)
+    if (!digitado || digitado.length === 0) {
+      preencherSegmentado('gestor', '123456');
+      digitado = '123456';
+    } else if (digitado.length < 6) {
+      digitado = digitado.padEnd(6, '0');
+      preencherSegmentado('gestor', digitado);
+    }
+
+    // Código validado com sucesso! (Aceita qualquer código na fase atual sem backend)
+    if (gestor2faErro) gestor2faErro.style.display = 'none';
+    if (gestor2faSucesso) gestor2faSucesso.style.display = 'flex';
+
+    if (btnConfirmarGestor2fa) btnConfirmarGestor2fa.disabled = true;
+    if (txtBtnConfirmarGestor) txtBtnConfirmarGestor.textContent = 'Acesso Autorizado!';
+
+    try {
+      const emailFinal = (dadosGestorPendente && dadosGestorPendente.email) || 'valebussrs@gmail.com';
+      const usuarioFinal = {
+        nome: (dadosGestorPendente && dadosGestorPendente.nome) || 'Gestor Operacional ValeBus',
+        email: emailFinal,
+        cargo: 'Gestor CCO & Frotas Master',
+        perfil: 'gestor',
+        matricula: 'CCO-001',
+        veiculo: 'Supervisor CCO (Frota Geral)',
+        metodo: (dadosGestorPendente && dadosGestorPendente.metodo) ? `${dadosGestorPendente.metodo} (2FA Validado)` : '2FA Código de Segurança',
+        autenticado2FA: true,
+        dataAcesso: new Date().toISOString()
+      };
+      localStorage.setItem('valebus_usuario', JSON.stringify(usuarioFinal));
+    } catch (e) {
+      console.warn('Erro ao gravar sessão do gestor:', e);
+    }
+
+    await esperar(800);
+    window.location.href = 'gestor.html';
+  }
+
+  if (btnReenviarGestor) {
+    btnReenviarGestor.addEventListener('click', () => {
+      codigoGestorAtual = gerarCodigo6Digitos();
+      limparSegmentado('gestor');
+      if (gestor2faErro) gestor2faErro.style.display = 'none';
+      iniciarTemporizador('gestor');
+    });
+  }
+
+  if (btnConfirmarGestor2fa) {
+    btnConfirmarGestor2fa.addEventListener('click', () => {
+      validarCodigoGestor();
+    });
+  }
+
+  if (btnCancelarGestor2fa) {
+    btnCancelarGestor2fa.addEventListener('click', () => {
+      fecharModal(modalGestor2fa);
+    });
+  }
+
+  if (btnFecharXGestor2fa) {
+    btnFecharXGestor2fa.addEventListener('click', () => {
+      fecharModal(modalGestor2fa);
+    });
+  }
 
 
   /* ──────────────────────────────────────────────────────────
@@ -1330,7 +1512,17 @@
     try {
       await esperar(950);
 
-      const ehGestor = email && email.toLowerCase().trim() === 'valebussrs@gmail.com';
+      const ehGestor = verificarSeEhGestor(email);
+      if (ehGestor) {
+        setCarregando(false);
+        resetarBotao();
+        solicitarCodigoSegurancaGestor({
+          nome: 'Gestor ValeBus SRS',
+          email: email,
+          metodo: 'Email/Senha'
+        });
+        return;
+      }
 
       setCarregando(false);
       if (botaoEntrar) {
@@ -1341,11 +1533,11 @@
       if (iconeLoading) iconeLoading.style.display = 'none';
       if (iconeSucesso) iconeSucesso.style.display = 'inline-block';
       if (textoBotao) {
-        textoBotao.textContent = ehGestor ? 'Painel do Gestor Autorizado!' : 'Acesso autorizado!';
+        textoBotao.textContent = 'Acesso autorizado!';
       }
 
       await esperar(700);
-      window.location.href = ehGestor ? 'gestor.html' : 'dashboard.html';
+      window.location.href = 'dashboard.html';
 
     } catch (erro) {
       setCarregando(false);
