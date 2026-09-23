@@ -278,7 +278,7 @@
       chave: 'porto_sapucai',
       nome: 'Linha Porto Sapucaí',
       cor: '#0891b2',
-      partida: 'Br-459 Rod. Jk, Km 116 Leste',
+      partida: 'Br-459 Rod. Jk, Km 116 Leste | Porto Sapucaí',
       proximaParada: 'Br-459 Rod. Jk, Km 116,3 Leste | Acesso Ao Porto Sapucaí'
     },
     reforco_jose_gm: {
@@ -305,13 +305,14 @@
   };
 
   const FROTA = [
-    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.254164, -45.696709], velocidade: 28, isMeuOnibus: true },
-    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.2470, -45.7090], velocidade: 32, isMeuOnibus: false },
-    { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              posicao: [-22.2445, -45.7060], velocidade: 25, isMeuOnibus: false },
-    { chaveLinha: 'industrial',             linha: LINHAS.industrial,             posicao: [-22.2610, -45.7140], velocidade: 35, isMeuOnibus: false },
-    { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          posicao: [-22.2660, -45.6880], velocidade: 30, isMeuOnibus: false },
-    { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, posicao: [-22.2510, -45.7010], velocidade: 27, isMeuOnibus: false },
-    { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      posicao: [-22.2545, -45.7075], velocidade: 29, isMeuOnibus: false }
+    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.254164, -45.696709], velocidade: 0, isMeuOnibus: true },
+    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false },
+    { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false },
+    { chaveLinha: 'industrial',             linha: LINHAS.industrial,             posicao: [-22.261352, -45.771513], velocidade: 0, isMeuOnibus: false },
+    { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          posicao: [-22.257161, -45.803458], velocidade: 0, isMeuOnibus: false },
+    { chaveLinha: 'reforco_jose_gm',        linha: LINHAS.reforco_jose_gm,        posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false },
+    { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false },
+    { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false }
   ];
 
   /* ──────────────────────────────────────────────────────────

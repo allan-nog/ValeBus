@@ -115,7 +115,7 @@
       nome: 'Linha Anchieta',
       cor: '#16a34a',
       partida: 'Praça Urbana Carolina | Praça Do Murilo',
-      proximaParada: 'Rua José Ribeiro De Barros, 59 | Inatel - Sentido Recanto'
+      proximaParada: 'R. José Ribeiro De Barros, 59 | Inatel - Sentido Recanto'
     },
     fernandes: {
       chave: 'fernandes',
@@ -142,7 +142,7 @@
       chave: 'porto_sapucai',
       nome: 'Linha Porto Sapucaí',
       cor: '#0891b2',
-      partida: 'Br-459 Rod. Jk, Km 116 Leste',
+      partida: 'Br-459 Rod. Jk, Km 116 Leste | Porto Sapucaí',
       proximaParada: 'Br-459 Rod. Jk, Km 116,3 Leste | Acesso Ao Porto Sapucaí'
     },
     reforco_jose_gm: {
@@ -169,13 +169,14 @@
   };
 
   const FROTA = [
-    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.254186, -45.696698], velocidade: 28 },
-    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.2470, -45.7090], velocidade: 32 },
-    { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              posicao: [-22.2445, -45.7060], velocidade: 25 },
-    { chaveLinha: 'industrial',             linha: LINHAS.industrial,             posicao: [-22.2610, -45.7140], velocidade: 35 },
-    { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          posicao: [-22.2660, -45.6880], velocidade: 30 },
-    { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, posicao: [-22.2510, -45.7010], velocidade: 27 },
-    { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      posicao: [-22.2545, -45.7075], velocidade: 29 }
+    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.254164, -45.696709], velocidade: 0 },
+    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.225829, -45.718194], velocidade: 0 },
+    { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              posicao: [-22.225829, -45.718194], velocidade: 0 },
+    { chaveLinha: 'industrial',             linha: LINHAS.industrial,             posicao: [-22.261352, -45.771513], velocidade: 0 },
+    { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          posicao: [-22.257161, -45.803458], velocidade: 0 },
+    { chaveLinha: 'reforco_jose_gm',        linha: LINHAS.reforco_jose_gm,        posicao: [-22.225829, -45.718194], velocidade: 0 },
+    { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, posicao: [-22.225829, -45.718194], velocidade: 0 },
+    { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      posicao: [-22.225829, -45.718194], velocidade: 0 }
   ];
 
 
@@ -287,19 +288,40 @@
           </div>
         </div>
         <div class="popup-onibus__footer">
-          <span class="popup-onibus__velocidade">⚡ <strong>${bus.velocidade} km/h</strong></span>
+          <span class="popup-onibus__velocidade">⚡ <strong>${bus.velocidade === 0 ? '0 km/h (Ponto Inicial)' : bus.velocidade + ' km/h'}</strong></span>
           <span class="popup-onibus__gps-badge">GPS Online</span>
         </div>
       </div>
     `;
   }
 
+  // Micro-deslocamento na baia do terminal (Rua das Rosas) para visualização clara de todos os ônibus em "Todas as Linhas"
+  const OFFSETS_BAIA_ROSAS = {
+    fernandes: [0, 0],
+    fortaleza: [0.00007, -0.00015],
+    reforco_jose_gm: [-0.00007, 0.00015],
+    sao_benedito_hora_meia: [0.00014, -0.00030],
+    sao_benedito_hora: [-0.00014, 0.00030]
+  };
+
+  function obterPosicaoVisual(bus, linhaSelecionada) {
+    if (linhaSelecionada && linhaSelecionada !== 'todas') {
+      return bus.posicao; // Exatamente a parada 1 oficial
+    }
+    const offset = OFFSETS_BAIA_ROSAS[bus.chaveLinha];
+    if (offset) {
+      return [bus.posicao[0] + offset[0], bus.posicao[1] + offset[1]];
+    }
+    return bus.posicao;
+  }
+
   function renderizarMarcadores() {
     FROTA.forEach(bus => {
       const icone = criarIconeBus(bus.linha.cor);
       const conteudoPopup = gerarHtmlPopup(bus);
+      const posInicial = obterPosicaoVisual(bus, 'todas');
 
-      const marker = L.marker(bus.posicao, { icon: icone })
+      const marker = L.marker(posInicial, { icon: icone })
         .addTo(map)
         .bindPopup(conteudoPopup);
 
@@ -458,11 +480,11 @@
      ────────────────────────────────────────────────────────── */
   const camadaTrajetos = L.layerGroup();
   let trajetosVisiveis = true; // Ativo por padrão
-  let polylineAnchietaRef = null;
+  let polylineAtivaRef = null;
 
   function renderizarTrajetos(linhaSelecionada = linhaAtivaFiltro) {
     camadaTrajetos.clearLayers();
-    polylineAnchietaRef = null;
+    polylineAtivaRef = null;
 
     if (!window.VALEBUS_PARADAS) return;
 
@@ -490,7 +512,7 @@
         interactive: false
       });
 
-      // 2. Traçado principal na cor oficial da Linha (Verde esmeralda para Linha Anchieta)
+      // 2. Traçado principal na cor oficial da Linha
       const polyPrincipal = L.polyline(coords, {
         color: meta.cor,
         weight: 4.5,
@@ -500,8 +522,9 @@
         interactive: true
       });
 
+      const totalParadasLinha = (window.VALEBUS_PARADAS.paradasPorLinha[chave] || []).length;
       polyPrincipal.bindTooltip(
-        `<strong>${meta.nome}</strong><br><span style="font-size:11px;color:#cbd5e1;">Itinerário completo &bull; 4,5 km (14 paradas)</span>`,
+        `<strong>${meta.nome}</strong><br><span style="font-size:11px;color:#cbd5e1;">Itinerário oficial &bull; ${totalParadasLinha} paradas</span>`,
         { sticky: true, opacity: 0.95 }
       );
 
@@ -516,9 +539,7 @@
       camadaTrajetos.addLayer(polyHalo);
       camadaTrajetos.addLayer(polyPrincipal);
 
-      if (chave === 'anchieta') {
-        polylineAnchietaRef = polyPrincipal;
-      }
+      polylineAtivaRef = polyPrincipal;
     });
 
     if (trajetosVisiveis && !map.hasLayer(camadaTrajetos)) {
@@ -707,6 +728,7 @@
 
       marcadoresMap.forEach(({ marker, bus }) => {
         if (linhaSelecionada === 'todas' || bus.chaveLinha === linhaSelecionada) {
+          marker.setLatLng(obterPosicaoVisual(bus, linhaSelecionada));
           if (!map.hasLayer(marker)) map.addLayer(marker);
           totalVisivel++;
         } else {
@@ -772,7 +794,8 @@
     if (itemBus) {
       ocultarAlertaLinhaVazia();
       const { marker, bus } = itemBus;
-      const latLng = marker.getLatLng();
+      marker.setLatLng(bus.posicao);
+      const latLng = bus.posicao;
 
       // Garantir que a camada do marcador está visível se houver filtro
       if (!map.hasLayer(marker)) {
@@ -786,11 +809,11 @@
       // Atualiza popup antes de abrir
       marker.setPopupContent(gerarHtmlPopup(bus));
 
-      // Se for a Linha Anchieta e tiver traçado com múltiplos pontos, enquadra o trajeto
-      if (chaveLinha === 'anchieta' && polylineAnchietaRef && trajetosVisiveis) {
-        map.fitBounds(polylineAnchietaRef.getBounds(), {
+      // Se houver traçado ativo com múltiplos pontos, enquadra o trajeto completo da linha
+      if (polylineAtivaRef && trajetosVisiveis) {
+        map.fitBounds(polylineAtivaRef.getBounds(), {
           padding: [50, 50],
-          maxZoom: 15,
+          maxZoom: 16,
           animate: true,
           duration: 1.2
         });
