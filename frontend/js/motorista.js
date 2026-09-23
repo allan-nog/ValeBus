@@ -22,15 +22,16 @@
   const estadoMotorista = {
     nome: 'João Silva',
     matricula: 'MOT-104',
-    linhaCodigo: 'Linha Anchieta',
-    linhaNome: 'Praça Urbana / Recanto',
-    estacao: 'Praça Urbana Carolina',
+    linhaAtivaChave: 'fernandes',
+    linhaCodigo: 'Linha Fernandes',
+    linhaNome: 'Bairro Fernandes / São Benedito / Centro / Algodoeira',
+    estacao: "Rua Das Rosas, 300 | Caixa D'Água Da Copasa",
     veiculo: 'Ônibus #02',
     viagensHoje: 12,
     emRota: false,
-    distanciaKm: 4.5,
-    tempoMin: 15,
-    proximaParada: '1. Praça Do Murilo'
+    distanciaKm: 10.9,
+    tempoMin: 35,
+    proximaParada: "1. Caixa D'Água Da Copasa"
   };
 
   function atualizarRelogio() {
@@ -58,8 +59,39 @@
           if (u.nome) estadoMotorista.nome = u.nome;
           if (u.matricula) estadoMotorista.matricula = u.matricula;
           if (u.linha) {
-            estadoMotorista.linhaCodigo = u.linha.includes('0') ? u.linha : 'Linha 01';
-            estadoMotorista.linhaNome = u.linha;
+            if (u.linha.toLowerCase().includes('industrial')) {
+              estadoMotorista.linhaAtivaChave = 'industrial';
+              estadoMotorista.linhaCodigo = 'Linha Industrial';
+              estadoMotorista.linhaNome = 'Distrito Industrial / BR-459 / Centro / Praça Urbana Carolina';
+              estadoMotorista.estacao = 'BR-459 Rod. JK, Km 119,8 Leste | Entr. MG-173 Para Cachoeira de Minas';
+              estadoMotorista.distanciaKm = 9.4;
+              estadoMotorista.tempoMin = 25;
+              estadoMotorista.proximaParada = '1. Entr. MG-173 Para Cachoeira De Minas';
+            } else if (u.linha.toLowerCase().includes('fortaleza')) {
+              estadoMotorista.linhaAtivaChave = 'fortaleza';
+              estadoMotorista.linhaCodigo = 'Linha Fortaleza';
+              estadoMotorista.linhaNome = 'Bairro Fernandes / São Benedito / Centro / Bairro Fortaleza';
+              estadoMotorista.estacao = "Rua Das Rosas, 300 | Caixa D'Água Da Copasa";
+              estadoMotorista.distanciaKm = 11.0;
+              estadoMotorista.tempoMin = 36;
+              estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
+            } else if (u.linha.toLowerCase().includes('anchieta')) {
+              estadoMotorista.linhaAtivaChave = 'anchieta';
+              estadoMotorista.linhaCodigo = 'Linha Anchieta';
+              estadoMotorista.linhaNome = 'Praça Urbana / Recanto';
+              estadoMotorista.estacao = 'Praça Urbana Carolina';
+              estadoMotorista.distanciaKm = 4.5;
+              estadoMotorista.tempoMin = 15;
+              estadoMotorista.proximaParada = '1. Praça Do Murilo';
+            } else {
+              estadoMotorista.linhaAtivaChave = 'fernandes';
+              estadoMotorista.linhaCodigo = 'Linha Fernandes';
+              estadoMotorista.linhaNome = 'Bairro Fernandes / São Benedito / Centro / Algodoeira';
+              estadoMotorista.estacao = "Rua Das Rosas, 300 | Caixa D'Água Da Copasa";
+              estadoMotorista.distanciaKm = 10.9;
+              estadoMotorista.tempoMin = 35;
+              estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
+            }
           }
           if (u.veiculo) estadoMotorista.veiculo = u.veiculo.replace(/\s*\(Prefixo\s*\d+\)/i, '').trim();
         }
@@ -156,60 +188,87 @@
     if (elMobileBadge) elMobileBadge.textContent = estadoMotorista.linhaCodigo;
     if (elMobileDestino) elMobileDestino.textContent = estadoMotorista.linhaNome;
 
-    // Sincronizar estado visual dos botões da escala
-    const btnEscalaIndustrial = document.getElementById('btn-escala-industrial');
-    const btnEscalaAnchieta = document.getElementById('btn-escala-anchieta');
-    const tagStatusLinha01 = document.getElementById('tag-status-linha01');
-    const tagStatusAnchieta = document.getElementById('tag-status-anchieta');
-    const cardLinha01 = document.getElementById('card-escala-linha01');
-    const cardAnchieta = document.getElementById('card-escala-anchieta');
-
-    const ehAnchieta = estadoMotorista.linhaCodigo && estadoMotorista.linhaCodigo.toLowerCase().includes('anchieta');
-    if (ehAnchieta) {
-      if (btnEscalaAnchieta) {
-        btnEscalaAnchieta.className = 'btn-rota-acao btn-rota-acao--ativo rota-card__btn-trocar';
-        btnEscalaAnchieta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Ativa no Cockpit</span>';
-      }
-      if (tagStatusAnchieta) {
-        tagStatusAnchieta.textContent = 'Ativa no Cockpit';
-        tagStatusAnchieta.style.backgroundColor = 'rgba(22, 163, 74, 0.15)';
-        tagStatusAnchieta.style.color = '#16a34a';
-      }
-      if (cardAnchieta) cardAnchieta.style.border = '2px solid #16a34a';
-
-      if (btnEscalaIndustrial) {
-        btnEscalaIndustrial.className = 'btn-rota-acao btn-rota-acao--verde rota-card__btn-trocar';
-        btnEscalaIndustrial.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Ativar Linha 01</span>';
-      }
-      if (tagStatusLinha01) {
-        tagStatusLinha01.textContent = 'Disponível na Escala';
-        tagStatusLinha01.style.backgroundColor = 'rgba(100, 116, 139, 0.12)';
-        tagStatusLinha01.style.color = 'var(--texto-secundario)';
-      }
-      if (cardLinha01) cardLinha01.style.border = '1px solid var(--borda-cor)';
-    } else {
-      if (btnEscalaIndustrial) {
-        btnEscalaIndustrial.className = 'btn-rota-acao btn-rota-acao--ativo rota-card__btn-trocar';
-        btnEscalaIndustrial.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Ativa no Cockpit</span>';
-      }
-      if (tagStatusLinha01) {
-        tagStatusLinha01.textContent = 'Em Operação';
-        tagStatusLinha01.style.backgroundColor = 'rgba(37, 99, 235, 0.15)';
-        tagStatusLinha01.style.color = 'var(--cor-marca)';
-      }
-      if (cardLinha01) cardLinha01.style.border = '2px solid var(--cor-marca)';
-
-      if (btnEscalaAnchieta) {
-        btnEscalaAnchieta.className = 'btn-rota-acao btn-rota-acao--verde rota-card__btn-trocar';
-        btnEscalaAnchieta.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Ativar Rota Anchieta</span>';
-      }
-      if (tagStatusAnchieta) {
-        tagStatusAnchieta.textContent = '14 Paradas • 4,5 km';
-        tagStatusAnchieta.style.backgroundColor = 'rgba(22, 163, 74, 0.15)';
-        tagStatusAnchieta.style.color = '#16a34a';
-      }
-      if (cardAnchieta) cardAnchieta.style.border = '1px solid var(--borda-cor)';
+    // Sincronizar subtítulo
+    const mainSubtitulo = document.getElementById('main-subtitulo');
+    if (mainSubtitulo) {
+      mainSubtitulo.innerHTML = `Santa Rita do Sapucaí &mdash; ${estadoMotorista.veiculo} (${estadoMotorista.linhaCodigo} ${estadoMotorista.linhaNome})`;
     }
+
+    // Sincronizar estado visual dos cards e botões da escala
+    const cardsConfig = [
+      {
+        chave: 'fernandes',
+        btnId: 'btn-escala-fernandes',
+        tagId: 'tag-status-fernandes',
+        cardId: 'card-escala-fernandes',
+        cor: '#2563eb',
+        classeInativo: 'btn-rota-acao--azul',
+        textoAtivar: 'Ativar Rota Fernandes',
+        tagInativa: '32 Paradas • 10,9 km'
+      },
+      {
+        chave: 'anchieta',
+        btnId: 'btn-escala-anchieta',
+        tagId: 'tag-status-anchieta',
+        cardId: 'card-escala-anchieta',
+        cor: '#16a34a',
+        classeInativo: 'btn-rota-acao--verde',
+        textoAtivar: 'Ativar Rota Anchieta',
+        tagInativa: '14 Paradas • 4,5 km'
+      },
+      {
+        chave: 'fortaleza',
+        btnId: 'btn-escala-fortaleza',
+        tagId: 'tag-status-fortaleza',
+        cardId: 'card-escala-fortaleza',
+        cor: '#9333ea',
+        classeInativo: 'btn-rota-acao--roxo',
+        textoAtivar: 'Ativar Rota Fortaleza',
+        tagInativa: '30 Paradas • 11,0 km'
+      },
+      {
+        chave: 'industrial',
+        btnId: 'btn-escala-industrial',
+        tagId: 'tag-status-industrial',
+        cardId: 'card-escala-industrial',
+        cor: '#ea580c',
+        classeInativo: 'btn-rota-acao--laranja',
+        textoAtivar: 'Ativar Rota Industrial',
+        tagInativa: '12 Paradas • 9,4 km'
+      }
+    ];
+
+    const linhaAtivaAtual = estadoMotorista.linhaAtivaChave || 'fernandes';
+    cardsConfig.forEach(cfg => {
+      const btn = document.getElementById(cfg.btnId);
+      const tag = document.getElementById(cfg.tagId);
+      const card = document.getElementById(cfg.cardId);
+      const isAtiva = (cfg.chave === linhaAtivaAtual);
+
+      if (isAtiva) {
+        if (btn) {
+          btn.className = 'btn-rota-acao btn-rota-acao--ativo rota-card__btn-trocar';
+          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Ativa no Cockpit</span>';
+        }
+        if (tag) {
+          tag.textContent = 'Ativa no Cockpit';
+          tag.style.backgroundColor = `${cfg.cor}24`;
+          tag.style.color = cfg.cor;
+        }
+        if (card) card.style.border = `2px solid ${cfg.cor}`;
+      } else {
+        if (btn) {
+          btn.className = `btn-rota-acao ${cfg.classeInativo} rota-card__btn-trocar`;
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>${cfg.textoAtivar}</span>`;
+        }
+        if (tag) {
+          tag.textContent = cfg.tagInativa;
+          tag.style.backgroundColor = 'rgba(100, 116, 139, 0.12)';
+          tag.style.color = 'var(--texto-secundario)';
+        }
+        if (card) card.style.border = '1px solid var(--borda-cor)';
+      }
+    });
 
     // Métricas do Cockpit
     const elDistancia = document.getElementById('metrica-distancia');
@@ -223,8 +282,9 @@
       elParada.textContent = estadoMotorista.proximaParada;
       elParada.title = estadoMotorista.proximaParada;
     }
-    if (elIndicador && window.VALEBUS_PARADAS && window.VALEBUS_PARADAS.paradasPorLinha && window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
-      const total = window.VALEBUS_PARADAS.paradasPorLinha.anchieta.length;
+    const chaveAtiva = estadoMotorista.linhaAtivaChave || 'fernandes';
+    if (elIndicador && window.VALEBUS_PARADAS && window.VALEBUS_PARADAS.paradasPorLinha && window.VALEBUS_PARADAS.paradasPorLinha[chaveAtiva]) {
+      const total = window.VALEBUS_PARADAS.paradasPorLinha[chaveAtiva].length;
       elIndicador.textContent = `${(indiceParadaAtual || 0) + 1}/${total}`;
     }
 
@@ -305,8 +365,8 @@
   };
 
   const FROTA = [
-    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.254164, -45.696709], velocidade: 0, isMeuOnibus: true },
-    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false },
+    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: true },
+    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.254164, -45.696709], velocidade: 0, isMeuOnibus: false },
     { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false },
     { chaveLinha: 'industrial',             linha: LINHAS.industrial,             posicao: [-22.261352, -45.771513], velocidade: 0, isMeuOnibus: false },
     { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          posicao: [-22.257161, -45.803458], velocidade: 0, isMeuOnibus: false },
@@ -323,13 +383,14 @@
   let meuOnibusMarker = null;
   const marcadoresMap = new Map();
 
-  // Camadas vetoriais exclusivas da Linha Anchieta
-  const camadaTrajetoAnchieta = L.layerGroup();
-  const camadaParadasAnchieta = L.layerGroup();
-  let rotaAnchietaVisivel = false;
-  let paradasAnchietaVisiveis = false;
-  let polylineAnchieta = null;
-  let waypointAnchietaIndex = 0;
+  // Camadas vetoriais dinâmicas da linha ativa
+  const camadaTrajetoLinha = L.layerGroup();
+  const camadaParadasLinha = L.layerGroup();
+  let rotaVisivel = true;
+  let paradasVisiveis = true;
+  let polylineLinha = null;
+  let waypointLinhaIndex = 0;
+  const marcadoresParadasLinha = [];
 
   function criarIconeBus(cor, isMeu = false) {
     const htmlIcone = `
@@ -383,18 +444,24 @@
   }
 
   /* ──────────────────────────────────────────────────────────
-     5.1. PONTOS DE ÔNIBUS DA LINHA ANCHIETA (14 PARADAS)
+     5.1. PONTOS DE ÔNIBUS COM ÍCONE OFICIAL (QUALQUER LINHA)
      ────────────────────────────────────────────────────────── */
-  function criarIconeParadaMotorista(ponto, index, total) {
-    const cor = '#16a34a';
+  function criarIconeParadaMotorista(ponto, index, total, corLinha = '#2563eb') {
     const num = ponto.numero || (index + 1);
     const htmlIcone = `
-      <div class="ponto-parada-container motorista-ponto-parada" data-linha="anchieta" data-num="${num}">
-        <div class="ponto-parada-pin" style="--cor-ponto: ${cor};">
-          <div class="ponto-parada-corpo" style="background-color: ${cor}; border: 2px solid #ffffff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.35);">
-            <span style="font-size: 11px; font-weight: 800; color: #ffffff; line-height: 1; font-family: system-ui, -apple-system, sans-serif;">${num}</span>
+      <div class="ponto-parada-container motorista-ponto-parada" data-linha="${ponto.linha || estadoMotorista.linhaAtivaChave}" data-num="${num}" title="Parada #${num}: ${ponto.referencia}">
+        <div class="ponto-parada-pin" style="--cor-ponto: ${corLinha};">
+          <div class="ponto-parada-corpo" style="background-color: ${corLinha};">
+            <svg class="ponto-parada-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
+              <path d="M4 10h16"></path>
+              <path d="M7 16v3"></path>
+              <path d="M17 16v3"></path>
+              <circle cx="8" cy="13" r="1" fill="#ffffff"></circle>
+              <circle cx="16" cy="13" r="1" fill="#ffffff"></circle>
+            </svg>
           </div>
-          <div class="ponto-parada-ponteiro" style="border-top-color: ${cor};"></div>
+          <div class="ponto-parada-ponteiro" style="border-top-color: ${corLinha};"></div>
         </div>
       </div>
     `;
@@ -402,24 +469,24 @@
     return L.divIcon({
       html: htmlIcone,
       className: 'leaflet-ponto-parada-wrapper',
-      iconSize: [28, 34],
-      iconAnchor: [14, 32],
-      popupAnchor: [0, -30]
+      iconSize: [24, 30],
+      iconAnchor: [12, 28],
+      popupAnchor: [0, -26]
     });
   }
 
-  function gerarHtmlPopupParadaMotorista(ponto, index, total) {
+  function gerarHtmlPopupParadaMotorista(ponto, index, total, nomeLinha, corLinha = '#2563eb') {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${ponto.posicao[0]},${ponto.posicao[1]}`;
     const num = ponto.numero || (index + 1);
 
     return `
       <div class="popup-ponto popup-ponto--motorista" style="min-width: 240px; padding: 4px;">
         <div class="popup-ponto__topo" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
-          <span style="font-size: 11px; font-weight: 800; color: #16a34a; text-transform: uppercase; letter-spacing: 0.04em;">
-            Parada #${num} de ${total} &bull; Linha Anchieta
+          <span style="font-size: 11px; font-weight: 800; color: ${corLinha}; text-transform: uppercase; letter-spacing: 0.04em;">
+            Parada #${num} de ${total} &bull; ${nomeLinha}
           </span>
-          <span style="font-size: 10px; font-weight: 700; background: rgba(22, 163, 74, 0.12); color: #16a34a; padding: 2px 7px; border-radius: 999px;">
-            ${ponto.sentido || 'Sentido Recanto'}
+          <span style="font-size: 10px; font-weight: 700; background: rgba(37, 99, 235, 0.12); color: ${corLinha}; padding: 2px 7px; border-radius: 999px;">
+            ${ponto.sentido || 'Sentido da Linha'}
           </span>
         </div>
 
@@ -430,7 +497,7 @@
           </div>
           <div class="popup-ponto__item" style="margin-top: 4px;">
             <span class="popup-ponto__rotulo" style="display: block; font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600;">Ponto de Referência</span>
-            <div class="popup-ponto__referencia" style="color: #16a34a; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 5px; margin-top: 2px;">
+            <div class="popup-ponto__referencia" style="color: ${corLinha}; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 5px; margin-top: 2px;">
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
                 <circle cx="12" cy="9" r="2.5"/>
@@ -441,7 +508,7 @@
         </div>
 
         <div class="popup-ponto__acoes" style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
-          <button type="button" class="btn-definir-parada-alvo" data-indice="${index}" style="background: #16a34a; color: #ffffff; border: none; border-radius: 8px; padding: 7px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);">
+          <button type="button" class="btn-definir-parada-alvo" data-indice="${index}" style="background: ${corLinha}; color: #ffffff; border: none; border-radius: 8px; padding: 7px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             <span>Definir como Próxima Parada no Cockpit</span>
           </button>
@@ -454,19 +521,31 @@
     `;
   }
 
-  function renderizarParadasAnchieta() {
-    camadaParadasAnchieta.clearLayers();
-    marcadoresParadasAnchieta.length = 0;
+  function renderizarParadasLinha(chaveLinha) {
+    camadaParadasLinha.clearLayers();
+    marcadoresParadasLinha.length = 0;
 
-    if (!window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
+    if (!window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha[chaveLinha]) {
       return;
     }
 
-    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.anchieta;
+    const paradas = window.VALEBUS_PARADAS.paradasPorLinha[chaveLinha];
+    let cor = '#2563eb';
+    let nome = 'Linha Fernandes';
+    if (chaveLinha === 'anchieta') {
+      cor = '#16a34a';
+      nome = 'Linha Anchieta';
+    } else if (chaveLinha === 'fortaleza') {
+      cor = '#9333ea';
+      nome = 'Linha Fortaleza';
+    } else if (chaveLinha === 'industrial') {
+      cor = '#ea580c';
+      nome = 'Linha Industrial';
+    }
 
     paradas.forEach((ponto, index) => {
-      const icone = criarIconeParadaMotorista(ponto, index, paradas.length);
-      const popupHtml = gerarHtmlPopupParadaMotorista(ponto, index, paradas.length);
+      const icone = criarIconeParadaMotorista(ponto, index, paradas.length, cor);
+      const popupHtml = gerarHtmlPopupParadaMotorista(ponto, index, paradas.length, nome, cor);
 
       const marker = L.marker(ponto.posicao, {
         icon: icone,
@@ -478,30 +557,51 @@
         { direction: 'top', offset: [0, -28], opacity: 0.95 }
       );
 
-      marcadoresParadasAnchieta.push(marker);
-      camadaParadasAnchieta.addLayer(marker);
+      marcadoresParadasLinha.push(marker);
+      camadaParadasLinha.addLayer(marker);
     });
 
-    if (paradasAnchietaVisiveis && map && !map.hasLayer(camadaParadasAnchieta)) {
-      camadaParadasAnchieta.addTo(map);
+    if (paradasVisiveis && map && !map.hasLayer(camadaParadasLinha)) {
+      camadaParadasLinha.addTo(map);
     }
   }
 
   /* ──────────────────────────────────────────────────────────
-     5.2. TRAÇADO VETORIAL DA ROTA DA LINHA ANCHIETA
+     5.2. TRAÇADO VETORIAL DA LINHA ATIVA
      ────────────────────────────────────────────────────────── */
-  function renderizarRotaAnchieta() {
-    camadaTrajetoAnchieta.clearLayers();
-    polylineAnchieta = null;
+  function renderizarRotaLinha(chaveLinha) {
+    camadaTrajetoLinha.clearLayers();
+    polylineLinha = null;
 
     if (!window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.obterTrajeto) return;
 
-    const coords = window.VALEBUS_PARADAS.obterTrajeto('anchieta');
+    const coords = window.VALEBUS_PARADAS.obterTrajeto(chaveLinha);
     if (!coords || coords.length === 0) return;
 
-    // Halo escuro para legibilidade e contraste
+    let cor = '#2563eb';
+    let corHalo = '#172554';
+    let titulo = 'Linha Fernandes &bull; Rota Oficial';
+    let desc = 'Fernandes ➔ Centro ➔ Algodoeira (10,9 km &bull; 32 paradas)';
+
+    if (chaveLinha === 'anchieta') {
+      cor = '#16a34a';
+      corHalo = '#052e16';
+      titulo = 'Linha Anchieta &bull; Rota Oficial';
+      desc = 'Praça Urbana Carolina ➔ Recanto (4,5 km &bull; 14 paradas)';
+    } else if (chaveLinha === 'fortaleza') {
+      cor = '#9333ea';
+      corHalo = '#3b0764';
+      titulo = 'Linha Fortaleza &bull; Rota Oficial';
+      desc = 'Fernandes ➔ Centro ➔ Bairro Fortaleza (11,0 km &bull; 30 paradas)';
+    } else if (chaveLinha === 'industrial') {
+      cor = '#ea580c';
+      corHalo = '#431407';
+      titulo = 'Linha Industrial &bull; Rota Oficial';
+      desc = 'Distrito Industrial ➔ BR-459 ➔ Centro ➔ Murilo (9,4 km &bull; 12 paradas)';
+    }
+
     const polyHalo = L.polyline(coords, {
-      color: '#052e16',
+      color: corHalo,
       weight: 7.5,
       opacity: 0.35,
       lineCap: 'round',
@@ -509,9 +609,8 @@
       interactive: false
     });
 
-    // Linha principal no verde oficial da Linha Anchieta
-    polylineAnchieta = L.polyline(coords, {
-      color: '#16a34a',
+    polylineLinha = L.polyline(coords, {
+      color: cor,
       weight: 5,
       opacity: 0.95,
       lineCap: 'round',
@@ -519,33 +618,40 @@
       interactive: true
     });
 
-    polylineAnchieta.bindTooltip(
-      `<strong>Linha Anchieta &bull; Rota Oficial</strong><br><span style="font-size:11px;color:#cbd5e1;">Itinerário: Praça Urbana Carolina ➔ Recanto (4,5 km &bull; 14 paradas)</span>`,
+    polylineLinha.bindTooltip(
+      `<strong>${titulo}</strong><br><span style="font-size:11px;color:#cbd5e1;">Itinerário: ${desc}</span>`,
       { sticky: true, opacity: 0.95 }
     );
 
-    polylineAnchieta.on('mouseover', () => {
-      polylineAnchieta.setStyle({ weight: 7, opacity: 1 });
+    polylineLinha.on('mouseover', () => {
+      polylineLinha.setStyle({ weight: 7, opacity: 1 });
     });
-    polylineAnchieta.on('mouseout', () => {
-      polylineAnchieta.setStyle({ weight: 5, opacity: 0.95 });
+    polylineLinha.on('mouseout', () => {
+      polylineLinha.setStyle({ weight: 5, opacity: 0.95 });
     });
 
-    camadaTrajetoAnchieta.addLayer(polyHalo);
-    camadaTrajetoAnchieta.addLayer(polylineAnchieta);
+    camadaTrajetoLinha.addLayer(polyHalo);
+    camadaTrajetoLinha.addLayer(polylineLinha);
 
-    if (rotaAnchietaVisivel && map && !map.hasLayer(camadaTrajetoAnchieta)) {
-      camadaTrajetoAnchieta.addTo(map);
+    if (rotaVisivel && map && !map.hasLayer(camadaTrajetoLinha)) {
+      camadaTrajetoLinha.addTo(map);
     }
   }
 
-  function enquadrarRotaAnchieta() {
+  function enquadrarRotaLinha() {
     if (!map) return;
-    if (polylineAnchieta) {
-      map.fitBounds(polylineAnchieta.getBounds(), { padding: [40, 40], maxZoom: 16 });
-      mostrarToast('Rota da Linha Anchieta enquadrada no mapa.');
+    if (polylineLinha) {
+      map.fitBounds(polylineLinha.getBounds(), { padding: [40, 40], maxZoom: 16 });
+      const nomes = {
+        anchieta: 'Linha Anchieta',
+        fernandes: 'Linha Fernandes',
+        fortaleza: 'Linha Fortaleza',
+        industrial: 'Linha Industrial'
+      };
+      const nome = nomes[estadoMotorista.linhaAtivaChave] || 'Linha Selecionada';
+      mostrarToast(`Rota da ${nome} enquadrada no mapa.`);
     } else if (window.VALEBUS_PARADAS) {
-      const coords = window.VALEBUS_PARADAS.obterTrajeto('anchieta');
+      const coords = window.VALEBUS_PARADAS.obterTrajeto(estadoMotorista.linhaAtivaChave);
       if (coords && coords.length > 0) {
         map.fitBounds(L.polyline(coords).getBounds(), { padding: [40, 40] });
       }
@@ -553,10 +659,11 @@
   }
 
   function selecionarParadaCockpit(indice, abrirPopupMapa = false) {
-    if (!window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
+    const chave = estadoMotorista.linhaAtivaChave || 'fernandes';
+    if (!window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha[chave]) {
       return;
     }
-    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.anchieta;
+    const paradas = window.VALEBUS_PARADAS.paradasPorLinha[chave];
     if (indice < 0) indice = 0;
     if (indice >= paradas.length) indice = paradas.length - 1;
 
@@ -566,8 +673,20 @@
 
     estadoMotorista.proximaParada = `${num}. ${ponto.referencia}`;
     const fracaoRestante = (paradas.length - indiceParadaAtual) / paradas.length;
-    estadoMotorista.distanciaKm = parseFloat((4.5 * Math.max(0.1, fracaoRestante)).toFixed(1));
-    estadoMotorista.tempoMin = Math.max(1, Math.round(15 * Math.max(0.1, fracaoRestante)));
+    let distTotal = 10.9;
+    let tempoTotal = 35;
+    if (chave === 'anchieta') {
+      distTotal = 4.5;
+      tempoTotal = 15;
+    } else if (chave === 'fortaleza') {
+      distTotal = 11.0;
+      tempoTotal = 36;
+    } else if (chave === 'industrial') {
+      distTotal = 9.4;
+      tempoTotal = 25;
+    }
+    estadoMotorista.distanciaKm = parseFloat((distTotal * Math.max(0.05, fracaoRestante)).toFixed(1));
+    estadoMotorista.tempoMin = Math.max(1, Math.round(tempoTotal * Math.max(0.05, fracaoRestante)));
 
     renderizarDadosMotorista();
 
@@ -576,16 +695,56 @@
       elIndicador.textContent = `${num}/${paradas.length}`;
     }
 
-    if (abrirPopupMapa && map && marcadoresParadasAnchieta[indiceParadaAtual]) {
-      const marker = marcadoresParadasAnchieta[indiceParadaAtual];
+    if (abrirPopupMapa && map && marcadoresParadasLinha[indiceParadaAtual]) {
+      const marker = marcadoresParadasLinha[indiceParadaAtual];
       map.panTo(marker.getLatLng(), { animate: true });
       marker.openPopup();
     }
   }
 
   /* ──────────────────────────────────────────────────────────
-     5.3. LISTA EXPANSÍVEL DE ITINERÁRIO (TELA DE ROTAS)
+     5.3. LISTAS EXPANSÍVEIS DE ITINERÁRIO (TELA DE ROTAS)
      ────────────────────────────────────────────────────────── */
+  function preencherListaParadasFernandes() {
+    const listaContainer = document.getElementById('lista-paradas-fernandes-container');
+    if (!listaContainer || !window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.fernandes) {
+      return;
+    }
+
+    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.fernandes;
+    listaContainer.innerHTML = paradas.map((ponto, i) => {
+      const num = ponto.numero || (i + 1);
+      return `
+        <div class="fernandes-parada-card" data-indice="${i}" title="Clique para ver Parada #${num} no mapa">
+          <span class="fernandes-parada-badge" title="Ponto de Parada">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
+              <path d="M4 10h16"></path>
+              <path d="M7 16v3"></path>
+              <path d="M17 16v3"></path>
+              <circle cx="8" cy="13" r="1" fill="#ffffff"></circle>
+              <circle cx="16" cy="13" r="1" fill="#ffffff"></circle>
+            </svg>
+          </span>
+          <div class="fernandes-parada-info">
+            <div class="fernandes-parada-ref">#${num} ${ponto.referencia}</div>
+            <div class="fernandes-parada-end">${ponto.endereco}</div>
+          </div>
+          <button type="button" class="fernandes-parada-btn-mapa" aria-label="Localizar no mapa">Ver no Mapa</button>
+        </div>
+      `;
+    }).join('');
+
+    listaContainer.querySelectorAll('.fernandes-parada-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const idx = parseInt(card.getAttribute('data-indice'), 10);
+        ativarLinhaNoCockpit('fernandes');
+        trocarSecao('cockpit');
+        selecionarParadaCockpit(idx, true);
+      });
+    });
+  }
+
   function preencherListaParadasItinerario() {
     const listaContainer = document.getElementById('lista-paradas-anchieta-container');
     if (!listaContainer || !window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
@@ -596,10 +755,19 @@
     listaContainer.innerHTML = paradas.map((ponto, i) => {
       const num = ponto.numero || (i + 1);
       return `
-        <div class="anchieta-parada-card" data-indice="${i}" title="Clique para ver parada no mapa">
-          <span class="anchieta-parada-badge">${num}</span>
+        <div class="anchieta-parada-card" data-indice="${i}" title="Clique para ver Parada #${num} no mapa">
+          <span class="anchieta-parada-badge" title="Ponto de Parada">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
+              <path d="M4 10h16"></path>
+              <path d="M7 16v3"></path>
+              <path d="M17 16v3"></path>
+              <circle cx="8" cy="13" r="1" fill="#ffffff"></circle>
+              <circle cx="16" cy="13" r="1" fill="#ffffff"></circle>
+            </svg>
+          </span>
           <div class="anchieta-parada-info">
-            <div class="anchieta-parada-ref">${ponto.referencia}</div>
+            <div class="anchieta-parada-ref">#${num} ${ponto.referencia}</div>
             <div class="anchieta-parada-end">${ponto.endereco}</div>
           </div>
           <button type="button" class="anchieta-parada-btn-mapa" aria-label="Localizar no mapa">Ver no Mapa</button>
@@ -610,37 +778,235 @@
     listaContainer.querySelectorAll('.anchieta-parada-card').forEach(card => {
       card.addEventListener('click', () => {
         const idx = parseInt(card.getAttribute('data-indice'), 10);
+        ativarLinhaNoCockpit('anchieta');
         trocarSecao('cockpit');
         selecionarParadaCockpit(idx, true);
       });
     });
   }
 
+  function preencherListaParadasFortaleza() {
+    const listaContainer = document.getElementById('lista-paradas-fortaleza-container');
+    if (!listaContainer || !window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.fortaleza) {
+      return;
+    }
+
+    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.fortaleza;
+    listaContainer.innerHTML = paradas.map((ponto, i) => {
+      const num = ponto.numero || (i + 1);
+      return `
+        <div class="fortaleza-parada-card" data-indice="${i}" title="Clique para ver Parada #${num} no mapa">
+          <span class="fortaleza-parada-badge" title="Ponto de Parada">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
+              <path d="M4 10h16"></path>
+              <path d="M7 16v3"></path>
+              <path d="M17 16v3"></path>
+              <circle cx="8" cy="13" r="1" fill="#ffffff"></circle>
+              <circle cx="16" cy="13" r="1" fill="#ffffff"></circle>
+            </svg>
+          </span>
+          <div class="fortaleza-parada-info">
+            <div class="fortaleza-parada-ref">#${num} ${ponto.referencia}</div>
+            <div class="fortaleza-parada-end">${ponto.endereco}</div>
+          </div>
+          <button type="button" class="fortaleza-parada-btn-mapa" aria-label="Localizar no mapa">Ver no Mapa</button>
+        </div>
+      `;
+    }).join('');
+
+    listaContainer.querySelectorAll('.fortaleza-parada-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const idx = parseInt(card.getAttribute('data-indice'), 10);
+        ativarLinhaNoCockpit('fortaleza');
+        trocarSecao('cockpit');
+        selecionarParadaCockpit(idx, true);
+      });
+    });
+  }
+
+  function preencherListaParadasIndustrial() {
+    const listaContainer = document.getElementById('lista-paradas-industrial-container');
+    if (!listaContainer || !window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.industrial) {
+      return;
+    }
+
+    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.industrial;
+    listaContainer.innerHTML = paradas.map((ponto, i) => {
+      const num = ponto.numero || (i + 1);
+      return `
+        <div class="industrial-parada-card" data-indice="${i}" title="Clique para ver Parada #${num} no mapa">
+          <span class="industrial-parada-badge" title="Ponto de Parada">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
+              <path d="M4 10h16"></path>
+              <path d="M7 16v3"></path>
+              <path d="M17 16v3"></path>
+              <circle cx="8" cy="13" r="1" fill="#ffffff"></circle>
+              <circle cx="16" cy="13" r="1" fill="#ffffff"></circle>
+            </svg>
+          </span>
+          <div class="industrial-parada-info">
+            <div class="industrial-parada-ref">#${num} ${ponto.referencia}</div>
+            <div class="industrial-parada-end">${ponto.endereco}</div>
+          </div>
+          <button type="button" class="industrial-parada-btn-mapa" aria-label="Localizar no mapa">Ver no Mapa</button>
+        </div>
+      `;
+    }).join('');
+
+    listaContainer.querySelectorAll('.industrial-parada-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const idx = parseInt(card.getAttribute('data-indice'), 10);
+        ativarLinhaNoCockpit('industrial');
+        trocarSecao('cockpit');
+        selecionarParadaCockpit(idx, true);
+      });
+    });
+  }
+
+  function atualizarBotoesFlutuantesLinha(chaveLinha) {
+    let cor = '#2563eb';
+    let labelRota = 'Rota Fernandes (10.9 km)';
+    let totalP = 32;
+
+    if (chaveLinha === 'anchieta') {
+      cor = '#16a34a';
+      labelRota = 'Rota Anchieta (4.5 km)';
+      totalP = 14;
+    } else if (chaveLinha === 'fortaleza') {
+      cor = '#9333ea';
+      labelRota = 'Rota Fortaleza (11.0 km)';
+      totalP = 30;
+    } else if (chaveLinha === 'industrial') {
+      cor = '#ea580c';
+      labelRota = 'Rota Industrial (9.4 km)';
+      totalP = 12;
+    }
+
+    const dot = document.getElementById('dot-rota-ativa');
+    const txtRota = document.getElementById('label-toggle-rota');
+    const txtParadas = document.getElementById('label-toggle-paradas');
+
+    if (dot) dot.style.backgroundColor = cor;
+    if (txtRota) txtRota.textContent = labelRota;
+    if (txtParadas) txtParadas.textContent = `${totalP} Paradas`;
+
+    if (btnToggleRotaAnchieta) {
+      btnToggleRotaAnchieta.classList.toggle('motorista-btn-flutuante--ativo', rotaVisivel);
+      btnToggleRotaAnchieta.setAttribute('aria-pressed', rotaVisivel ? 'true' : 'false');
+    }
+    if (btnToggleParadasAnchieta) {
+      btnToggleParadasAnchieta.classList.toggle('motorista-btn-flutuante--ativo', paradasVisiveis);
+      btnToggleParadasAnchieta.setAttribute('aria-pressed', paradasVisiveis ? 'true' : 'false');
+    }
+  }
+
+  function ativarLinhaNoCockpit(chaveLinha) {
+    estadoMotorista.linhaAtivaChave = chaveLinha;
+    waypointLinhaIndex = 0;
+
+    if (chaveLinha === 'industrial') {
+      estadoMotorista.linhaCodigo = 'Linha Industrial';
+      estadoMotorista.linhaNome = 'Distrito Industrial / BR-459 / Centro / Praça Urbana Carolina';
+      estadoMotorista.estacao = 'BR-459 Rod. JK, Km 119,8 Leste | Entr. MG-173 Para Cachoeira de Minas';
+      estadoMotorista.distanciaKm = 9.4;
+      estadoMotorista.tempoMin = 25;
+      estadoMotorista.proximaParada = '1. Entr. MG-173 Para Cachoeira De Minas';
+    } else if (chaveLinha === 'fortaleza') {
+      estadoMotorista.linhaCodigo = 'Linha Fortaleza';
+      estadoMotorista.linhaNome = 'Bairro Fernandes / São Benedito / Centro / Bairro Fortaleza';
+      estadoMotorista.estacao = "Rua Das Rosas, 300 | Caixa D'Água Da Copasa";
+      estadoMotorista.distanciaKm = 11.0;
+      estadoMotorista.tempoMin = 36;
+      estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
+    } else if (chaveLinha === 'anchieta') {
+      estadoMotorista.linhaCodigo = 'Linha Anchieta';
+      estadoMotorista.linhaNome = 'Praça Urbana / Recanto';
+      estadoMotorista.estacao = 'Praça Urbana Carolina';
+      estadoMotorista.distanciaKm = 4.5;
+      estadoMotorista.tempoMin = 15;
+      estadoMotorista.proximaParada = '1. Praça Do Murilo';
+    } else {
+      estadoMotorista.linhaCodigo = 'Linha Fernandes';
+      estadoMotorista.linhaNome = 'Bairro Fernandes / São Benedito / Centro / Algodoeira';
+      estadoMotorista.estacao = "Rua Das Rosas, 300 | Caixa D'Água Da Copasa";
+      estadoMotorista.distanciaKm = 10.9;
+      estadoMotorista.tempoMin = 35;
+      estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
+    }
+
+    // Atualiza ônibus no mapa: marca qual veículo é o "Meu Ônibus"
+    FROTA.forEach(b => {
+      b.isMeuOnibus = (b.chaveLinha === chaveLinha);
+      const entry = marcadoresMap.get(b.chaveLinha);
+      if (entry) {
+        entry.bus.isMeuOnibus = b.isMeuOnibus;
+        entry.marker.setIcon(criarIconeBus(b.linha.cor, b.isMeuOnibus));
+        entry.marker.setPopupContent(gerarHtmlPopup(b));
+        if (b.isMeuOnibus) {
+          meuOnibusMarker = entry.marker;
+        }
+      }
+    });
+
+    // Posiciona o ônibus do motorista na Parada 1 da linha
+    if (meuOnibusMarker && window.VALEBUS_PARADAS) {
+      const paradas = window.VALEBUS_PARADAS.paradasPorLinha[chaveLinha];
+      if (paradas && paradas.length > 0) {
+        meuOnibusMarker.setLatLng(paradas[0].posicao);
+      }
+    }
+
+    // Renderiza a rota e paradas da linha ativa
+    renderizarRotaLinha(chaveLinha);
+    renderizarParadasLinha(chaveLinha);
+    selecionarParadaCockpit(0, false);
+
+    // Atualiza controles flutuantes
+    atualizarBotoesFlutuantesLinha(chaveLinha);
+
+    renderizarDadosMotorista();
+    enquadrarRotaLinha();
+
+    const infoLinhas = {
+      fernandes: { nome: 'Linha Fernandes', detalhe: '32 paradas (10,9 km)' },
+      anchieta: { nome: 'Linha Anchieta', detalhe: '14 paradas (4,5 km)' },
+      fortaleza: { nome: 'Linha Fortaleza', detalhe: '30 paradas (11,0 km)' },
+      industrial: { nome: 'Linha Industrial', detalhe: '12 paradas (9,4 km)' }
+    };
+    const info = infoLinhas[chaveLinha] || { nome: chaveLinha, detalhe: '' };
+    mostrarToast(`${info.nome} ativada no Cockpit com ${info.detalhe}.`);
+  }
+
   if (mapaEl) {
     map = L.map('mapa-motorista', {
       zoomControl: true,
       attributionControl: false
-    }).setView([-22.2505, -45.7005], 14.5);
+    }).setView([-22.2505, -45.7005], 14);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Renderiza a rota e paradas da Linha Anchieta
-    renderizarRotaAnchieta();
-    renderizarParadasAnchieta();
+    // Renderiza a rota e paradas da linha inicial (Fernandes por padrão)
+    const linhaInicial = estadoMotorista.linhaAtivaChave || 'fernandes';
+    renderizarRotaLinha(linhaInicial);
+    renderizarParadasLinha(linhaInicial);
 
     // Renderiza marcadores da frota
     FROTA.forEach(bus => {
-      const icone = criarIconeBus(bus.linha.cor, bus.isMeuOnibus);
+      const isMeu = bus.chaveLinha === linhaInicial;
+      bus.isMeuOnibus = isMeu;
+      const icone = criarIconeBus(bus.linha.cor, isMeu);
       const conteudoPopup = gerarHtmlPopup(bus);
 
       const marker = L.marker(bus.posicao, { icon: icone })
         .addTo(map)
         .bindPopup(conteudoPopup);
 
-      if (bus.isMeuOnibus) {
+      if (isMeu) {
         meuOnibusMarker = marker;
       }
 
@@ -664,16 +1030,18 @@
 
     // Simulação contínua de movimentação GPS da frota
     setInterval(() => {
-      // Se estiver em rota na Linha Anchieta, o veículo do motorista navega fielmente pelos 53 waypoints
-      if (meuOnibusMarker && estadoMotorista.emRota && estadoMotorista.linhaCodigo.includes('Anchieta') && window.VALEBUS_PARADAS) {
-        const coords = window.VALEBUS_PARADAS.obterTrajeto('anchieta');
+      const chaveAtiva = estadoMotorista.linhaAtivaChave || 'fernandes';
+
+      // Se estiver em rota, o veículo do motorista navega fielmente pelos waypoints da linha ativa
+      if (meuOnibusMarker && estadoMotorista.emRota && window.VALEBUS_PARADAS) {
+        const coords = window.VALEBUS_PARADAS.obterTrajeto(chaveAtiva);
         if (coords && coords.length > 0) {
-          waypointAnchietaIndex = (waypointAnchietaIndex + 1) % coords.length;
-          const novoPonto = coords[waypointAnchietaIndex];
+          waypointLinhaIndex = (waypointLinhaIndex + 1) % coords.length;
+          const novoPonto = coords[waypointLinhaIndex];
           meuOnibusMarker.setLatLng(novoPonto);
 
-          // Checa proximidade com as 14 paradas da Linha Anchieta para avanço automático suave
-          const paradas = window.VALEBUS_PARADAS.paradasPorLinha.anchieta || [];
+          // Checa proximidade com as paradas da linha ativa para avanço automático suave
+          const paradas = window.VALEBUS_PARADAS.paradasPorLinha[chaveAtiva] || [];
           for (let i = 0; i < paradas.length; i++) {
             const dLat = Math.abs(novoPonto[0] - paradas[i].posicao[0]);
             const dLng = Math.abs(novoPonto[1] - paradas[i].posicao[1]);
@@ -686,8 +1054,8 @@
       }
 
       marcadoresMap.forEach(({ marker, bus }) => {
-        // Se for o ônibus do motorista e estiver seguindo o traçado da Anchieta, não aplica desvio aleatório
-        if (bus.isMeuOnibus && estadoMotorista.emRota && estadoMotorista.linhaCodigo.includes('Anchieta')) {
+        // Se for o ônibus do motorista e estiver seguindo o traçado da rota, não aplica desvio aleatório
+        if (bus.isMeuOnibus && estadoMotorista.emRota) {
           return;
         }
 
@@ -720,67 +1088,68 @@
      5.4. CONTROLES FLUTUANTES DO MAPA & STEPPER DE PARADAS
      ────────────────────────────────────────────────────────── */
   function ativarRotaNoMapa(enquadrar = true) {
-    rotaAnchietaVisivel = true;
+    rotaVisivel = true;
     if (btnToggleRotaAnchieta) {
       btnToggleRotaAnchieta.classList.add('motorista-btn-flutuante--ativo');
       btnToggleRotaAnchieta.setAttribute('aria-pressed', 'true');
     }
-    if (map && !map.hasLayer(camadaTrajetoAnchieta)) {
-      camadaTrajetoAnchieta.addTo(map);
+    if (map && !map.hasLayer(camadaTrajetoLinha)) {
+      camadaTrajetoLinha.addTo(map);
     }
     if (enquadrar) {
-      enquadrarRotaAnchieta();
+      enquadrarRotaLinha();
     }
   }
 
   function desativarRotaNoMapa() {
-    rotaAnchietaVisivel = false;
+    rotaVisivel = false;
     if (btnToggleRotaAnchieta) {
       btnToggleRotaAnchieta.classList.remove('motorista-btn-flutuante--ativo');
       btnToggleRotaAnchieta.setAttribute('aria-pressed', 'false');
     }
-    if (map && map.hasLayer(camadaTrajetoAnchieta)) {
-      map.removeLayer(camadaTrajetoAnchieta);
+    if (map && map.hasLayer(camadaTrajetoLinha)) {
+      map.removeLayer(camadaTrajetoLinha);
     }
   }
 
   function ativarParadasNoMapa() {
-    paradasAnchietaVisiveis = true;
+    paradasVisiveis = true;
     if (btnToggleParadasAnchieta) {
       btnToggleParadasAnchieta.classList.add('motorista-btn-flutuante--ativo');
       btnToggleParadasAnchieta.setAttribute('aria-pressed', 'true');
     }
-    if (map && !map.hasLayer(camadaParadasAnchieta)) {
-      camadaParadasAnchieta.addTo(map);
+    if (map && !map.hasLayer(camadaParadasLinha)) {
+      camadaParadasLinha.addTo(map);
     }
   }
 
   function desativarParadasNoMapa() {
-    paradasAnchietaVisiveis = false;
-    if (btnToggleParadasAnchieta) {
-      btnToggleParadasParadasAnchietaClassRemove();
-    }
-    if (map && map.hasLayer(camadaParadasAnchieta)) {
-      map.removeLayer(camadaParadasAnchieta);
-    }
-  }
-
-  function btnToggleParadasParadasAnchietaClassRemove() {
+    paradasVisiveis = false;
     if (btnToggleParadasAnchieta) {
       btnToggleParadasAnchieta.classList.remove('motorista-btn-flutuante--ativo');
       btnToggleParadasAnchieta.setAttribute('aria-pressed', 'false');
+    }
+    if (map && map.hasLayer(camadaParadasLinha)) {
+      map.removeLayer(camadaParadasLinha);
     }
   }
 
   const btnToggleRotaAnchieta = document.getElementById('btn-toggle-rota-anchieta');
   if (btnToggleRotaAnchieta) {
     btnToggleRotaAnchieta.addEventListener('click', () => {
-      if (!rotaAnchietaVisivel) {
+      const nomes = {
+        anchieta: 'Linha Anchieta',
+        fernandes: 'Linha Fernandes',
+        fortaleza: 'Linha Fortaleza',
+        industrial: 'Linha Industrial'
+      };
+      const nome = nomes[estadoMotorista.linhaAtivaChave] || 'Linha Selecionada';
+      if (!rotaVisivel) {
         ativarRotaNoMapa(true);
-        mostrarToast('Traçado oficial da Linha Anchieta traçado no mapa.');
+        mostrarToast(`Traçado oficial da ${nome} exibido no mapa.`);
       } else {
         desativarRotaNoMapa();
-        mostrarToast('Traçado da Linha Anchieta ocultado.');
+        mostrarToast(`Traçado da ${nome} ocultado.`);
       }
     });
   }
@@ -788,9 +1157,23 @@
   const btnToggleParadasAnchieta = document.getElementById('btn-toggle-paradas-anchieta');
   if (btnToggleParadasAnchieta) {
     btnToggleParadasAnchieta.addEventListener('click', () => {
-      if (!paradasAnchietaVisiveis) {
+      const totais = {
+        anchieta: 14,
+        fernandes: 32,
+        fortaleza: 30,
+        industrial: 12
+      };
+      const nomes = {
+        anchieta: 'Linha Anchieta',
+        fernandes: 'Linha Fernandes',
+        fortaleza: 'Linha Fortaleza',
+        industrial: 'Linha Industrial'
+      };
+      const total = totais[estadoMotorista.linhaAtivaChave] || 12;
+      const nome = nomes[estadoMotorista.linhaAtivaChave] || 'Linha Selecionada';
+      if (!paradasVisiveis) {
         ativarParadasNoMapa();
-        mostrarToast('14 Paradas da Linha Anchieta exibidas no mapa.');
+        mostrarToast(`${total} Paradas da ${nome} exibidas no mapa.`);
       } else {
         desativarParadasNoMapa();
         mostrarToast('Pontos de parada ocultados.');
@@ -800,7 +1183,7 @@
 
   const btnEnquadrarRotaAnchieta = document.getElementById('btn-enquadrar-rota-anchieta');
   if (btnEnquadrarRotaAnchieta) {
-    btnEnquadrarRotaAnchieta.addEventListener('click', enquadrarRotaAnchieta);
+    btnEnquadrarRotaAnchieta.addEventListener('click', enquadrarRotaLinha);
   }
 
   // Stepper de navegação entre paradas no Cockpit
@@ -816,6 +1199,22 @@
   if (btnParadaProxima) {
     btnParadaProxima.addEventListener('click', () => {
       selecionarParadaCockpit(indiceParadaAtual + 1, true);
+    });
+  }
+
+  // Caixa expansível de itinerário da Linha Fernandes
+  const btnToggleListaParadasFernandes = document.getElementById('btn-toggle-lista-paradas-fernandes');
+  const boxParadasFernandes = document.getElementById('box-paradas-fernandes');
+  const listaParadasFernandesContainer = document.getElementById('lista-paradas-fernandes-container');
+
+  if (btnToggleListaParadasFernandes && boxParadasFernandes) {
+    btnToggleListaParadasFernandes.addEventListener('click', () => {
+      const estaVisivel = boxParadasFernandes.style.display !== 'none';
+      boxParadasFernandes.style.display = estaVisivel ? 'none' : 'block';
+      btnToggleListaParadasFernandes.textContent = estaVisivel ? '📋 Ver 32 Paradas' : '✕ Ocultar Paradas';
+      if (!estaVisivel && listaParadasFernandesContainer && listaParadasFernandesContainer.children.length === 0) {
+        preencherListaParadasFernandes();
+      }
     });
   }
 
@@ -835,8 +1234,44 @@
     });
   }
 
-  // Preenche inicialmente o itinerário
+  // Caixa expansível de itinerário da Linha Fortaleza
+  const btnToggleListaParadasFortaleza = document.getElementById('btn-toggle-lista-paradas-fortaleza');
+  const boxParadasFortaleza = document.getElementById('box-paradas-fortaleza');
+  const listaParadasFortalezaContainer = document.getElementById('lista-paradas-fortaleza-container');
+
+  if (btnToggleListaParadasFortaleza && boxParadasFortaleza) {
+    btnToggleListaParadasFortaleza.addEventListener('click', () => {
+      const estaVisivel = boxParadasFortaleza.style.display !== 'none';
+      boxParadasFortaleza.style.display = estaVisivel ? 'none' : 'block';
+      btnToggleListaParadasFortaleza.textContent = estaVisivel ? '📋 Ver 30 Paradas' : '✕ Ocultar Paradas';
+      if (!estaVisivel && listaParadasFortalezaContainer && listaParadasFortalezaContainer.children.length === 0) {
+        preencherListaParadasFortaleza();
+      }
+    });
+  }
+
+  // Caixa expansível de itinerário da Linha Industrial
+  const btnToggleListaParadasIndustrial = document.getElementById('btn-toggle-lista-paradas-industrial');
+  const boxParadasIndustrial = document.getElementById('box-paradas-industrial');
+  const listaParadasIndustrialContainer = document.getElementById('lista-paradas-industrial-container');
+
+  if (btnToggleListaParadasIndustrial && boxParadasIndustrial) {
+    btnToggleListaParadasIndustrial.addEventListener('click', () => {
+      const estaVisivel = boxParadasIndustrial.style.display !== 'none';
+      boxParadasIndustrial.style.display = estaVisivel ? 'none' : 'block';
+      btnToggleListaParadasIndustrial.textContent = estaVisivel ? '📋 Ver 12 Paradas' : '✕ Ocultar Paradas';
+      if (!estaVisivel && listaParadasIndustrialContainer && listaParadasIndustrialContainer.children.length === 0) {
+        preencherListaParadasIndustrial();
+      }
+    });
+  }
+
+  // Preenche inicialmente os itinerários
+  preencherListaParadasFernandes();
   preencherListaParadasItinerario();
+  preencherListaParadasFortaleza();
+  preencherListaParadasIndustrial();
+  atualizarBotoesFlutuantesLinha(estadoMotorista.linhaAtivaChave || 'fernandes');
   selecionarParadaCockpit(0, false);
 
   /* ──────────────────────────────────────────────────────────
@@ -891,8 +1326,8 @@
         mostrarToast('Boa viagem! Rota e paradas traçadas no mapa automaticamente.');
 
         // Enquadra a visão da rota no mapa e foca a navegação
-        if (polylineAnchieta && map) {
-          map.fitBounds(polylineAnchieta.getBounds(), { padding: [50, 50], maxZoom: 15 });
+        if (polylineLinha && map) {
+          map.fitBounds(polylineLinha.getBounds(), { padding: [50, 50], maxZoom: 15 });
         } else if (meuOnibusMarker && map) {
           map.flyTo(meuOnibusMarker.getLatLng(), 15.5, { duration: 0.8 });
         }
@@ -923,8 +1358,20 @@
         if (intervaloContador) clearInterval(intervaloContador);
 
         estadoMotorista.viagensHoje += 1;
-        estadoMotorista.distanciaKm = 3.8;
-        estadoMotorista.tempoMin = 12;
+        let distTot = 10.9;
+        let tempoTot = 35;
+        if (estadoMotorista.linhaAtivaChave === 'anchieta') {
+          distTot = 4.5;
+          tempoTot = 15;
+        } else if (estadoMotorista.linhaAtivaChave === 'fortaleza') {
+          distTot = 11.0;
+          tempoTot = 36;
+        } else if (estadoMotorista.linhaAtivaChave === 'industrial') {
+          distTot = 9.4;
+          tempoTot = 25;
+        }
+        estadoMotorista.distanciaKm = distTot;
+        estadoMotorista.tempoMin = tempoTot;
 
         try {
           localStorage.setItem('valebus_viagens_hoje', estadoMotorista.viagensHoje.toString());
@@ -1062,50 +1509,8 @@
   const botoesTrocar = document.querySelectorAll('.rota-card__btn-trocar');
   botoesTrocar.forEach(btn => {
     btn.addEventListener('click', () => {
-      const l = btn.getAttribute('data-linha');
-      if (l === 'anchieta') {
-        estadoMotorista.linhaCodigo = 'Linha Anchieta';
-        estadoMotorista.linhaNome = 'Praça Urbana / Recanto';
-        selecionarParadaCockpit(0);
-
-        if (meuOnibusMarker && window.VALEBUS_PARADAS) {
-          const coords = window.VALEBUS_PARADAS.obterTrajeto('anchieta');
-          if (coords && coords.length > 0) {
-            meuOnibusMarker.setLatLng(coords[0]);
-          }
-        }
-
-        if (map) {
-          if (!map.hasLayer(camadaTrajetoAnchieta)) {
-            camadaTrajetoAnchieta.addTo(map);
-            rotaAnchietaVisivel = true;
-          }
-          if (!map.hasLayer(camadaParadasAnchieta)) {
-            camadaParadasAnchieta.addTo(map);
-            paradasAnchietaVisiveis = true;
-          }
-        }
-
-        if (btnToggleRotaAnchieta) {
-          btnToggleRotaAnchieta.classList.add('motorista-btn-flutuante--ativo');
-          btnToggleRotaAnchieta.setAttribute('aria-pressed', 'true');
-        }
-        if (btnToggleParadasAnchieta) {
-          btnToggleParadasAnchieta.classList.add('motorista-btn-flutuante--ativo');
-          btnToggleParadasAnchieta.setAttribute('aria-pressed', 'true');
-        }
-
-        enquadrarRotaAnchieta();
-        mostrarToast('Linha Anchieta ativada com traçado de 4,5 km e 14 paradas.');
-      } else {
-        estadoMotorista.linhaCodigo = 'Linha 01';
-        estadoMotorista.linhaNome = 'Centro / Bairro Industrial';
-        estadoMotorista.distanciaKm = 3.8;
-        estadoMotorista.tempoMin = 12;
-        estadoMotorista.proximaParada = 'Av. Inatel, Centro';
-        mostrarToast('Linha 01 ativada.');
-      }
-      renderizarDadosMotorista();
+      const l = btn.getAttribute('data-linha') || 'fernandes';
+      ativarLinhaNoCockpit(l);
       trocarSecao('cockpit');
     });
   });

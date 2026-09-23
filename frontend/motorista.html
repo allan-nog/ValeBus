@@ -355,7 +355,7 @@
       <div class="main__header">
         <div class="main__header-info">
           <h1 class="main__titulo" id="main-titulo">Cockpit de Bordo &bull; Telemetria em Tempo Real</h1>
-          <p class="main__subtitulo" id="main-subtitulo">Santa Rita do Sapucaí &mdash; Ônibus #02 (Linha 01 Centro / Bairro Industrial)</p>
+          <p class="main__subtitulo" id="main-subtitulo">Santa Rita do Sapucaí &mdash; Ônibus #02 (Linha Fernandes Bairro Fernandes / São Benedito / Centro / Algodoeira)</p>
         </div>
         <div class="main__header-status" id="main-header-status" aria-label="Status da transmissão">
           <span class="live-dot" aria-hidden="true"></span>
@@ -378,13 +378,13 @@
 
           <!-- Controles Flutuantes do Mapa do Motorista -->
           <div class="motorista-mapa-controles-flutuantes" id="controles-mapa-motorista">
-            <button type="button" class="motorista-btn-flutuante" id="btn-toggle-rota-anchieta" title="Exibir traçado oficial e enquadrar a Linha Anchieta" aria-pressed="false">
-              <span class="motorista-btn-flutuante__dot" style="background-color: #16a34a;"></span>
-              <span>Rota Anchieta (4.5 km)</span>
+            <button type="button" class="motorista-btn-flutuante" id="btn-toggle-rota-anchieta" title="Exibir traçado oficial e enquadrar a rota ativa" aria-pressed="false">
+              <span class="motorista-btn-flutuante__dot" id="dot-rota-ativa" style="background-color: #2563eb;"></span>
+              <span id="label-toggle-rota">Rota Fernandes (10.9 km)</span>
             </button>
-            <button type="button" class="motorista-btn-flutuante" id="btn-toggle-paradas-anchieta" title="Exibir ou ocultar os 14 pontos de parada no mapa" aria-pressed="false">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span>14 Paradas</span>
+            <button type="button" class="motorista-btn-flutuante" id="btn-toggle-paradas-anchieta" title="Exibir ou ocultar os pontos de parada no mapa" aria-pressed="false">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="currentColor"></circle><circle cx="16" cy="13" r="1" fill="currentColor"></circle></svg>
+              <span id="label-toggle-paradas">32 Paradas</span>
             </button>
             <button type="button" class="btn-recenter-mapa-valebus" id="btn-recenter-gps" aria-label="Recentralizar no meu ônibus" title="Centralizar visualização no ônibus">
               <svg width="16" height="16" aria-hidden="true"><use href="#icone-mira"/></svg>
@@ -494,45 +494,59 @@
           </div>
 
           <div class="linhas-grid">
-            <!-- Linha Ativa Atual -->
-            <article class="linha-card" id="card-escala-linha01" style="border: 2px solid var(--cor-marca);">
+            <!-- Linha Fernandes (Oficial) -->
+            <article class="linha-card" id="card-escala-fernandes" style="border: 2px solid #2563eb;">
               <div class="linha-card__topo">
-                <span class="linha-card__dot" style="background-color: var(--cor-marca);"></span>
-                <h3 class="linha-card__titulo">Linha 01 &mdash; Centro &rarr; Bairro Industrial</h3>
-                <span class="linha-card__status-tag" id="tag-status-linha01" style="background-color: rgba(37,99,235,0.15); color: var(--cor-marca);">Em Operação</span>
+                <span class="linha-card__dot" style="background-color: #2563eb;"></span>
+                <h3 class="linha-card__titulo">Linha Fernandes &mdash; Fernandes / Centro / Algodoeira</h3>
+                <span class="linha-card__status-tag" id="tag-status-fernandes" style="background-color: rgba(37, 99, 235, 0.15); color: #2563eb;">Ativa no Cockpit</span>
               </div>
               <div class="linha-card__conteudo">
                 <div class="linha-card__dado">
                   <span class="linha-card__rotulo">🚩 Terminal de Partida:</span>
-                  <span class="linha-card__texto">Terminal Urbano Central (Partida às 08:15)</span>
+                  <span class="linha-card__texto">Rua das Rosas, 300 (Parada 1 &bull; Caixa D'Água da Copasa)</span>
                 </div>
                 <div class="linha-card__dado">
-                  <span class="linha-card__rotulo">📍 Próxima Parada:</span>
-                  <span class="linha-card__texto">Av. Inatel, Centro &bull; Previsto em 12 min</span>
+                  <span class="linha-card__rotulo">📍 Itinerário Completo:</span>
+                  <span class="linha-card__texto">Ginásio &bull; Presídio &bull; José G. Mendes &bull; Bilac Pinto &bull; D.L. &bull; Qualitronix &bull; Centro &bull; Fambrás &bull; Algodoeira</span>
                 </div>
                 <div class="linha-card__dado">
-                  <span class="linha-card__rotulo">🏁 Destino Final:</span>
-                  <span class="linha-card__texto">Distrito Industrial JK (14 paradas no trajeto)</span>
+                  <span class="linha-card__rotulo">🏁 Ponto Final:</span>
+                  <span class="linha-card__texto">Rua Cel. Joaquim Inácio, 360 (Parada 32 &bull; Algodoeira)</span>
                 </div>
               </div>
               <div class="rota-card-acoes-bar">
-                <span class="rota-card-status-badge">
-                  <span class="rota-card-status-dot"></span>
-                  <span>Pontualidade 98%</span>
-                </span>
-                <button type="button" class="btn-rota-acao btn-rota-acao--ativo rota-card__btn-trocar" id="btn-escala-industrial" data-linha="industrial">
+                <button type="button" class="btn-rota-acao btn-rota-acao--secundario" id="btn-toggle-lista-paradas-fernandes">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  <span>Ver 32 Paradas</span>
+                </button>
+                <button type="button" class="btn-rota-acao btn-rota-acao--ativo rota-card__btn-trocar" id="btn-escala-fernandes" data-linha="fernandes">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                   <span>Ativa no Cockpit</span>
                 </button>
               </div>
+
+              <!-- Lista Expansível das 32 Paradas da Linha Fernandes -->
+              <div class="fernandes-itinerario-box" id="box-paradas-fernandes" style="display: none;">
+                <div class="anchieta-itinerario-header">
+                  <span class="anchieta-itinerario-titulo">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="#2563eb"></circle><circle cx="16" cy="13" r="1" fill="#2563eb"></circle></svg>
+                    32 Paradas da Linha Fernandes (Fernandes / Algodoeira)
+                  </span>
+                  <span style="font-size: 11px; font-weight: 700; color: #2563eb;">Clique no ponto para ver no mapa</span>
+                </div>
+                <div class="anchieta-paradas-lista" id="lista-paradas-fernandes-container">
+                  <!-- Carregado via JS a partir de VALEBUS_PARADAS.paradasPorLinha.fernandes -->
+                </div>
+              </div>
             </article>
 
-            <!-- Linha Alternativa: Anchieta -->
-            <article class="linha-card" id="card-escala-anchieta">
+            <!-- Linha Anchieta (Oficial) -->
+            <article class="linha-card" id="card-escala-anchieta" style="border: 1px solid var(--borda-cor);">
               <div class="linha-card__topo">
                 <span class="linha-card__dot" style="background-color: #16a34a;"></span>
                 <h3 class="linha-card__titulo">Linha Anchieta &mdash; Praça Urbana / Recanto</h3>
-                <span class="linha-card__status-tag" id="tag-status-anchieta" style="background-color: rgba(22, 163, 74, 0.15); color: #16a34a;">14 Paradas • 4,5 km</span>
+                <span class="linha-card__status-tag" id="tag-status-anchieta" style="background-color: rgba(100, 116, 139, 0.12); color: var(--texto-secundario);">14 Paradas • 4,5 km</span>
               </div>
               <div class="linha-card__conteudo">
                 <div class="linha-card__dado">
@@ -563,13 +577,107 @@
               <div class="anchieta-itinerario-box" id="box-paradas-anchieta" style="display: none;">
                 <div class="anchieta-itinerario-header">
                   <span class="anchieta-itinerario-titulo">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="#16a34a"></circle><circle cx="16" cy="13" r="1" fill="#16a34a"></circle></svg>
                     14 Paradas da Linha Anchieta (Sentido Recanto)
                   </span>
                   <span style="font-size: 11px; font-weight: 700; color: #16a34a;">Clique no ponto para ver no mapa</span>
                 </div>
                 <div class="anchieta-paradas-lista" id="lista-paradas-anchieta-container">
                   <!-- Carregado via JS a partir de VALEBUS_PARADAS.paradasPorLinha.anchieta -->
+                </div>
+              </div>
+            </article>
+
+            <!-- Linha Fortaleza (Oficial) -->
+            <article class="linha-card" id="card-escala-fortaleza" style="border: 1px solid var(--borda-cor);">
+              <div class="linha-card__topo">
+                <span class="linha-card__dot" style="background-color: #9333ea;"></span>
+                <h3 class="linha-card__titulo">Linha Fortaleza &mdash; Fernandes / Centro / Bairro Fortaleza</h3>
+                <span class="linha-card__status-tag" id="tag-status-fortaleza" style="background-color: rgba(100, 116, 139, 0.12); color: var(--texto-secundario);">30 Paradas • 11,0 km</span>
+              </div>
+              <div class="linha-card__conteudo">
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🚩 Terminal de Partida:</span>
+                  <span class="linha-card__texto">Rua das Rosas, 300 (Parada 1 &bull; Caixa D'Água da Copasa)</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">📍 Itinerário Completo:</span>
+                  <span class="linha-card__texto">Ginásio &bull; Presídio &bull; José G. Mendes &bull; Bilac Pinto &bull; D.L. &bull; Centro &bull; Bairro Fortaleza</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🏁 Ponto Final:</span>
+                  <span class="linha-card__texto">Av. Sebastião Reginaldo Cunha, 515 (Parada 31 &bull; Bairro Fortaleza)</span>
+                </div>
+              </div>
+              <div class="rota-card-acoes-bar">
+                <button type="button" class="btn-rota-acao btn-rota-acao--secundario" id="btn-toggle-lista-paradas-fortaleza">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  <span>Ver 30 Paradas</span>
+                </button>
+                <button type="button" class="btn-rota-acao btn-rota-acao--roxo rota-card__btn-trocar" id="btn-escala-fortaleza" data-linha="fortaleza">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Ativar Rota Fortaleza</span>
+                </button>
+              </div>
+
+              <!-- Lista Expansível das 30 Paradas da Linha Fortaleza -->
+              <div class="fortaleza-itinerario-box" id="box-paradas-fortaleza" style="display: none;">
+                <div class="anchieta-itinerario-header">
+                  <span class="anchieta-itinerario-titulo">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="#9333ea"></circle><circle cx="16" cy="13" r="1" fill="#9333ea"></circle></svg>
+                    30 Paradas da Linha Fortaleza (Fernandes / Centro / Fortaleza)
+                  </span>
+                  <span style="font-size: 11px; font-weight: 700; color: #9333ea;">Clique no ponto para ver no mapa</span>
+                </div>
+                <div class="anchieta-paradas-lista" id="lista-paradas-fortaleza-container">
+                  <!-- Carregado via JS a partir de VALEBUS_PARADAS.paradasPorLinha.fortaleza -->
+                </div>
+              </div>
+            </article>
+
+            <!-- Linha Industrial (Oficial) -->
+            <article class="linha-card" id="card-escala-industrial" style="border: 1px solid var(--borda-cor);">
+              <div class="linha-card__topo">
+                <span class="linha-card__dot" style="background-color: #ea580c;"></span>
+                <h3 class="linha-card__titulo">Linha Industrial &mdash; Distrito Industrial / BR-459 / Centro / Murilo</h3>
+                <span class="linha-card__status-tag" id="tag-status-industrial" style="background-color: rgba(100, 116, 139, 0.12); color: var(--texto-secundario);">12 Paradas • 9,4 km</span>
+              </div>
+              <div class="linha-card__conteudo">
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🚩 Terminal de Partida:</span>
+                  <span class="linha-card__texto">BR-459 Rod. JK, Km 119,8 Leste (Parada 1 &bull; Entr. MG-173 Para Cachoeira de Minas)</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">📍 Itinerário Completo:</span>
+                  <span class="linha-card__texto">Linear &bull; Carreteiro &bull; Ipanema &bull; Intelbras &bull; Nitere &bull; Antiga Real &bull; Unissul &bull; Praça da Câmara &bull; São Benedito &bull; Inatel</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🏁 Ponto Final:</span>
+                  <span class="linha-card__texto">Praça Urbana Carolina (Parada 12 &bull; Praça do Murilo)</span>
+                </div>
+              </div>
+              <div class="rota-card-acoes-bar">
+                <button type="button" class="btn-rota-acao btn-rota-acao--secundario" id="btn-toggle-lista-paradas-industrial">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  <span>Ver 12 Paradas</span>
+                </button>
+                <button type="button" class="btn-rota-acao btn-rota-acao--laranja rota-card__btn-trocar" id="btn-escala-industrial" data-linha="industrial">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Ativar Rota Industrial</span>
+                </button>
+              </div>
+
+              <!-- Lista Expansível das 12 Paradas da Linha Industrial -->
+              <div class="industrial-itinerario-box" id="box-paradas-industrial" style="display: none;">
+                <div class="anchieta-itinerario-header">
+                  <span class="anchieta-itinerario-titulo">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="#ea580c"></circle><circle cx="16" cy="13" r="1" fill="#ea580c"></circle></svg>
+                    12 Paradas da Linha Industrial (Distrito Industrial / BR-459 / Murilo)
+                  </span>
+                  <span style="font-size: 11px; font-weight: 700; color: #ea580c;">Clique no ponto para ver no mapa</span>
+                </div>
+                <div class="anchieta-paradas-lista" id="lista-paradas-industrial-container">
+                  <!-- Carregado via JS a partir de VALEBUS_PARADAS.paradasPorLinha.industrial -->
                 </div>
               </div>
             </article>

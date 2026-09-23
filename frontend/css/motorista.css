@@ -729,6 +729,279 @@
   transform: translateY(-1px);
 }
 
+/* Botão de Destaque Azul (Ativar Linha Fernandes) */
+.btn-rota-acao--azul {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+}
+
+.btn-rota-acao--azul:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Botão de Destaque Roxo (Ativar Linha Fortaleza) */
+.btn-rota-acao--roxo {
+  background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 3px 10px rgba(147, 51, 234, 0.3);
+}
+
+.btn-rota-acao--roxo:hover {
+  background: linear-gradient(135deg, #7e22ce 0%, #6b21a8 100%);
+  box-shadow: 0 5px 14px rgba(147, 51, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Botão de Destaque Laranja (Ativar Linha Industrial) */
+.btn-rota-acao--laranja {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.3);
+}
+
+.btn-rota-acao--laranja:hover {
+  background: linear-gradient(135deg, #c2410c 0%, #9a3412 100%);
+  box-shadow: 0 5px 14px rgba(234, 88, 12, 0.4);
+  transform: translateY(-1px);
+}
+
+.fernandes-itinerario-box {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--borda-cor);
+  animation: fadeIn 0.2s ease;
+}
+
+.fernandes-parada-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fernandes-parada-card:hover {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateY(-1px);
+}
+
+.fernandes-parada-badge {
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 800;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fernandes-parada-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fernandes-parada-ref {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fernandes-parada-end {
+  font-size: 11px;
+  color: var(--texto-secundario);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fernandes-parada-btn-mapa {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #2563eb;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.fernandes-parada-btn-mapa:hover {
+  background: rgba(37, 99, 235, 0.15);
+}
+
+.fortaleza-itinerario-box {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--borda-cor);
+  animation: fadeIn 0.2s ease;
+}
+
+.fortaleza-parada-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fortaleza-parada-card:hover {
+  border-color: #9333ea;
+  background: rgba(147, 51, 234, 0.05);
+  transform: translateY(-1px);
+}
+
+.fortaleza-parada-badge {
+  background: #9333ea;
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 800;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fortaleza-parada-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fortaleza-parada-ref {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fortaleza-parada-end {
+  font-size: 11px;
+  color: var(--texto-secundario);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fortaleza-parada-btn-mapa {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #9333ea;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.fortaleza-parada-btn-mapa:hover {
+  background: rgba(147, 51, 234, 0.15);
+}
+
+.industrial-itinerario-box {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--borda-cor);
+  animation: fadeIn 0.2s ease;
+}
+
+.industrial-parada-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.industrial-parada-card:hover {
+  border-color: #ea580c;
+  background: rgba(234, 88, 12, 0.05);
+  transform: translateY(-1px);
+}
+
+.industrial-parada-badge {
+  background: #ea580c;
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 800;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.industrial-parada-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.industrial-parada-ref {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.industrial-parada-end {
+  font-size: 11px;
+  color: var(--texto-secundario);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.industrial-parada-btn-mapa {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #ea580c;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.industrial-parada-btn-mapa:hover {
+  background: rgba(234, 88, 12, 0.15);
+}
+
 /* Blocos de Informação do Perfil */
 .perfil-info-grid {
   display: grid;
