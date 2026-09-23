@@ -2014,3 +2014,182 @@ html, body {
     display: none;
   }
 }
+
+/* ═════════════════════════════════════════════════════════════
+   ESTILOS DO MÓDULO DE CHAMADOS E REPORTS DE MOTORISTAS
+   ═════════════════════════════════════════════════════════════ */
+.gestor-chamado-card {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all var(--transicao);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.gestor-chamado-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.gestor-chamado-card--urgente {
+  border-left: 4px solid #dc2626;
+}
+
+.gestor-chamado-card--moderada {
+  border-left: 4px solid #d97706;
+}
+
+.gestor-chamado-card--baixa {
+  border-left: 4px solid #2563eb;
+}
+
+.gestor-chamado-card--resolvido {
+  border-left: 4px solid #16a34a;
+  opacity: 0.85;
+}
+
+.gestor-chamado-card__topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gestor-chamado-card__ident {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gestor-chamado-card__icone {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--raio-pequeno);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.gestor-chamado-card__icone--garagem {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.gestor-chamado-card__icone--transito {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.gestor-chamado-card__titulos {
+  display: flex;
+  flex-direction: column;
+}
+
+.gestor-chamado-card__titulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  line-height: 1.2;
+}
+
+.gestor-chamado-card__sub {
+  font-size: 12px;
+  color: var(--texto-secundario);
+  margin-top: 2px;
+}
+
+.gestor-chamado-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.gestor-chamado-badge--urgente {
+  background: rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.gestor-chamado-badge--moderada {
+  background: rgba(217, 119, 6, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.gestor-chamado-badge--baixa {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+.gestor-chamado-badge--resolvido {
+  background: rgba(22, 163, 74, 0.15);
+  color: #16a34a;
+  border: 1px solid rgba(22, 163, 74, 0.3);
+}
+
+.gestor-chamado-card__metas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: var(--fundo-campo);
+  padding: 10px 12px;
+  border-radius: var(--raio-pequeno);
+  font-size: 12px;
+}
+
+.gestor-chamado-meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.gestor-chamado-meta-rotulo {
+  font-size: 10px;
+  color: var(--texto-secundario);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.gestor-chamado-meta-valor {
+  color: var(--texto-principal);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gestor-chamado-card__descricao {
+  font-size: 12.5px;
+  color: var(--texto-principal);
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--raio-pequeno);
+  padding: 8px 10px;
+  line-height: 1.4;
+}
+
+.gestor-chamado-card__rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--borda-cor);
+  flex-wrap: wrap;
+}
+
+.gestor-chamado-card__tempo {
+  font-size: 11px;
+  color: var(--texto-secundario);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

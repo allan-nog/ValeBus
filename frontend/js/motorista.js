@@ -325,8 +325,8 @@
   // Camadas vetoriais exclusivas da Linha Anchieta
   const camadaTrajetoAnchieta = L.layerGroup();
   const camadaParadasAnchieta = L.layerGroup();
-  let rotaAnchietaVisivel = true;
-  let paradasAnchietaVisiveis = true;
+  let rotaAnchietaVisivel = false;
+  let paradasAnchietaVisiveis = false;
   let polylineAnchieta = null;
   let waypointAnchietaIndex = 0;
 
@@ -718,22 +718,67 @@
   /* ──────────────────────────────────────────────────────────
      5.4. CONTROLES FLUTUANTES DO MAPA & STEPPER DE PARADAS
      ────────────────────────────────────────────────────────── */
+  function ativarRotaNoMapa(enquadrar = true) {
+    rotaAnchietaVisivel = true;
+    if (btnToggleRotaAnchieta) {
+      btnToggleRotaAnchieta.classList.add('motorista-btn-flutuante--ativo');
+      btnToggleRotaAnchieta.setAttribute('aria-pressed', 'true');
+    }
+    if (map && !map.hasLayer(camadaTrajetoAnchieta)) {
+      camadaTrajetoAnchieta.addTo(map);
+    }
+    if (enquadrar) {
+      enquadrarRotaAnchieta();
+    }
+  }
+
+  function desativarRotaNoMapa() {
+    rotaAnchietaVisivel = false;
+    if (btnToggleRotaAnchieta) {
+      btnToggleRotaAnchieta.classList.remove('motorista-btn-flutuante--ativo');
+      btnToggleRotaAnchieta.setAttribute('aria-pressed', 'false');
+    }
+    if (map && map.hasLayer(camadaTrajetoAnchieta)) {
+      map.removeLayer(camadaTrajetoAnchieta);
+    }
+  }
+
+  function ativarParadasNoMapa() {
+    paradasAnchietaVisiveis = true;
+    if (btnToggleParadasAnchieta) {
+      btnToggleParadasAnchieta.classList.add('motorista-btn-flutuante--ativo');
+      btnToggleParadasAnchieta.setAttribute('aria-pressed', 'true');
+    }
+    if (map && !map.hasLayer(camadaParadasAnchieta)) {
+      camadaParadasAnchieta.addTo(map);
+    }
+  }
+
+  function desativarParadasNoMapa() {
+    paradasAnchietaVisiveis = false;
+    if (btnToggleParadasAnchieta) {
+      btnToggleParadasParadasAnchietaClassRemove();
+    }
+    if (map && map.hasLayer(camadaParadasAnchieta)) {
+      map.removeLayer(camadaParadasAnchieta);
+    }
+  }
+
+  function btnToggleParadasParadasAnchietaClassRemove() {
+    if (btnToggleParadasAnchieta) {
+      btnToggleParadasAnchieta.classList.remove('motorista-btn-flutuante--ativo');
+      btnToggleParadasAnchieta.setAttribute('aria-pressed', 'false');
+    }
+  }
+
   const btnToggleRotaAnchieta = document.getElementById('btn-toggle-rota-anchieta');
   if (btnToggleRotaAnchieta) {
     btnToggleRotaAnchieta.addEventListener('click', () => {
-      rotaAnchietaVisivel = !rotaAnchietaVisivel;
-      btnToggleRotaAnchieta.classList.toggle('motorista-btn-flutuante--ativo', rotaAnchietaVisivel);
-      btnToggleRotaAnchieta.setAttribute('aria-pressed', String(rotaAnchietaVisivel));
-
-      if (rotaAnchietaVisivel) {
-        if (map && !map.hasLayer(camadaTrajetoAnchieta)) {
-          camadaTrajetoAnchieta.addTo(map);
-        }
-        mostrarToast('Traçado da Linha Anchieta exibido no mapa.');
+      if (!rotaAnchietaVisivel) {
+        ativarRotaNoMapa(true);
+        mostrarToast('Traçado oficial da Linha Anchieta traçado no mapa.');
       } else {
-        if (map && map.hasLayer(camadaTrajetoAnchieta)) {
-          map.removeLayer(camadaTrajetoAnchieta);
-        }
+        desativarRotaNoMapa();
         mostrarToast('Traçado da Linha Anchieta ocultado.');
       }
     });
@@ -742,19 +787,11 @@
   const btnToggleParadasAnchieta = document.getElementById('btn-toggle-paradas-anchieta');
   if (btnToggleParadasAnchieta) {
     btnToggleParadasAnchieta.addEventListener('click', () => {
-      paradasAnchietaVisiveis = !paradasAnchietaVisiveis;
-      btnToggleParadasAnchieta.classList.toggle('motorista-btn-flutuante--ativo', paradasAnchietaVisiveis);
-      btnToggleParadasAnchieta.setAttribute('aria-pressed', String(paradasAnchietaVisiveis));
-
-      if (paradasAnchietaVisiveis) {
-        if (map && !map.hasLayer(camadaParadasAnchieta)) {
-          camadaParadasAnchieta.addTo(map);
-        }
+      if (!paradasAnchietaVisiveis) {
+        ativarParadasNoMapa();
         mostrarToast('14 Paradas da Linha Anchieta exibidas no mapa.');
       } else {
-        if (map && map.hasLayer(camadaParadasAnchieta)) {
-          map.removeLayer(camadaParadasAnchieta);
-        }
+        desativarParadasNoMapa();
         mostrarToast('Pontos de parada ocultados.');
       }
     });
@@ -846,9 +883,16 @@
         if (elStatusTexto) elStatusTexto.textContent = 'Em Rota';
         if (elTopStatus) elTopStatus.textContent = 'Em Rota • Transmitindo ao CCO';
 
-        mostrarToast('Boa viagem! Rota iniciada e telemetria transmitindo ao CCO.');
+        // Traçar automaticamente a rota no mapa e exibir as paradas da linha
+        ativarRotaNoMapa(false);
+        ativarParadasNoMapa();
 
-        if (meuOnibusMarker && map) {
+        mostrarToast('Boa viagem! Rota e paradas traçadas no mapa automaticamente.');
+
+        // Enquadra a visão da rota no mapa e foca a navegação
+        if (polylineAnchieta && map) {
+          map.fitBounds(polylineAnchieta.getBounds(), { padding: [50, 50], maxZoom: 15 });
+        } else if (meuOnibusMarker && map) {
           map.flyTo(meuOnibusMarker.getLatLng(), 15.5, { duration: 0.8 });
         }
 
@@ -1162,7 +1206,7 @@
   });
 
   /* ──────────────────────────────────────────────────────────
-     9. MODAIS DE SUPORTE E OCORRÊNCIAS
+     9. ALERTAS OPERACIONAIS: TRÂNSITO & GARAGEM (PROBLEMAS NO ÔNIBUS)
      ────────────────────────────────────────────────────────── */
   const modalProblema = document.getElementById('modal-problema');
   const btnAbrirProblema = document.getElementById('btn-abrir-problema');
@@ -1170,6 +1214,13 @@
   const btnFecharProblema = document.getElementById('btn-fechar-modal-problema');
   const btnCancelarProblema = document.getElementById('btn-cancelar-problema');
   const formProblema = document.getElementById('form-relatar-problema');
+  const selectTipoProblema = document.getElementById('select-tipo-problema');
+  const inputLocalProblema = document.getElementById('input-local-problema');
+  const textareaDetalhesProblema = document.getElementById('textarea-detalhes-problema');
+  const btnGpsSyncProblema = document.getElementById('btn-gps-sync-problema');
+  const btnEnviarProblema = document.getElementById('btn-enviar-problema');
+  const btnEnviarProblemaTexto = document.getElementById('btn-enviar-problema-texto');
+  const painelOcorrenciasContainer = document.getElementById('painel-ocorrencias-ativas');
 
   const modalSuporte = document.getElementById('modal-suporte');
   const btnAbrirSuporte = document.getElementById('btn-abrir-suporte');
@@ -1177,48 +1228,480 @@
   const btnFecharSuporte = document.getElementById('btn-fechar-modal-suporte');
   const btnFecharSuporteRodape = document.getElementById('btn-fechar-suporte-rodape');
 
+  // Estado persistente de alertas de trânsito e suporte da garagem
+  let ocorrenciasAtivas = [];
+  try {
+    const salvas = localStorage.getItem('valebus_ocorrencias_motorista');
+    if (salvas) ocorrenciasAtivas = JSON.parse(salvas);
+  } catch (e) {
+    ocorrenciasAtivas = [];
+  }
+
+  let socorroGaragemAtivo = null;
+  try {
+    const socorroSalvo = localStorage.getItem('valebus_socorro_garagem');
+    if (socorroSalvo) socorroGaragemAtivo = JSON.parse(socorroSalvo);
+  } catch (e) {
+    socorroGaragemAtivo = null;
+  }
+
+  function salvarOcorrencias() {
+    try {
+      localStorage.setItem('valebus_ocorrencias_motorista', JSON.stringify(ocorrenciasAtivas));
+    } catch (e) {}
+    renderizarOcorrenciasPainel();
+  }
+
+  function salvarSocorroGaragem() {
+    try {
+      if (socorroGaragemAtivo) {
+        localStorage.setItem('valebus_socorro_garagem', JSON.stringify(socorroGaragemAtivo));
+      } else {
+        localStorage.removeItem('valebus_socorro_garagem');
+      }
+    } catch (e) {}
+    renderizarOcorrenciasPainel();
+    atualizarCardSocorroModal();
+  }
+
   function abrirModal(m) {
     fecharTodosDropdowns();
-    if (m) {
-      m.classList.add('aberto');
-      m.setAttribute('aria-hidden', 'false');
-    }
+    if (!m) return;
+    m.classList.add('aberto');
+    m.classList.add('ativo');
+    m.setAttribute('aria-hidden', 'false');
   }
 
   function fecharModal(m) {
-    if (m) {
-      m.classList.remove('aberto');
-      m.setAttribute('aria-hidden', 'true');
-    }
+    if (!m) return;
+    m.classList.remove('aberto');
+    m.classList.remove('ativo');
+    m.setAttribute('aria-hidden', 'true');
   }
 
-  if (btnAbrirProblema) btnAbrirProblema.addEventListener('click', () => abrirModal(modalProblema));
-  if (btnPainelRelatar) btnPainelRelatar.addEventListener('click', () => abrirModal(modalProblema));
+  /* ──────────────────────────────────────────────────────────
+     MODAL 1: ALERTA DE TRÂNSITO NA VIA
+     ────────────────────────────────────────────────────────── */
+  function prepararModalTransito() {
+    const elVeiculo = document.getElementById('modal-ocorrencia-veiculo');
+    const elLinha = document.getElementById('modal-ocorrencia-linha');
+    const elMotorista = document.getElementById('modal-ocorrencia-motorista');
+
+    if (elVeiculo) elVeiculo.textContent = estadoMotorista.veiculo || 'Ônibus #02';
+    if (elLinha) elLinha.textContent = estadoMotorista.linhaCodigo || 'Linha Anchieta';
+    if (elMotorista) elMotorista.textContent = `Condutor: ${estadoMotorista.nome || 'João Silva'} (${estadoMotorista.matricula || 'MOT-104'})`;
+
+    if (inputLocalProblema && (!inputLocalProblema.value || inputLocalProblema.value === 'Av. Inatel, Centro')) {
+      const paradaAtual = estadoMotorista.proximaParada ? estadoMotorista.proximaParada.replace(/^\d+\.\s*/, '') : 'Praça Urbana Carolina';
+      inputLocalProblema.value = `${paradaAtual}, Santa Rita do Sapucaí`;
+    }
+
+    abrirModal(modalProblema);
+  }
+
+  if (btnAbrirProblema) btnAbrirProblema.addEventListener('click', prepararModalTransito);
+  if (btnPainelRelatar) btnPainelRelatar.addEventListener('click', prepararModalTransito);
   if (btnFecharProblema) btnFecharProblema.addEventListener('click', () => fecharModal(modalProblema));
   if (btnCancelarProblema) btnCancelarProblema.addEventListener('click', () => fecharModal(modalProblema));
 
-  if (formProblema) {
-    formProblema.addEventListener('submit', (e) => {
-      e.preventDefault();
-      fecharModal(modalProblema);
-      mostrarToast('Alerta transmitido à Central CCO com prioridade!');
+  // Chips de Seleção de Tipo de Trânsito
+  const chipsGrid = document.getElementById('ocorrencia-chips-grid');
+  if (chipsGrid) {
+    chipsGrid.addEventListener('click', (e) => {
+      const chip = e.target.closest('.ocorrencia-chip');
+      if (!chip) return;
+      chipsGrid.querySelectorAll('.ocorrencia-chip').forEach(c => c.classList.remove('ocorrencia-chip--ativo'));
+      chip.classList.add('ocorrencia-chip--ativo');
+      const valor = chip.getAttribute('data-valor');
+      if (selectTipoProblema && valor) {
+        selectTipoProblema.value = valor;
+      }
     });
   }
 
-  if (btnAbrirSuporte) btnAbrirSuporte.addEventListener('click', () => abrirModal(modalSuporte));
-  if (btnPainelSuporte) btnPainelSuporte.addEventListener('click', () => abrirModal(modalSuporte));
+  // Sincronizar GPS no Alerta de Trânsito
+  if (btnGpsSyncProblema) {
+    btnGpsSyncProblema.addEventListener('click', () => {
+      const parada = estadoMotorista.proximaParada ? estadoMotorista.proximaParada.replace(/^\d+\.\s*/, '') : 'Praça Urbana Carolina';
+      const coords = (marcadorVeiculo && marcadorVeiculo.getLatLng) ? marcadorVeiculo.getLatLng() : null;
+      const refGps = coords ? ` (GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})` : '';
+      if (inputLocalProblema) {
+        inputLocalProblema.value = `${parada}${refGps}`;
+        inputLocalProblema.focus();
+      }
+      mostrarToast('Posição GPS do veículo atualizada no formulário!', 'info', '📍');
+    });
+  }
+
+  // Sugestões Rápidas de Descrição de Trânsito
+  const sugestoesChipsWrap = document.getElementById('sugestoes-chips-problema');
+  if (sugestoesChipsWrap) {
+    sugestoesChipsWrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('.sugestao-chip');
+      if (!btn || !textareaDetalhesProblema) return;
+      const texto = btn.getAttribute('data-texto');
+      if (texto) {
+        if (textareaDetalhesProblema.value.trim().length > 0) {
+          textareaDetalhesProblema.value += ` ${texto}`;
+        } else {
+          textareaDetalhesProblema.value = texto;
+        }
+        textareaDetalhesProblema.focus();
+      }
+    });
+  }
+
+  // Envio do Alerta de Trânsito
+  if (formProblema) {
+    formProblema.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const tipo = selectTipoProblema ? selectTipoProblema.value : 'transito';
+      const mapaNomes = {
+        transito: 'Congestionamento / Trânsito Parado',
+        acidente: 'Acidente na Pista',
+        desvio: 'Obras / Desvio de Itinerário',
+        semaforo: 'Semáforo Inoperante',
+        alagamento: 'Pista Alagada / Escorregadia',
+        outro: 'Bloqueio na Via'
+      };
+      const tipoTexto = mapaNomes[tipo] || 'Alerta de Trânsito';
+
+      const iconesMap = {
+        transito: '🚦',
+        acidente: '💥',
+        desvio: '🚧',
+        semaforo: '🛑',
+        alagamento: '🌧️',
+        outro: '⚠️'
+      };
+      const icone = iconesMap[tipo] || '🚦';
+
+      const local = (inputLocalProblema && inputLocalProblema.value.trim()) || 'Itinerário Regular';
+      const detalhes = (textareaDetalhesProblema && textareaDetalhesProblema.value.trim()) || 'Retenção na via informada pelo condutor.';
+
+      const radioGravidade = document.querySelector('input[name="gravidade"]:checked');
+      const gravidade = radioGravidade ? radioGravidade.value : 'baixa';
+
+      if (btnEnviarProblema) {
+        btnEnviarProblema.disabled = true;
+        if (btnEnviarProblemaTexto) btnEnviarProblemaTexto.textContent = 'Registrando alerta...';
+      }
+
+      setTimeout(() => {
+        const agora = new Date();
+        const horaStr = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+        const protocoloNum = Math.floor(1000 + Math.random() * 9000);
+        const protocolo = `TRANS-${protocoloNum}`;
+
+        const novaOcorrencia = {
+          id: protocolo,
+          categoria: 'transito',
+          tipo,
+          tipoTexto,
+          icone,
+          local,
+          detalhes,
+          gravidade,
+          hora: horaStr,
+          status: 'Alerta Ativo',
+          emAndamento: true,
+          motorista: estadoMotorista.nome || 'João Silva',
+          matricula: estadoMotorista.matricula || 'MOT-104',
+          veiculo: estadoMotorista.veiculo || 'Ônibus #02',
+          linha: estadoMotorista.linhaCodigo || 'Linha Anchieta',
+          criadoEm: agora.toISOString()
+        };
+
+        // Salva na fila de chamados do Gestor CCO
+        try {
+          let historicoChamados = [];
+          const historicoSalvo = localStorage.getItem('valebus_chamados_gestor');
+          if (historicoSalvo) historicoChamados = JSON.parse(historicoSalvo);
+          historicoChamados.unshift(novaOcorrencia);
+          localStorage.setItem('valebus_chamados_gestor', JSON.stringify(historicoChamados.slice(0, 50)));
+        } catch (e) {
+          console.warn('Erro ao replicar alerta no canal do gestor:', e);
+        }
+
+        ocorrenciasAtivas.unshift(novaOcorrencia);
+        salvarOcorrencias();
+
+        if (btnEnviarProblema) {
+          btnEnviarProblema.disabled = false;
+          if (btnEnviarProblemaTexto) btnEnviarProblemaTexto.textContent = 'Enviar Alerta de Trânsito';
+        }
+        fecharModal(modalProblema);
+
+        mostrarToast(`Alerta de trânsito registrado com sucesso! #${protocolo}`, 'alerta', icone);
+
+        if (textareaDetalhesProblema) textareaDetalhesProblema.value = '';
+      }, 450);
+    });
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     MODAL 2: ALERTA PARA A GARAGEM (PROBLEMAS NO ÔNIBUS)
+     ────────────────────────────────────────────────────────── */
+  const inputLocalGaragem = document.getElementById('input-local-garagem');
+  const btnGpsSyncGaragem = document.getElementById('btn-gps-sync-garagem');
+  const oficinaFalhasGrid = document.getElementById('oficina-falhas-grid');
+  const btnDespacharSocorro = document.getElementById('btn-despachar-socorro');
+  const btnDespacharSocorroTitulo = document.getElementById('btn-despachar-socorro-titulo');
+  const textareaOficinaDetalhe = document.getElementById('textarea-oficina-detalhe');
+  const chamadoAtivoWrap = document.getElementById('oficina-chamado-ativo-wrap');
+
+  let falhaSelecionada = 'pneu';
+  let falhaTextoSelecionado = 'Pneu / Rodagem';
+
+  function prepararModalGaragem() {
+    const elVeiculo = document.getElementById('modal-garagem-veiculo');
+    const elLinha = document.getElementById('modal-garagem-linha');
+    const elMotorista = document.getElementById('modal-garagem-motorista');
+
+    if (elVeiculo) elVeiculo.textContent = estadoMotorista.veiculo || 'Ônibus #02';
+    if (elLinha) elLinha.textContent = estadoMotorista.linhaCodigo || 'Linha Anchieta';
+    if (elMotorista) elMotorista.textContent = `Condutor: ${estadoMotorista.nome || 'João Silva'} (${estadoMotorista.matricula || 'MOT-104'})`;
+
+    if (inputLocalGaragem && (!inputLocalGaragem.value || inputLocalGaragem.value === 'Av. Inatel, Centro')) {
+      const paradaAtual = estadoMotorista.proximaParada ? estadoMotorista.proximaParada.replace(/^\d+\.\s*/, '') : 'Praça Urbana Carolina';
+      inputLocalGaragem.value = `${paradaAtual}, Santa Rita do Sapucaí`;
+    }
+
+    abrirModal(modalSuporte);
+    atualizarCardSocorroModal();
+  }
+
+  if (btnAbrirSuporte) btnAbrirSuporte.addEventListener('click', prepararModalGaragem);
+  if (btnPainelSuporte) btnPainelSuporte.addEventListener('click', prepararModalGaragem);
   if (btnFecharSuporte) btnFecharSuporte.addEventListener('click', () => fecharModal(modalSuporte));
   if (btnFecharSuporteRodape) btnFecharSuporteRodape.addEventListener('click', () => fecharModal(modalSuporte));
 
-  // Botões de suporte
-  const btnCco = document.getElementById('btn-chamar-cco');
-  const btnPing = document.getElementById('btn-ping-telemetria');
-  const btnMec = document.getElementById('btn-chamar-manutencao');
+  // Seleção do problema mecânico no grid
+  if (oficinaFalhasGrid) {
+    oficinaFalhasGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.oficina-falha-btn');
+      if (!btn) return;
+      oficinaFalhasGrid.querySelectorAll('.oficina-falha-btn').forEach(b => b.classList.remove('oficina-falha-btn--ativo'));
+      btn.classList.add('oficina-falha-btn--ativo');
+      falhaSelecionada = btn.getAttribute('data-falha') || 'pneu';
+      falhaTextoSelecionado = btn.querySelector('span:last-child').textContent || 'Problema no Ônibus';
+    });
+  }
 
-  if (btnCco) btnCco.addEventListener('click', () => mostrarToast('Chamada VHF solicitada. Sintonizando CCO.'));
-  if (btnPing) btnPing.addEventListener('click', () => mostrarToast('Sinal GPS & Validador 100% Estável (22ms).'));
-  if (btnMec) btnMec.addEventListener('click', () => mostrarToast('Solicitação de socorro enviada à Garagem.'));
+  // Sincronizar GPS da localização do ônibus
+  if (btnGpsSyncGaragem) {
+    btnGpsSyncGaragem.addEventListener('click', () => {
+      const parada = estadoMotorista.proximaParada ? estadoMotorista.proximaParada.replace(/^\d+\.\s*/, '') : 'Praça Urbana Carolina';
+      const coords = (marcadorVeiculo && marcadorVeiculo.getLatLng) ? marcadorVeiculo.getLatLng() : null;
+      const refGps = coords ? ` (GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})` : '';
+      if (inputLocalGaragem) {
+        inputLocalGaragem.value = `${parada}${refGps}`;
+        inputLocalGaragem.focus();
+      }
+      mostrarToast('Localização do ônibus atualizada!', 'info', '📍');
+    });
+  }
 
+  function atualizarCardSocorroModal() {
+    if (!chamadoAtivoWrap) return;
+    if (socorroGaragemAtivo) {
+      chamadoAtivoWrap.style.display = 'block';
+      chamadoAtivoWrap.innerHTML = `
+        <div class="painel-ocorrencia-card painel-ocorrencia-card--suporte" style="margin-bottom: 12px;">
+          <div class="painel-ocorrencia-card__topo">
+            <div class="painel-ocorrencia-card__tipo-wrap">
+              <span class="painel-ocorrencia-card__icone">🔧</span>
+              <strong class="painel-ocorrencia-card__titulo">${socorroGaragemAtivo.titulo}</strong>
+            </div>
+            <span class="painel-ocorrencia-card__protocolo">${socorroGaragemAtivo.id}</span>
+          </div>
+          <div class="painel-ocorrencia-card__detalhes">
+            <strong>Falha reportada:</strong> ${socorroGaragemAtivo.problemaTexto}<br>
+            <strong>Condição:</strong> ${socorroGaragemAtivo.condicaoTexto}<br>
+            ${socorroGaragemAtivo.precisaSocorro ? `<strong>Equipe Garagem:</strong> ${socorroGaragemAtivo.viatura} • Chegada estimada em ~${socorroGaragemAtivo.tempoEstimadoMin} min.<br>` : ''}
+            <strong>Local informado:</strong> ${socorroGaragemAtivo.local}
+            ${socorroGaragemAtivo.observacao ? `<br><strong>Obs:</strong> ${socorroGaragemAtivo.observacao}` : ''}
+          </div>
+          <div class="painel-ocorrencia-card__rodape">
+            <span class="status-badge ${socorroGaragemAtivo.precisaSocorro ? 'status-badge--alerta' : 'status-badge--online'}">${socorroGaragemAtivo.statusBadge}</span>
+            <button type="button" class="painel-ocorrencia-card__btn-concluir" id="btn-cancelar-socorro-modal">Finalizar Alerta</button>
+          </div>
+        </div>
+      `;
+
+      const btnCancelar = document.getElementById('btn-cancelar-socorro-modal');
+      if (btnCancelar) {
+        btnCancelar.addEventListener('click', () => {
+          socorroGaragemAtivo = null;
+          salvarSocorroGaragem();
+          mostrarToast('Alerta da garagem concluído.', 'info', '🔧');
+        });
+      }
+
+      if (btnDespacharSocorro) {
+        btnDespacharSocorro.style.display = 'none';
+      }
+    } else {
+      chamadoAtivoWrap.style.display = 'none';
+      chamadoAtivoWrap.innerHTML = '';
+      if (btnDespacharSocorro) {
+        btnDespacharSocorro.style.display = 'flex';
+      }
+    }
+  }
+
+  // Enviar alerta à Garagem
+  if (btnDespacharSocorro) {
+    btnDespacharSocorro.addEventListener('click', () => {
+      const agora = new Date();
+      const hora = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+      const parada = (inputLocalGaragem && inputLocalGaragem.value.trim()) || 'Av. Inatel, Centro';
+      const obs = (textareaOficinaDetalhe && textareaOficinaDetalhe.value.trim()) || '';
+
+      const radioCondicao = document.querySelector('input[name="gravidade_garagem"]:checked');
+      const condicao = radioCondicao ? radioCondicao.value : 'baixa';
+
+      const precisaSocorro = (condicao === 'alta');
+      let condicaoTexto = 'Dá para rodar (Alerta preventivo)';
+      let statusBadge = 'Alerta Registrado';
+      let titulo = 'Problema Notificado à Garagem';
+
+      if (condicao === 'moderada') {
+        condicaoTexto = 'Revisar no fim da viagem';
+        statusBadge = 'Manutenção Notificada';
+        titulo = 'Manutenção Programada';
+      } else if (condicao === 'alta') {
+        condicaoTexto = 'Parada Imediata / Socorro Urgente';
+        statusBadge = 'Socorro Despachado';
+        titulo = 'Socorro Mecânico Acionado';
+      }
+
+      socorroGaragemAtivo = {
+        id: `GAR-${Math.floor(1000 + Math.random() * 9000)}`,
+        categoria: 'garagem',
+        titulo,
+        problema: falhaSelecionada,
+        problemaTexto: falhaTextoSelecionado,
+        condicao,
+        condicaoTexto,
+        precisaSocorro,
+        observacao: obs,
+        viatura: 'Viatura Garagem #01 (Mecânico: Carlos)',
+        tempoEstimadoMin: 14,
+        horaChamado: hora,
+        statusBadge,
+        local: parada,
+        motorista: estadoMotorista.nome || 'João Silva',
+        matricula: estadoMotorista.matricula || 'MOT-104',
+        veiculo: estadoMotorista.veiculo || 'Ônibus #02',
+        linha: estadoMotorista.linhaCodigo || 'Linha Anchieta',
+        criadoEm: agora.toISOString()
+      };
+
+      // Notifica o canal do Gestor CCO salvando na fila unificada de chamados
+      try {
+        let historicoChamados = [];
+        const historicoSalvo = localStorage.getItem('valebus_chamados_gestor');
+        if (historicoSalvo) historicoChamados = JSON.parse(historicoSalvo);
+        historicoChamados.unshift(socorroGaragemAtivo);
+        localStorage.setItem('valebus_chamados_gestor', JSON.stringify(historicoChamados.slice(0, 50)));
+      } catch (e) {
+        console.warn('Erro ao replicar chamado no canal do gestor:', e);
+      }
+
+      salvarSocorroGaragem();
+      mostrarToast(
+        precisaSocorro
+          ? 'Socorro mecânico da Garagem acionado com urgência! Viatura em rota (~14 min).'
+          : 'Alerta de problema no ônibus enviado à Garagem e ao Gestor CCO!',
+        precisaSocorro ? 'alerta' : 'sucesso',
+        '🔧'
+      );
+
+      if (textareaOficinaDetalhe) textareaOficinaDetalhe.value = '';
+    });
+  }
+
+  // Copiar Telefones de Plantão
+  document.querySelectorAll('.telemetria-contato-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const fone = item.getAttribute('data-fone');
+      if (fone && navigator.clipboard) {
+        navigator.clipboard.writeText(fone).then(() => {
+          mostrarToast(`Telefone ${fone} copiado!`, 'info', '📋');
+        }).catch(() => {
+          mostrarToast(`Telefone: ${fone}`, 'info', '📞');
+        });
+      } else if (fone) {
+        mostrarToast(`Telefone: ${fone}`, 'info', '📞');
+      }
+    });
+  });
+
+  /* ──────────────────────────────────────────────────────────
+     RENDERIZADOR DE ALERTAS NO PAINEL LATERAL
+     ────────────────────────────────────────────────────────── */
+  function renderizarOcorrenciasPainel() {
+    if (!painelOcorrenciasContainer) return;
+
+    let html = '';
+
+    // Alertas de Trânsito Ativos (Alertas da Garagem ficam restritos ao modal de Suporte Garagem)
+    if (ocorrenciasAtivas.length > 0) {
+      ocorrenciasAtivas.forEach(oc => {
+        const corStatus = oc.gravidade === 'alta' ? '#dc2626' : (oc.gravidade === 'moderada' ? '#d97706' : '#16a34a');
+        html += `
+          <div class="painel-ocorrencia-card" id="card-oc-${oc.id}">
+            <div class="painel-ocorrencia-card__topo">
+              <div class="painel-ocorrencia-card__tipo-wrap">
+                <span class="painel-ocorrencia-card__icone">${oc.icone || '🚦'}</span>
+                <strong class="painel-ocorrencia-card__titulo">${oc.tipoTexto}</strong>
+              </div>
+              <span class="painel-ocorrencia-card__protocolo">#${oc.id}</span>
+            </div>
+            <div class="painel-ocorrencia-card__detalhes">
+              <strong>Local:</strong> ${oc.local}<br>
+              <strong>Obs:</strong> ${oc.detalhes}
+            </div>
+            <div class="painel-ocorrencia-card__rodape">
+              <span class="painel-ocorrencia-card__status" style="color: ${corStatus};">
+                <span class="status-bolinha status-bolinha--pulsante" style="color: ${corStatus};">●</span>
+                ${oc.hora} • ${oc.status}
+              </span>
+              <button type="button" class="painel-ocorrencia-card__btn-concluir" data-acao="concluir-ocorrencia" data-id="${oc.id}">Concluir</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    if (!html) {
+      painelOcorrenciasContainer.innerHTML = `
+        <div style="font-size: 11px; color: var(--texto-secundario); padding: 4px 2px; text-align: left; display: flex; align-items: center; gap: 6px;">
+          <span style="color: #16a34a; font-weight: bold;">●</span>
+          <span>Nenhum alerta de via ativo.</span>
+        </div>
+      `;
+    } else {
+      painelOcorrenciasContainer.innerHTML = html;
+
+      painelOcorrenciasContainer.querySelectorAll('button[data-acao="concluir-ocorrencia"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute('data-id');
+          ocorrenciasAtivas = ocorrenciasAtivas.filter(o => o.id !== id);
+          salvarOcorrencias();
+          mostrarToast(`Alerta de trânsito #${id} concluído!`, 'sucesso', '✅');
+        });
+      });
+    }
+  }
+
+  // Inicializa renderização do painel
+  renderizarOcorrenciasPainel();
+
+  // Fechamento de Modais clicando fora ou com tecla ESC
   [modalProblema, modalSuporte].forEach(m => {
     if (m) {
       m.addEventListener('click', (e) => {
@@ -1227,23 +1710,39 @@
     }
   });
 
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      fecharModal(modalProblema);
+      fecharModal(modalSuporte);
+    }
+  });
+
   /* ──────────────────────────────────────────────────────────
-     10. NOTIFICAÇÕES TOAST
+     10. NOTIFICAÇÕES TOAST COM ÍCONES E TEMAS
      ────────────────────────────────────────────────────────── */
   const toastContainer = document.getElementById('toast-container');
 
-  function mostrarToast(msg) {
+  function mostrarToast(msg, tipo = 'info', iconePersonalizado = null) {
     if (!toastContainer) return;
     const toast = document.createElement('div');
-    toast.className = 'valebus-toast valebus-toast--info';
+    const classeTipo = tipo === 'alerta' ? 'valebus-toast--atencao' : (tipo === 'sucesso' ? 'valebus-toast--sucesso' : 'valebus-toast--info');
+    toast.className = `valebus-toast ${classeTipo}`;
+
+    let icone = iconePersonalizado;
+    if (!icone) {
+      if (tipo === 'alerta') icone = '⚠️';
+      else if (tipo === 'sucesso') icone = '✅';
+      else icone = '🚌';
+    }
+
     toast.innerHTML = `
-      <div class="valebus-toast__icone-wrap">🚌</div>
+      <div class="valebus-toast__icone-wrap">${icone}</div>
       <div class="valebus-toast__corpo">
         <strong class="valebus-toast__titulo">Terminal do Motorista</strong>
         <span class="valebus-toast__msg">${msg}</span>
       </div>
       <button type="button" class="valebus-toast__fechar" aria-label="Fechar">✕</button>
-      <div class="valebus-toast__progresso" style="animation-duration: 3500ms;"></div>
+      <div class="valebus-toast__progresso" style="animation-duration: 3800ms;"></div>
     `;
 
     toastContainer.appendChild(toast);
@@ -1255,7 +1754,7 @@
     };
 
     if (btnFechar) btnFechar.addEventListener('click', remover);
-    setTimeout(remover, 3500);
+    setTimeout(remover, 3800);
   }
 
 })();

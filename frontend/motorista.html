@@ -258,8 +258,8 @@
                   <svg><use href="#icone-alerta-triangulo"/></svg>
                 </div>
                 <div class="usuario-dropdown__item-texto">
-                  <span class="usuario-dropdown__item-titulo">Relatar um Problema</span>
-                  <span class="usuario-dropdown__item-desc">Trânsito, pane mecânica ou desvio</span>
+                  <span class="usuario-dropdown__item-titulo">Alerta de Trânsito</span>
+                  <span class="usuario-dropdown__item-desc">Retenção, obras ou desvio na via</span>
                 </div>
               </button>
 
@@ -268,8 +268,8 @@
                   <svg><use href="#icone-suporte"/></svg>
                 </div>
                 <div class="usuario-dropdown__item-texto">
-                  <span class="usuario-dropdown__item-titulo">Suporte Técnico</span>
-                  <span class="usuario-dropdown__item-desc">Canal VHF, garagem e telemetria</span>
+                  <span class="usuario-dropdown__item-titulo">Suporte Garagem</span>
+                  <span class="usuario-dropdown__item-desc">Problema no ônibus ou oficina</span>
                 </div>
               </button>
             </div>
@@ -378,17 +378,13 @@
 
           <!-- Controles Flutuantes do Mapa do Motorista -->
           <div class="motorista-mapa-controles-flutuantes" id="controles-mapa-motorista">
-            <button type="button" class="motorista-btn-flutuante motorista-btn-flutuante--ativo" id="btn-toggle-rota-anchieta" title="Exibir ou ocultar traçado oficial da Linha Anchieta" aria-pressed="true">
+            <button type="button" class="motorista-btn-flutuante" id="btn-toggle-rota-anchieta" title="Exibir traçado oficial e enquadrar a Linha Anchieta" aria-pressed="false">
               <span class="motorista-btn-flutuante__dot" style="background-color: #16a34a;"></span>
               <span>Rota Anchieta (4.5 km)</span>
             </button>
-            <button type="button" class="motorista-btn-flutuante motorista-btn-flutuante--ativo" id="btn-toggle-paradas-anchieta" title="Exibir ou ocultar os 14 pontos de parada no mapa" aria-pressed="true">
+            <button type="button" class="motorista-btn-flutuante" id="btn-toggle-paradas-anchieta" title="Exibir ou ocultar os 14 pontos de parada no mapa" aria-pressed="false">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <span>14 Paradas</span>
-            </button>
-            <button type="button" class="motorista-btn-flutuante" id="btn-enquadrar-rota-anchieta" title="Enquadrar visualização em toda a rota da Anchieta">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-              <span>Ver Trajeto</span>
             </button>
             <button type="button" class="btn-recenter-mapa-valebus" id="btn-recenter-gps" aria-label="Recentralizar no meu ônibus" title="Centralizar visualização no ônibus">
               <svg width="16" height="16" aria-hidden="true"><use href="#icone-mira"/></svg>
@@ -745,18 +741,40 @@
         </div>
       </section>
 
-      <!-- Ações Rápidas do Painel -->
-      <section style="margin-top: 24px;">
-        <h2 class="painel__secao-titulo">Ações de Rádio &amp; CCO</h2>
+      <!-- Alertas Operacionais: Trânsito e Garagem -->
+      <section class="painel-secao-alertas" id="secao-alertas-operacionais" style="margin-top: 24px;">
+        <div class="painel-alertas-topo">
+          <h2 class="painel__secao-titulo" style="margin: 0;">Alertas Operacionais</h2>
+          <span class="status-badge status-badge--online" id="status-badge-operacao" title="Comunicação de Bordo Ativa">
+            <span class="status-bolinha status-bolinha--pulsante">●</span> Em Linha
+          </span>
+        </div>
+
         <div class="painel-acoes-motorista">
-          <button type="button" class="btn-painel-acao" id="btn-painel-relatar">
-            <svg width="16" height="16" aria-hidden="true"><use href="#icone-alerta-triangulo"/></svg>
-            <span>Relatar Ocorrência</span>
+          <button type="button" class="btn-painel-acao btn-painel-acao--alerta" id="btn-painel-relatar" aria-label="Alerta de Trânsito">
+            <div class="btn-painel-acao__icone-circulo btn-painel-acao__icone-circulo--alerta">
+              <svg width="18" height="18" aria-hidden="true"><use href="#icone-alerta-triangulo"/></svg>
+            </div>
+            <div class="btn-painel-acao__texto">
+              <strong class="btn-painel-acao__titulo">Alerta de Trânsito</strong>
+              <span class="btn-painel-acao__sub">Retenção, obras ou via</span>
+            </div>
           </button>
-          <button type="button" class="btn-painel-acao" id="btn-painel-suporte">
-            <svg width="16" height="16" aria-hidden="true"><use href="#icone-suporte"/></svg>
-            <span>Suporte Garagem</span>
+
+          <button type="button" class="btn-painel-acao btn-painel-acao--suporte" id="btn-painel-suporte" aria-label="Suporte Garagem">
+            <div class="btn-painel-acao__icone-circulo btn-painel-acao__icone-circulo--suporte">
+              <svg width="18" height="18" aria-hidden="true"><use href="#icone-suporte"/></svg>
+            </div>
+            <div class="btn-painel-acao__texto">
+              <strong class="btn-painel-acao__titulo">Suporte Garagem</strong>
+              <span class="btn-painel-acao__sub">Problema no ônibus ou oficina</span>
+            </div>
           </button>
+        </div>
+
+        <!-- Alertas Ativos no Painel Lateral -->
+        <div class="painel-ocorrencias-ativas" id="painel-ocorrencias-ativas">
+          <!-- Alimentado dinamicamente via motorista.js -->
         </div>
       </section>
 
@@ -765,94 +783,283 @@
   </div><!-- /dashboard -->
 
   <!-- ═══════════════════════════════════════════════════════
-       MODAIS DE OCORRÊNCIA E SUPORTE TÉCNICO
+       MODAIS OPERACIONAIS: ALERTA DE TRÂNSITO & ALERTA GARAGEM
        ═══════════════════════════════════════════════════════ -->
 
-  <!-- Modal: Relatar um Problema -->
+  <!-- Modal 1: Alerta de Trânsito na Via -->
   <div class="modal-overlay" id="modal-problema" aria-hidden="true">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-problema-titulo">
+    <div class="modal-card modal-card--operacional" role="dialog" aria-modal="true" aria-labelledby="modal-problema-titulo">
       <div class="modal-card__header">
         <div class="modal-card__icone-topo modal-card__icone-topo--alerta" aria-hidden="true">
           <svg width="22" height="22"><use href="#icone-alerta-triangulo"/></svg>
         </div>
         <div class="modal-card__header-info">
-          <h3 class="modal-card__titulo" id="modal-problema-titulo">Relatar Ocorrência na Linha</h3>
-          <p class="modal-card__subtitulo">Comunicação imediata com o Centro de Controle Operacional (CCO).</p>
+          <h3 class="modal-card__titulo" id="modal-problema-titulo">Alerta de Trânsito</h3>
+          <p class="modal-card__subtitulo">Informe retenções, desvios ou incidentes de tráfego no itinerário.</p>
         </div>
         <button type="button" class="modal-card__btn-fechar" id="btn-fechar-modal-problema" aria-label="Fechar modal">
           <svg width="18" height="18"><use href="#icone-fechar"/></svg>
         </button>
       </div>
 
+      <!-- Banner de Contexto do Veículo -->
+      <div class="modal-veiculo-contexto">
+        <div class="modal-veiculo-info">
+          <span class="modal-veiculo-badge" id="modal-ocorrencia-veiculo">Ônibus #02</span>
+          <span class="modal-linha-badge" id="modal-ocorrencia-linha">Linha Anchieta</span>
+          <span class="modal-motorista-badge" id="modal-ocorrencia-motorista">Condutor: João Silva (MOT-104)</span>
+        </div>
+        <div class="modal-transmissao-status">
+          <span class="status-bolinha status-bolinha--pulsante">●</span>
+          <span>GPS Sincronizado</span>
+        </div>
+      </div>
+
       <form id="form-relatar-problema" class="modal-card__corpo">
+        <!-- 1. Tipo de Situação de Trânsito -->
         <div class="form-grupo">
-          <label class="form-label" for="select-tipo-problema">Tipo de Ocorrência:</label>
-          <select id="select-tipo-problema" class="form-select" required>
-            <option value="transito">Trânsito Intenso / Congestionamento</option>
-            <option value="pane">Pane Mecânica / Elétrica no Veículo</option>
-            <option value="acidente">Acidente na Via</option>
+          <label class="form-label" for="select-tipo-problema">
+            <span>Situação do Trânsito:</span>
+            <span class="form-label__dica">Selecione o tipo de impacto</span>
+          </label>
+
+          <select id="select-tipo-problema" class="form-select" style="display: none;" required>
+            <option value="transito" selected>Congestionamento / Trânsito Parado</option>
+            <option value="acidente">Acidente na Pista</option>
             <option value="desvio">Obras / Desvio de Itinerário</option>
-            <option value="lotacao">Excesso de Lotação de Passageiros</option>
-            <option value="outro">Outro Motivo</option>
+            <option value="semaforo">Semáforo Apagado / Quebrado</option>
+            <option value="alagamento">Alagamento / Pista Escorregadia</option>
+            <option value="outro">Outro Bloqueio na Via</option>
           </select>
+
+          <!-- Chips interativos para toque rápido -->
+          <div class="ocorrencia-chips-grid" id="ocorrencia-chips-grid">
+            <button type="button" class="ocorrencia-chip ocorrencia-chip--ativo" data-valor="transito">
+              <span class="ocorrencia-chip__icone">🚦</span>
+              <span class="ocorrencia-chip__texto">Lentidão / Parado</span>
+            </button>
+            <button type="button" class="ocorrencia-chip" data-valor="acidente">
+              <span class="ocorrencia-chip__icone">💥</span>
+              <span class="ocorrencia-chip__texto">Acidente na Via</span>
+            </button>
+            <button type="button" class="ocorrencia-chip" data-valor="desvio">
+              <span class="ocorrencia-chip__icone">🚧</span>
+              <span class="ocorrencia-chip__texto">Obras / Desvio</span>
+            </button>
+            <button type="button" class="ocorrencia-chip" data-valor="semaforo">
+              <span class="ocorrencia-chip__icone">🛑</span>
+              <span class="ocorrencia-chip__texto">Semáforo Inoperante</span>
+            </button>
+            <button type="button" class="ocorrencia-chip" data-valor="alagamento">
+              <span class="ocorrencia-chip__icone">🌧️</span>
+              <span class="ocorrencia-chip__texto">Pista Alagada</span>
+            </button>
+            <button type="button" class="ocorrencia-chip" data-valor="outro">
+              <span class="ocorrencia-chip__icone">⚠️</span>
+              <span class="ocorrencia-chip__texto">Outro Bloqueio</span>
+            </button>
+          </div>
         </div>
 
-        <div class="form-grupo" style="margin-top: 14px;">
-          <label class="form-label" for="textarea-detalhes-problema">Detalhes / Localização Aproximada:</label>
-          <textarea id="textarea-detalhes-problema" class="form-textarea" placeholder="Descreva brevemente a situação para suporte da central..." rows="3"></textarea>
+        <!-- 2. Localização Atual / Ponto de Referência -->
+        <div class="form-grupo">
+          <div class="form-label-wrap">
+            <label class="form-label" for="input-local-problema">Local / Ponto de Referência:</label>
+            <button type="button" class="btn-gps-sync" id="btn-gps-sync-problema" title="Atualizar com posição GPS em tempo real">
+              <svg width="13" height="13" aria-hidden="true"><use href="#icone-mira"/></svg>
+              <span>Usar Posição GPS</span>
+            </button>
+          </div>
+          <input type="text" id="input-local-problema" class="form-input" placeholder="Ex: Av. Inatel, próx. à Praça Urbana" value="Av. Inatel, Centro" required>
+        </div>
+
+        <!-- 3. Previsão de Atraso na Viagem -->
+        <div class="form-grupo">
+          <label class="form-label">Impacto Estimado no Horário:</label>
+          <div class="urgencia-selector" id="urgencia-selector" role="radiogroup" aria-label="Nível de Atraso Estimado">
+            <label class="urgencia-pill urgencia-pill--baixa">
+              <input type="radio" name="gravidade" value="baixa" checked>
+              <span class="urgencia-pill__indicador"></span>
+              <span class="urgencia-pill__texto">Leve (&lt; 5 min)</span>
+            </label>
+            <label class="urgencia-pill urgencia-pill--moderada">
+              <input type="radio" name="gravidade" value="moderada">
+              <span class="urgencia-pill__indicador"></span>
+              <span class="urgencia-pill__texto">Médio (5 a 15 min)</span>
+            </label>
+            <label class="urgencia-pill urgencia-pill--alta">
+              <input type="radio" name="gravidade" value="alta">
+              <span class="urgencia-pill__indicador"></span>
+              <span class="urgencia-pill__texto">Alto (&gt; 15 min / Travado)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 4. Descrição com Sugestões Rápidas de Toque -->
+        <div class="form-grupo">
+          <label class="form-label" for="textarea-detalhes-problema">
+            <span>Observação / Detalhes:</span>
+          </label>
+          <div class="sugestoes-chips" id="sugestoes-chips-problema">
+            <button type="button" class="sugestao-chip" data-texto="Trânsito totalmente parado neste trecho.">+ Tráfego parado</button>
+            <button type="button" class="sugestao-chip" data-texto="Semáforo apagado gerando fila de veículos.">+ Semáforo apagado</button>
+            <button type="button" class="sugestao-chip" data-texto="Bloqueio parcial de faixa devido a obras.">+ Pista em obras</button>
+            <button type="button" class="sugestao-chip" data-texto="Desvio necessário pela via paralela.">+ Desvio de rua</button>
+          </div>
+          <textarea id="textarea-detalhes-problema" class="form-textarea" placeholder="Descreva brevemente a situação da via..." rows="3"></textarea>
         </div>
 
         <div class="modal-card__footer">
           <button type="button" class="btn-modal btn-modal--secundario" id="btn-cancelar-problema">Cancelar</button>
-          <button type="submit" class="btn-modal btn-modal--primario" id="btn-enviar-problema">
-            <span>Enviar Alerta ao CCO</span>
+          <button type="submit" class="btn-modal btn-modal--primario btn-modal--transmitir" id="btn-enviar-problema">
+            <svg width="17" height="17" aria-hidden="true"><use href="#icone-alerta-triangulo"/></svg>
+            <span id="btn-enviar-problema-texto">Enviar Alerta de Trânsito</span>
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal: Suporte Técnico -->
+  <!-- Modal 2: Alerta para a Garagem (Problema no Ônibus) -->
   <div class="modal-overlay" id="modal-suporte" aria-hidden="true">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-suporte-titulo">
+    <div class="modal-card modal-card--suporte" role="dialog" aria-modal="true" aria-labelledby="modal-suporte-titulo">
       <div class="modal-card__header">
-        <div class="modal-card__icone-topo" style="background-color: rgba(37,99,235,0.15); color: var(--cor-marca);" aria-hidden="true">
+        <div class="modal-card__icone-topo modal-card__icone-topo--suporte" aria-hidden="true">
           <svg width="22" height="22"><use href="#icone-suporte"/></svg>
         </div>
         <div class="modal-card__header-info">
-          <h3 class="modal-card__titulo" id="modal-suporte-titulo">Suporte Técnico &amp; Garagem</h3>
-          <p class="modal-card__subtitulo">Canais rápidos de atendimento e socorro mecânico.</p>
+          <h3 class="modal-card__titulo" id="modal-suporte-titulo">Suporte Garagem</h3>
+          <p class="modal-card__subtitulo">Reporte problemas no ônibus para manutenção ou socorro mecânico.</p>
         </div>
         <button type="button" class="modal-card__btn-fechar" id="btn-fechar-modal-suporte" aria-label="Fechar modal">
           <svg width="18" height="18"><use href="#icone-fechar"/></svg>
         </button>
       </div>
 
+      <!-- Banner de Contexto do Veículo -->
+      <div class="modal-veiculo-contexto">
+        <div class="modal-veiculo-info">
+          <span class="modal-veiculo-badge" id="modal-garagem-veiculo">Ônibus #02</span>
+          <span class="modal-linha-badge" id="modal-garagem-linha">Linha Anchieta</span>
+          <span class="modal-motorista-badge" id="modal-garagem-motorista">Condutor: João Silva (MOT-104)</span>
+        </div>
+        <div class="modal-transmissao-status">
+          <span class="status-bolinha status-bolinha--pulsante">●</span>
+          <span>Plantão Garagem Ativo</span>
+        </div>
+      </div>
+
       <div class="modal-card__corpo">
-        <div class="suporte-acoes-lista">
-          <button type="button" class="suporte-opcao-card" id="btn-chamar-cco">
-            <div class="suporte-opcao-card__icone">📻</div>
-            <div class="suporte-opcao-card__info">
-              <strong>Canal de Rádio CCO (VHF 154.850 MHz)</strong>
-              <span>Solicitar chamada direta com o operador de plantão</span>
+        <div class="oficina-painel">
+          <!-- 1. Componente / Problema com o Ônibus -->
+          <div class="form-grupo">
+            <label class="form-label">Problema Observado no Ônibus:</label>
+            <div class="oficina-falhas-grid" id="oficina-falhas-grid">
+              <button type="button" class="oficina-falha-btn oficina-falha-btn--ativo" data-falha="pneu">
+                <span class="oficina-falha-btn__icone">🛞</span>
+                <span>Pneu / Rodagem</span>
+              </button>
+              <button type="button" class="oficina-falha-btn" data-falha="freio">
+                <span class="oficina-falha-btn__icone">🛑</span>
+                <span>Freio / Ar Comprimido</span>
+              </button>
+              <button type="button" class="oficina-falha-btn" data-falha="motor">
+                <span class="oficina-falha-btn__icone">🌡️</span>
+                <span>Motor / Temperatura</span>
+              </button>
+              <button type="button" class="oficina-falha-btn" data-falha="eletrica">
+                <span class="oficina-falha-btn__icone">⚡</span>
+                <span>Bateria / Elétrica</span>
+              </button>
+              <button type="button" class="oficina-falha-btn" data-falha="acessibilidade">
+                <span class="oficina-falha-btn__icone">♿</span>
+                <span>Elevador Cadeirante</span>
+              </button>
+              <button type="button" class="oficina-falha-btn" data-falha="portas">
+                <span class="oficina-falha-btn__icone">🚪</span>
+                <span>Portas / Janelas</span>
+              </button>
+              <button type="button" class="oficina-falha-btn" data-falha="validador">
+                <span class="oficina-falha-btn__icone">💳</span>
+                <span>Validador / Bilhetagem</span>
+              </button>
+              <button type="button" class="oficina-falha-btn" data-falha="outro">
+                <span class="oficina-falha-btn__icone">⚠️</span>
+                <span>Outra Falha Mecânica</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Condição do Veículo -->
+          <div class="form-grupo">
+            <label class="form-label">Condição do Veículo:</label>
+            <div class="urgencia-selector" id="garagem-urgencia-selector" role="radiogroup" aria-label="Condição do Veículo">
+              <label class="urgencia-pill urgencia-pill--baixa">
+                <input type="radio" name="gravidade_garagem" value="baixa" checked>
+                <span class="urgencia-pill__indicador"></span>
+                <span class="urgencia-pill__texto">Dá para rodar (Alerta preventivo)</span>
+              </label>
+              <label class="urgencia-pill urgencia-pill--moderada">
+                <input type="radio" name="gravidade_garagem" value="moderada">
+                <span class="urgencia-pill__indicador"></span>
+                <span class="urgencia-pill__texto">Revisar no fim da viagem</span>
+              </label>
+              <label class="urgencia-pill urgencia-pill--alta">
+                <input type="radio" name="gravidade_garagem" value="alta">
+                <span class="urgencia-pill__indicador"></span>
+                <span class="urgencia-pill__texto">Parada Imediata (Precisa socorro)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 3. Localização do Ônibus -->
+          <div class="form-grupo">
+            <div class="form-label-wrap">
+              <label class="form-label" for="input-local-garagem">Localização do Ônibus:</label>
+              <button type="button" class="btn-gps-sync" id="btn-gps-sync-garagem" title="Atualizar com posição GPS em tempo real">
+                <svg width="13" height="13" aria-hidden="true"><use href="#icone-mira"/></svg>
+                <span>Usar Posição GPS</span>
+              </button>
+            </div>
+            <input type="text" id="input-local-garagem" class="form-input" placeholder="Ex: Av. Inatel, próx. à Praça Urbana" value="Av. Inatel, Centro">
+          </div>
+
+          <!-- 4. Descrição do Problema -->
+          <div class="form-grupo">
+            <label class="form-label" for="textarea-oficina-detalhe">Descrição do Problema no Ônibus:</label>
+            <textarea id="textarea-oficina-detalhe" class="form-textarea" placeholder="Descreva ruídos, vazamentos, perda de pressão, temperatura anormal ou sintomas observados..." rows="3"></textarea>
+          </div>
+
+          <!-- Chamado Existente (se ativo) -->
+          <div id="oficina-chamado-ativo-wrap" style="display: none;">
+            <!-- Preenchido dinamicamente se houver socorro a caminho -->
+          </div>
+
+          <!-- Botão Enviar Alerta para Garagem -->
+          <button type="button" class="btn-despachar-socorro" id="btn-despachar-socorro">
+            <span class="btn-despachar-socorro__icone">🚚</span>
+            <div class="btn-despachar-socorro__texto">
+              <strong id="btn-despachar-socorro-titulo">Enviar Alerta para Garagem & Gestor CCO</strong>
+              <span id="btn-despachar-socorro-sub">Notificar equipe de manutenção e Central de Controle</span>
             </div>
           </button>
 
-          <button type="button" class="suporte-opcao-card" id="btn-ping-telemetria">
-            <div class="suporte-opcao-card__icone">📡</div>
-            <div class="suporte-opcao-card__info">
-              <strong>Diagnóstico de Sinal GPS &amp; Validador</strong>
-              <span>Testar latência e sincronismo dos equipamentos</span>
+          <!-- Telefones Rápidos de Plantão da Garagem -->
+          <div class="telemetria-contatos" style="margin-top: 8px;">
+            <span class="telemetria-contatos__titulo">Telefones Diretos de Plantão:</span>
+            <div class="telemetria-contatos__lista">
+              <button type="button" class="telemetria-contato-item" data-fone="(35) 3471-0020" title="Clique para copiar">
+                <span class="telemetria-contato-item__rotulo">Oficina Garagem:</span>
+                <strong class="telemetria-contato-item__numero">(35) 3471-0020</strong>
+                <span class="telemetria-contato-item__copiar">Copiar</span>
+              </button>
+              <button type="button" class="telemetria-contato-item" data-fone="(35) 3471-0010" title="Clique para copiar">
+                <span class="telemetria-contato-item__rotulo">Central de Tráfego:</span>
+                <strong class="telemetria-contato-item__numero">(35) 3471-0010</strong>
+                <span class="telemetria-contato-item__copiar">Copiar</span>
+              </button>
             </div>
-          </button>
-
-          <button type="button" class="suporte-opcao-card" id="btn-chamar-manutencao">
-            <div class="suporte-opcao-card__icone">🔧</div>
-            <div class="suporte-opcao-card__info">
-              <strong>Socorro Mecânico / Oficina da Garagem</strong>
-              <span>Acionar equipe móvel de manutenção preventiva</span>
-            </div>
-          </button>
+          </div>
         </div>
       </div>
 

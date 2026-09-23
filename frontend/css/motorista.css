@@ -80,6 +80,12 @@
   box-shadow: 0 4px 14px rgba(22, 163, 74, 0.2);
 }
 
+[data-theme="dark"] .motorista-btn-flutuante--ativo {
+  background-color: rgba(22, 163, 74, 0.2);
+  border-color: #22c55e;
+  color: #4ade80;
+}
+
 .motorista-btn-flutuante__dot {
   width: 8px;
   height: 8px;
@@ -805,90 +811,987 @@
   }
 }
 
-/* ── Modais de Ocorrência & Suporte com Padrão ValeBus ── */
-.suporte-acoes-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* ═══════════════════════════════════════════════════════════
+   ALERTAS OPERACIONAIS — TRÂNSITO & GARAGEM
+   ═══════════════════════════════════════════════════════════ */
+.painel-secao-alertas {
+  margin-top: 24px;
 }
 
-.suporte-opcao-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  background-color: var(--fundo-campo);
-  border: 1.5px solid var(--borda-cor);
-  border-radius: var(--raio-medio);
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.16s ease;
-  width: 100%;
-}
-
-.suporte-opcao-card:hover {
-  background-color: var(--fundo-card);
-  border-color: var(--cor-marca);
-  transform: translateY(-1px);
-}
-
-.suporte-opcao-card__icone {
-  font-size: 20px;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background-color: var(--fundo-card);
+.painel-alertas-topo {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border: 1px solid var(--borda-cor);
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
 
-.suporte-opcao-card__info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.status-bolinha--pulsante {
+  color: #22c55e;
+  animation: pulso-led 1.6s ease-in-out infinite;
 }
 
-.suporte-opcao-card__info strong {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--texto-principal);
-}
-
-.suporte-opcao-card__info span {
-  font-size: 11.5px;
-  color: var(--texto-secundario);
+@keyframes pulso-led {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
 }
 
 /* Painel Lateral - Ações Rápidas */
 .painel-acoes-motorista {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  width: 100%;
 }
 
 .btn-painel-acao {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 8px;
+  gap: 12px;
+  padding: 10px 12px;
   background-color: var(--fundo-campo);
-  border: 1px solid var(--borda-cor);
-  border-radius: var(--raio-pequeno);
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--texto-principal);
+  border: 1.5px solid var(--borda-cor);
+  border-radius: var(--raio-medio);
   cursor: pointer;
-  transition: all 0.16s ease;
+  text-align: left;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .btn-painel-acao:hover {
   background-color: var(--fundo-card);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.btn-painel-acao--alerta:hover {
+  border-color: #f59e0b;
+}
+
+.btn-painel-acao--suporte:hover {
+  border-color: var(--cor-marca);
+}
+
+.btn-painel-acao__icone-circulo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+
+.btn-painel-acao:hover .btn-painel-acao__icone-circulo {
+  transform: scale(1.08);
+}
+
+.btn-painel-acao__icone-circulo--alerta {
+  background-color: rgba(245, 158, 11, 0.14);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.btn-painel-acao__icone-circulo--suporte {
+  background-color: rgba(26, 111, 212, 0.14);
+  color: var(--cor-marca);
+  border: 1px solid rgba(26, 111, 212, 0.3);
+}
+
+.btn-painel-acao__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-painel-acao__titulo {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--texto-principal);
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.btn-painel-acao__sub {
+  font-size: 11px;
+  color: var(--texto-secundario);
+  white-space: normal;
+  line-height: 1.25;
+}
+
+/* Card de Ocorrência Ativa no Painel Lateral */
+.painel-ocorrencias-ativas {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.painel-ocorrencia-card {
+  background: linear-gradient(145deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.03) 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--raio-medio);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: slideInOcorrencia 0.25s ease-out;
+}
+
+.painel-ocorrencia-card--suporte {
+  background: linear-gradient(145deg, rgba(26, 111, 212, 0.08) 0%, rgba(26, 111, 212, 0.03) 100%);
+  border-color: rgba(26, 111, 212, 0.35);
+}
+
+@keyframes slideInOcorrencia {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.painel-ocorrencia-card__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.painel-ocorrencia-card__tipo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.painel-ocorrencia-card__icone {
+  font-size: 14px;
+}
+
+.painel-ocorrencia-card__titulo {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--texto-principal);
+}
+
+.painel-ocorrencia-card__protocolo {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  color: var(--texto-secundario);
+}
+
+.painel-ocorrencia-card__detalhes {
+  font-size: 11.5px;
+  color: var(--texto-secundario);
+  line-height: 1.35;
+  background-color: var(--fundo-card);
+  padding: 6px 10px;
+  border-radius: var(--raio-pequeno);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.painel-ocorrencia-card__rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10.5px;
+}
+
+.painel-ocorrencia-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  color: #d97706;
+}
+
+.painel-ocorrencia-card__btn-concluir {
+  background: transparent;
+  border: 1px solid var(--borda-cor);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.painel-ocorrencia-card__btn-concluir:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ESTILOS GERAIS DOS MODAIS OPERACIONAIS
+   ═══════════════════════════════════════════════════════════ */
+.modal-overlay.aberto,
+.modal-overlay.ativo {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.modal-overlay.aberto .modal-card,
+.modal-overlay.ativo .modal-card {
+  transform: scale(1) translateY(0) !important;
+}
+
+.modal-card--operacional,
+.modal-card--suporte {
+  max-width: 530px;
+  width: 94vw;
+  max-height: 88vh;
+}
+
+/* Cabeçalho dos Modais Operacionais (Espaçamento Ícone + Título) */
+.modal-card__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--borda-cor);
+  background-color: var(--fundo-campo);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-card__icone-topo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.modal-card__icone-topo svg {
+  width: 22px;
+  height: 22px;
+}
+
+.modal-card__icone-topo--alerta {
+  background-color: rgba(245, 158, 11, 0.14);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.modal-card__icone-topo--suporte {
+  background-color: rgba(26, 111, 212, 0.14);
+  color: var(--cor-marca);
+  border: 1px solid rgba(26, 111, 212, 0.28);
+}
+
+.modal-card__header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-card__titulo {
+  font-size: 16.5px;
+  font-weight: 800;
+  color: var(--texto-principal);
+  line-height: 1.25;
+  margin: 0;
+}
+
+.modal-card__subtitulo {
+  font-size: 12px;
+  color: var(--texto-secundario);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.modal-card__btn-fechar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--texto-secundario);
+  transition: all 0.15s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.modal-card__btn-fechar:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #ef4444;
+  transform: scale(1.06);
+}
+
+/* Banner de Contexto Operacional no Modal */
+.modal-veiculo-contexto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--fundo-campo);
+  border-bottom: 1px solid var(--borda-cor);
+  font-size: 11px;
+}
+
+.modal-veiculo-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.modal-veiculo-badge {
+  background-color: var(--cor-marca);
+  color: #ffffff;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.modal-linha-badge {
+  background-color: var(--fundo-card);
+  border: 1px solid var(--borda-cor);
+  color: var(--texto-principal);
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.modal-motorista-badge {
+  color: var(--texto-secundario);
+  font-weight: 600;
+}
+
+.modal-transmissao-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+/* Grid de Chips de Tipo de Ocorrência */
+.ocorrencia-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+@media (max-width: 500px) {
+  .ocorrencia-chips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.ocorrencia-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 9px 4px;
+  background-color: var(--fundo-campo);
+  border: 1.5px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+  transition: all 0.16s ease;
+  font-family: inherit;
+  text-align: center;
+}
+
+.ocorrencia-chip:hover {
+  background-color: var(--fundo-card);
+  border-color: var(--cor-marca);
+  transform: translateY(-1px);
+}
+
+.ocorrencia-chip--ativo {
+  background-color: rgba(26, 111, 212, 0.08) !important;
+  border-color: var(--cor-marca) !important;
+  color: var(--cor-marca);
+  font-weight: 700;
+  box-shadow: 0 0 0 2px rgba(26, 111, 212, 0.2);
+}
+
+.ocorrencia-chip__icone {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.ocorrencia-chip__texto {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  line-height: 1.2;
+}
+
+.ocorrencia-chip--ativo .ocorrencia-chip__texto {
+  color: var(--cor-marca);
+}
+
+/* Localização & Botão Sincronizar GPS */
+.form-label-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-gps-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--borda-cor);
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--cor-marca);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-gps-sync:hover {
+  background-color: var(--cor-marca-clara);
+  border-color: var(--cor-marca);
+}
+
+/* Seletor de Nível de Gravidade / Urgência */
+.urgencia-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.urgencia-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 6px;
+  background-color: var(--fundo-campo);
+  border: 1.5px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.urgencia-pill input {
+  display: none;
+}
+
+.urgencia-pill__indicador {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.urgencia-pill--baixa .urgencia-pill__indicador { background-color: #22c55e; }
+.urgencia-pill--moderada .urgencia-pill__indicador { background-color: #f59e0b; }
+.urgencia-pill--alta .urgencia-pill__indicador { background-color: #ef4444; }
+
+.urgencia-pill:has(input:checked) {
+  background-color: var(--fundo-card);
+  border-color: var(--cor-marca);
+  box-shadow: 0 0 0 2px rgba(26, 111, 212, 0.2);
+}
+
+.urgencia-pill--baixa:has(input:checked) {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.urgencia-pill--moderada:has(input:checked) {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.urgencia-pill--alta:has(input:checked) {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+/* Sugestões Rápidas de Descrição */
+.sugestoes-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.sugestao-chip {
+  background-color: var(--fundo-campo);
+  border: 1px dashed var(--borda-cor);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.sugestao-chip:hover {
+  background-color: var(--cor-marca-clara);
   border-color: var(--cor-marca);
   color: var(--cor-marca);
+}
+
+/* Opções de Checkbox */
+.form-grupo-opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--fundo-campo);
+  padding: 10px 12px;
+  border-radius: var(--raio-pequeno);
+  border: 1px solid var(--borda-cor);
+}
+
+.form-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--texto-principal);
+  cursor: pointer;
+}
+
+.form-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--cor-marca);
+  cursor: pointer;
+}
+
+/* Rodapé dos Modais e Alinhamento Perfeito dos Botões */
+.modal-card__footer,
+.modal-card__rodape {
+  padding: 16px 22px;
+  border-top: 1px solid var(--borda-cor);
+  background-color: var(--fundo-campo);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.modal-card__footer .btn-modal,
+.modal-card__rodape .btn-modal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: all 0.16s ease;
+  box-sizing: border-box;
+  margin: 0;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.modal-card__footer .btn-modal svg,
+.modal-card__rodape .btn-modal svg {
+  flex-shrink: 0;
+}
+
+.btn-modal--secundario {
+  background-color: var(--fundo-card);
+  border: 1.5px solid var(--borda-cor);
+  color: var(--texto-principal);
+}
+
+.btn-modal--secundario:hover {
+  background-color: var(--borda-cor);
+  border-color: var(--texto-secundario);
+}
+
+.btn-modal--primario {
+  background-color: var(--cor-marca);
+  border: 1.5px solid var(--cor-marca);
+  color: #ffffff;
+}
+
+.btn-modal--primario:hover {
+  background-color: var(--cor-marca-escura);
+  border-color: var(--cor-marca-escura);
+}
+
+.btn-modal--transmitir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--cor-marca) 0%, var(--cor-marca-escura) 100%);
+  border: 1.5px solid var(--cor-marca-escura);
+  box-shadow: 0 4px 14px rgba(26, 111, 212, 0.35);
+  color: #ffffff;
+}
+
+.btn-modal--transmitir:hover {
+  box-shadow: 0 6px 18px rgba(26, 111, 212, 0.45);
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL DE SUPORTE: OFICINA & GARAGEM
+   ═══════════════════════════════════════════════════════════ */
+/* Oficina & Socorro Garagem */
+.oficina-painel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.oficina-status-box {
+  background-color: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  padding: 10px 12px;
+}
+
+.oficina-status-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.oficina-status-tag {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--cor-marca);
+}
+
+.oficina-status-desc {
+  font-size: 11.5px;
+  color: var(--texto-secundario);
+  margin: 0;
+}
+
+.oficina-falhas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+@media (max-width: 480px) {
+  .oficina-falhas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.oficina-falha-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  background-color: var(--fundo-campo);
+  border: 1.5px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-principal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.oficina-falha-btn:hover {
+  background-color: var(--fundo-card);
+  border-color: var(--cor-marca);
+}
+
+.oficina-falha-btn--ativo {
+  background-color: rgba(26, 111, 212, 0.08) !important;
+  border-color: var(--cor-marca) !important;
+  color: var(--cor-marca) !important;
+}
+
+.oficina-falha-btn__icone {
+  font-size: 18px;
+}
+
+.btn-despachar-socorro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--raio-medio);
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.35);
+  transition: all 0.18s ease;
+}
+
+.btn-despachar-socorro:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.45);
+}
+
+.btn-despachar-socorro__icone {
+  font-size: 24px;
+}
+
+.btn-despachar-socorro__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.btn-despachar-socorro__texto strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.btn-despachar-socorro__texto span {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+/* Telemetria e Diagnóstico */
+.telemetria-painel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.telemetria-sensores-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .telemetria-sensores-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.telemetria-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background-color: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+}
+
+.telemetria-card__icone {
+  font-size: 18px;
+}
+
+.telemetria-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.telemetria-card__nome {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--texto-principal);
+}
+
+.telemetria-card__status {
+  font-size: 10px;
+  color: var(--texto-secundario);
+}
+
+.telemetria-badge--ok {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background-color: rgba(22, 163, 74, 0.15);
+  color: #16a34a;
+}
+
+.telemetria-acoes-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn-executar-ping {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: var(--fundo-campo);
+  border: 1.5px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--cor-marca);
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.btn-executar-ping:hover {
+  background-color: var(--fundo-card);
+  border-color: var(--cor-marca);
+}
+
+.telemetria-barra-progresso {
+  width: 100%;
+  height: 6px;
+  background: var(--fundo-campo);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.telemetria-barra-preenchimento {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--cor-marca), #22c55e);
+  border-radius: 999px;
+  transition: width 1.2s ease-in-out;
+}
+
+/* Telefones de Plantão */
+.telemetria-contatos {
+  margin-top: 4px;
+}
+
+.telemetria-contatos__titulo {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-secundario);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.telemetria-contatos__lista {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.telemetria-contato-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background-color: var(--fundo-campo);
+  border: 1px solid var(--borda-cor);
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.telemetria-contato-item:hover {
+  background-color: var(--fundo-card);
+  border-color: var(--cor-marca);
+}
+
+.telemetria-contato-item__rotulo {
+  font-size: 10.5px;
+  color: var(--texto-secundario);
+}
+
+.telemetria-contato-item__numero {
+  font-size: 11px;
+  color: var(--texto-principal);
+}
+
+.telemetria-contato-item__copiar {
+  font-size: 9.5px;
+  color: var(--cor-marca);
+  font-weight: 700;
+}
+
+/* Modo Escuro para os Novos Componentes */
+[data-theme="dark"] .painel-ocorrencia-card {
+  background: linear-gradient(145deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.04) 100%);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+[data-theme="dark"] .painel-ocorrencia-card--suporte {
+  background: linear-gradient(145deg, rgba(56, 189, 248, 0.12) 0%, rgba(56, 189, 248, 0.04) 100%);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+[data-theme="dark"] .painel-ocorrencia-card__detalhes {
+  background-color: rgba(15, 23, 42, 0.8);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .ocorrencia-chip--ativo {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  border-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .ocorrencia-chip--ativo .ocorrencia-chip__texto {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .telemetria-card,
+[data-theme="dark"] .oficina-status-box,
+[data-theme="dark"] .telemetria-contato-item,
+[data-theme="dark"] .form-grupo-opcoes,
+[data-theme="dark"] .modal-veiculo-contexto,
+[data-theme="dark"] .modal-card__header,
+[data-theme="dark"] .modal-card__footer,
+[data-theme="dark"] .modal-card__rodape {
+  background-color: rgba(15, 23, 42, 0.7);
+  border-color: #1e293b;
+}
+
+[data-theme="dark"] .btn-modal--secundario {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .btn-modal--secundario:hover {
+  background-color: #334155;
+  border-color: #475569;
 }
 
 /* Linha Divisória da Sidebar */

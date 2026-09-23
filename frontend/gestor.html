@@ -285,12 +285,20 @@
         <span>Escalas do Dia</span>
       </button>
 
+      <button type="button" class="gestor-aba-btn" data-aba="chamados-motoristas" id="aba-chamados-motoristas">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+        <span>Chamados &amp; Reports de Bordo</span>
+        <span class="gestor-aba-badge gestor-aba-badge--alerta" id="badge-total-chamados" style="background: rgba(220, 38, 38, 0.15); color: #dc2626; font-weight: 700;">0</span>
+      </button>
+
       <button type="button" class="gestor-aba-btn" data-aba="ocorrencias">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
         </svg>
-        <span>Rádio &amp; Ocorrências</span>
+        <span>Rádio CCO</span>
       </button>
     </nav>
 
@@ -365,6 +373,98 @@
     <div class="gestor-painel-secao" id="painel-escalas" style="display: none;">
       <div class="gestor-escala-grid" id="grid-escalas-dia">
         <!-- Renderizado dinamicamente via gestor.js -->
+      </div>
+    </div>
+
+    <!-- ═══ PAINEL: CHAMADOS & REPORTS DOS MOTORISTAS (NOVO) ═══ -->
+    <div class="gestor-painel-secao" id="painel-chamados-motoristas" style="display: none;">
+      <!-- Barra Superior de Controle de Chamados -->
+      <div class="gestor-toolbar" style="margin-bottom: 20px;">
+        <div class="gestor-toolbar__esquerda">
+          <div class="gestor-busca-wrapper">
+            <svg class="gestor-busca-icone" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="gestor-busca-input" id="input-busca-chamados" placeholder="Buscar por motorista, veículo, falha ou protocolo...">
+          </div>
+
+          <select class="gestor-select-filtro" id="filtro-tipo-chamado" aria-label="Filtrar por tipo de report">
+            <option value="todos">Tipo: Todos os reports</option>
+            <option value="garagem">Falha Mecânica / Garagem</option>
+            <option value="transito">Alerta de Trânsito / Bloqueio</option>
+          </select>
+
+          <select class="gestor-select-filtro" id="filtro-urgencia-chamado" aria-label="Filtrar por gravidade">
+            <option value="todos">Gravidade: Todas</option>
+            <option value="alta">Urgente / Socorro Imediato</option>
+            <option value="moderada">Moderada / Fim da viagem</option>
+            <option value="baixa">Preventivo / Informativo</option>
+          </select>
+        </div>
+
+        <div class="gestor-toolbar__direita">
+          <button type="button" class="btn-gestor-secundario" id="btn-atualizar-chamados" title="Atualizar fila de reports dos motoristas">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            <span>Atualizar Reports</span>
+          </button>
+          <button type="button" class="btn-gestor-secundario" id="btn-simular-report-demo" title="Criar simulação de report de motorista">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span>Simular Report</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Resumo Rápido dos Chamados do Turno -->
+      <div class="gestor-chamados-kpis-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
+        <div class="gestor-kpi-chamado-mini" style="background: var(--fundo-card); border: 1px solid var(--borda-cor); border-radius: var(--raio-medio); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--texto-secundario); letter-spacing: 0.5px;">Reports em Aberto</div>
+            <div style="font-size: 22px; font-weight: 800; color: #dc2626;" id="stat-chamados-pendentes">0</div>
+          </div>
+          <div style="width: 38px; height: 38px; border-radius: var(--raio-pequeno); background: rgba(220, 38, 38, 0.12); color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            🚨
+          </div>
+        </div>
+
+        <div class="gestor-kpi-chamado-mini" style="background: var(--fundo-card); border: 1px solid var(--borda-cor); border-radius: var(--raio-medio); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--texto-secundario); letter-spacing: 0.5px;">Socorro Despachado</div>
+            <div style="font-size: 22px; font-weight: 800; color: #d97706;" id="stat-chamados-socorro">0</div>
+          </div>
+          <div style="width: 38px; height: 38px; border-radius: var(--raio-pequeno); background: rgba(217, 119, 6, 0.12); color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            🚚
+          </div>
+        </div>
+
+        <div class="gestor-kpi-chamado-mini" style="background: var(--fundo-card); border: 1px solid var(--borda-cor); border-radius: var(--raio-medio); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--texto-secundario); letter-spacing: 0.5px;">Alertas de Trânsito</div>
+            <div style="font-size: 22px; font-weight: 800; color: #2563eb;" id="stat-chamados-transito">0</div>
+          </div>
+          <div style="width: 38px; height: 38px; border-radius: var(--raio-pequeno); background: rgba(37, 99, 235, 0.12); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            🚦
+          </div>
+        </div>
+
+        <div class="gestor-kpi-chamado-mini" style="background: var(--fundo-card); border: 1px solid var(--borda-cor); border-radius: var(--raio-medio); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--texto-secundario); letter-spacing: 0.5px;">Resolvidos Hoje</div>
+            <div style="font-size: 22px; font-weight: 800; color: #16a34a;" id="stat-chamados-resolvidos">0</div>
+          </div>
+          <div style="width: 38px; height: 38px; border-radius: var(--raio-pequeno); background: rgba(22, 163, 74, 0.12); color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            ✅
+          </div>
+        </div>
+      </div>
+
+      <!-- Grade Principal de Chamados Recebidos -->
+      <div id="grid-chamados-motoristas" class="gestor-chamados-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px;">
+        <!-- Injetado dinamicamente via gestor.js -->
       </div>
     </div>
 
@@ -525,6 +625,48 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODAL DE DETALHES DO CHAMADO / REPORT DO MOTORISTA
+       ═══════════════════════════════════════════════════════ -->
+  <div class="gestor-modal-overlay" id="modal-detalhes-chamado" aria-hidden="true">
+    <div class="gestor-modal" role="dialog" aria-modal="true" aria-labelledby="modal-chamado-titulo">
+      <div class="gestor-modal__pull-bar" aria-hidden="true"></div>
+
+      <div class="gestor-modal__header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div id="modal-chamado-icone-wrap" style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: rgba(220, 38, 38, 0.12);">
+            🔧
+          </div>
+          <div>
+            <h2 class="gestor-modal__titulo" id="modal-chamado-titulo">Chamado de Bordo #GAR-0000</h2>
+            <div style="font-size: 11px; color: var(--texto-secundario);" id="modal-chamado-subtitulo">Emitido pelo motorista em rota</div>
+          </div>
+        </div>
+        <button type="button" class="gestor-modal__fechar" id="btn-fechar-modal-chamado" aria-label="Fechar janela">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="gestor-modal__corpo" id="modal-chamado-corpo">
+        <!-- Renderizado dinamicamente via gestor.js -->
+      </div>
+
+      <div class="gestor-modal__footer" style="padding: 16px 24px; border-top: 1px solid var(--borda-cor); display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--fundo-campo); flex-wrap: wrap;">
+        <button type="button" class="btn-gestor-secundario" id="btn-fechar-chamado-rodape">Fechar Visualização</button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-gestor-secundario" id="btn-despachar-apoio-chamado" style="border-color: #d97706; color: #d97706;">
+            <span>🚚 Despachar Apoio Mecânico</span>
+          </button>
+          <button type="button" class="btn-gestor-primario" id="btn-resolver-chamado-modal" style="background: #16a34a; border-color: #16a34a;">
+            <span>✅ Concluir Atendimento</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

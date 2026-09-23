@@ -517,46 +517,650 @@
   }
 
   /* ──────────────────────────────────────────────────────────
-     6. FEED DE OCORRÊNCIAS E TELEMETRIA
+     6. MÓDULO DE CHAMADOS & REPORTS DOS MOTORISTAS (NOVO)
+     ────────────────────────────────────────────────────────── */
+  const CHAVE_STORAGE_CHAMADOS = 'valebus_chamados_gestor';
+  const CHAVE_STORAGE_SOCORRO_MOTORISTA = 'valebus_socorro_garagem';
+  const CHAVE_STORAGE_OCORRENCIAS_MOTORISTA = 'valebus_ocorrencias_motorista';
+
+  // Base inicial padrão de chamados demonstrativos realistas caso não existam reports prévios
+  const CHAMADOS_PADRAO_INICIAIS = [
+    {
+      id: 'GAR-7419',
+      categoria: 'garagem',
+      titulo: 'Socorro Mecânico Acionado',
+      problema: 'pneu',
+      problemaTexto: 'Pneu / Rodagem',
+      condicao: 'alta',
+      condicaoTexto: 'Parada Imediata / Socorro Urgente',
+      precisaSocorro: true,
+      observacao: 'Pneu traseiro direito perdeu calibração na subida do Recanto dos Pássaros. Ônibus encostado em segurança no acostamento.',
+      viatura: 'Viatura Garagem #01 (Mecânico: Carlos)',
+      tempoEstimadoMin: 12,
+      horaChamado: '09:42',
+      statusBadge: 'Socorro Despachado',
+      local: 'Av. Inatel, próximo ao Trevo',
+      motorista: 'Marcos Vinicius Ramos',
+      matricula: 'MOT-1042',
+      veiculo: 'Ônibus #01',
+      linha: 'Linha Anchieta',
+      criadoEm: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      emAndamento: true
+    },
+    {
+      id: 'TRANS-8820',
+      categoria: 'transito',
+      tipo: 'desvio',
+      tipoTexto: 'Obras / Desvio de Itinerário',
+      icone: '🚧',
+      local: 'Rua Silvestre Ferraz (Centro)',
+      detalhes: 'Recapeamento asfáltico pela prefeitura. Trânsito desviando pela Travessa Cel. Joaquim Neto.',
+      gravidade: 'moderada',
+      hora: '09:20',
+      status: 'Alerta Ativo',
+      motorista: 'Carlos Alberto Mendes',
+      matricula: 'MOT-4821',
+      veiculo: 'Ônibus #02',
+      linha: 'Linha Fernandes',
+      criadoEm: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
+      emAndamento: true
+    },
+    {
+      id: 'GAR-4190',
+      categoria: 'garagem',
+      titulo: 'Manutenção Programada',
+      problema: 'validador',
+      problemaTexto: 'Validador / Bilhetagem',
+      condicao: 'moderada',
+      condicaoTexto: 'Revisar no fim da viagem',
+      precisaSocorro: false,
+      observacao: 'Leitor de aprovação do cartão ValeBus apresentou lentidão intermitente, reiniciado 1x.',
+      viatura: 'Oficina Garagem Central',
+      tempoEstimadoMin: 0,
+      horaChamado: '08:50',
+      statusBadge: 'Manutenção Notificada',
+      local: 'Terminal Praça Urbana Carolina',
+      motorista: 'Roberto Dias Silveira',
+      matricula: 'MOT-3310',
+      veiculo: 'Ônibus #03',
+      linha: 'Linha Fortaleza',
+      criadoEm: new Date(Date.now() - 75 * 60 * 1000).toISOString(),
+      emAndamento: false,
+      resolvidoPor: 'CCO - Suporte TI',
+      resolvidoEm: '09:10'
+    }
+  ];
+
+  function obterChamadosGestor() {
+    let lista = [];
+    try {
+      const salvos = localStorage.getItem(CHAVE_STORAGE_CHAMADOS);
+      if (salvos) {
+        lista = JSON.parse(salvos);
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar chamados do storage:', e);
+    }
+
+    // Se estiver vazio, popula com os padrões
+    if (!lista || lista.length === 0) {
+      lista = [...CHAMADOS_PADRAO_INICIAIS];
+      salvarChamadosGestor(lista);
+    }
+
+    // Sincroniza dinamicamente qualquer chamado ativo enviado recentemente pelo terminal do motorista
+    try {
+      const socorroAtivo = localStorage.getItem(CHAVE_STORAGE_SOCORRO_MOTORISTA);
+      if (socorroAtivo) {
+        const itemSocorro = JSON.parse(socorroAtivo);
+        const jaExiste = lista.find(c => c.id === itemSocorro.id);
+        if (!jaExiste) {
+          lista.unshift(itemSocorro);
+          salvarChamadosGestor(lista);
+        }
+      }
+
+      const ocsAtivas = localStorage.getItem(CHAVE_STORAGE_OCORRENCIAS_MOTORISTA);
+      if (ocsAtivas) {
+        const listaOcs = JSON.parse(ocsAtivas);
+        listaOcs.forEach(oc => {
+          const jaExiste = lista.find(c => c.id === oc.id);
+          if (!jaExiste) {
+            lista.unshift(oc);
+            salvarChamadosGestor(lista);
+          }
+        });
+      }
+    } catch (e) {}
+
+    return lista;
+  }
+
+  function salvarChamadosGestor(lista) {
+    try {
+      localStorage.setItem(CHAVE_STORAGE_CHAMADOS, JSON.stringify(lista));
+    } catch (e) {
+      console.error('Erro ao salvar chamados do gestor:', e);
+    }
+  }
+
+  let chamadoSelecionadoAtual = null;
+
+  function renderizarPainelChamados() {
+    const container = document.getElementById('grid-chamados-motoristas');
+    if (!container) return;
+
+    const lista = obterChamadosGestor();
+    const termoBusca = (document.getElementById('input-busca-chamados')?.value || '').toLowerCase().trim();
+    const filtroTipo = document.getElementById('filtro-tipo-chamado')?.value || 'todos';
+    const filtroUrgencia = document.getElementById('filtro-urgencia-chamado')?.value || 'todos';
+
+    // Filtragem
+    const filtrados = lista.filter(item => {
+      const matchBusca = !termoBusca ||
+        (item.id && item.id.toLowerCase().includes(termoBusca)) ||
+        (item.motorista && item.motorista.toLowerCase().includes(termoBusca)) ||
+        (item.matricula && item.matricula.toLowerCase().includes(termoBusca)) ||
+        (item.veiculo && item.veiculo.toLowerCase().includes(termoBusca)) ||
+        (item.linha && item.linha.toLowerCase().includes(termoBusca)) ||
+        (item.problemaTexto && item.problemaTexto.toLowerCase().includes(termoBusca)) ||
+        (item.tipoTexto && item.tipoTexto.toLowerCase().includes(termoBusca)) ||
+        (item.local && item.local.toLowerCase().includes(termoBusca)) ||
+        (item.observacao && item.observacao.toLowerCase().includes(termoBusca)) ||
+        (item.detalhes && item.detalhes.toLowerCase().includes(termoBusca));
+
+      const matchTipo = filtroTipo === 'todos' || item.categoria === filtroTipo;
+
+      let gravidadeItem = item.condicao || item.gravidade || 'baixa';
+      const matchUrgencia = filtroUrgencia === 'todos' || gravidadeItem === filtroUrgencia;
+
+      return matchBusca && matchTipo && matchUrgencia;
+    });
+
+    // Atualiza contadores dos mini-cards e badge da aba
+    const pendentes = lista.filter(c => c.emAndamento !== false).length;
+    const socorros = lista.filter(c => c.precisaSocorro && c.emAndamento !== false).length;
+    const transitos = lista.filter(c => c.categoria === 'transito' && c.emAndamento !== false).length;
+    const resolvidos = lista.filter(c => c.emAndamento === false).length;
+
+    const elStatPendentes = document.getElementById('stat-chamados-pendentes');
+    const elStatSocorro = document.getElementById('stat-chamados-socorro');
+    const elStatTransito = document.getElementById('stat-chamados-transito');
+    const elStatResolvidos = document.getElementById('stat-chamados-resolvidos');
+    const badgeAbaChamados = document.getElementById('badge-total-chamados');
+
+    if (elStatPendentes) elStatPendentes.textContent = pendentes;
+    if (elStatSocorro) elStatSocorro.textContent = socorros;
+    if (elStatTransito) elStatTransito.textContent = transitos;
+    if (elStatResolvidos) elStatResolvidos.textContent = resolvidos;
+    if (badgeAbaChamados) {
+      badgeAbaChamados.textContent = pendentes;
+      badgeAbaChamados.style.display = pendentes > 0 ? 'inline-block' : 'none';
+    }
+
+    if (filtrados.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: var(--fundo-card); border: 1px dashed var(--borda-cor); border-radius: var(--raio-medio);">
+          <div style="font-size: 32px; margin-bottom: 10px;">✨</div>
+          <h4 style="font-size: 15px; font-weight: 700; color: var(--texto-principal); margin-bottom: 6px;">Nenhum report encontrado</h4>
+          <p style="font-size: 13px; color: var(--texto-secundario); max-width: 440px; margin: 0 auto 16px;">Não há ocorrências ou relatos de problemas de bordo pendentes com os filtros selecionados.</p>
+          <button type="button" class="btn-gestor-secundario" id="btn-limpar-filtros-chamados" style="margin: 0 auto;">Limpar Filtros</button>
+        </div>
+      `;
+
+      const btnLimpar = document.getElementById('btn-limpar-filtros-chamados');
+      if (btnLimpar) {
+        btnLimpar.addEventListener('click', () => {
+          if (document.getElementById('input-busca-chamados')) document.getElementById('input-busca-chamados').value = '';
+          if (document.getElementById('filtro-tipo-chamado')) document.getElementById('filtro-tipo-chamado').value = 'todos';
+          if (document.getElementById('filtro-urgencia-chamado')) document.getElementById('filtro-urgencia-chamado').value = 'todos';
+          renderizarPainelChamados();
+        });
+      }
+      return;
+    }
+
+    container.innerHTML = filtrados.map(item => {
+      const ehGaragem = item.categoria === 'garagem';
+      const icone = ehGaragem ? (item.precisaSocorro ? '🚚' : '🔧') : (item.icone || '🚦');
+      const gravidade = item.condicao || item.gravidade || 'baixa';
+      const tituloPrincipal = ehGaragem ? (item.problemaTexto || item.titulo || 'Falha Mecânica') : (item.tipoTexto || 'Alerta de Trânsito');
+      const resolvida = item.emAndamento === false;
+
+      let classeBorda = 'gestor-chamado-card--baixa';
+      let classeBadge = 'gestor-chamado-badge--baixa';
+      let textoBadge = 'Preventivo';
+
+      if (resolvida) {
+        classeBorda = 'gestor-chamado-card--resolvido';
+        classeBadge = 'gestor-chamado-badge--resolvido';
+        textoBadge = 'Atendido / Concluído';
+      } else if (gravidade === 'alta') {
+        classeBorda = 'gestor-chamado-card--urgente';
+        classeBadge = 'gestor-chamado-badge--urgente';
+        textoBadge = 'Socorro Urgente';
+      } else if (gravidade === 'moderada') {
+        classeBorda = 'gestor-chamado-card--moderada';
+        classeBadge = 'gestor-chamado-badge--moderada';
+        textoBadge = 'Revisão Necessária';
+      }
+
+      const descricaoTexto = (ehGaragem ? item.observacao : item.detalhes) || 'Nenhum detalhe adicional inserido pelo motorista.';
+      const horaExibida = item.horaChamado || item.hora || 'Recente';
+
+      return `
+        <div class="gestor-chamado-card ${classeBorda}" data-id="${item.id}">
+          <div class="gestor-chamado-card__topo">
+            <div class="gestor-chamado-card__ident">
+              <div class="gestor-chamado-card__icone ${ehGaragem ? 'gestor-chamado-card__icone--garagem' : 'gestor-chamado-card__icone--transito'}">
+                ${icone}
+              </div>
+              <div class="gestor-chamado-card__titulos">
+                <span class="gestor-chamado-card__titulo">${tituloPrincipal}</span>
+                <span class="gestor-chamado-card__sub">${item.id} • ${ehGaragem ? 'Report de Bordo / Garagem' : 'Tráfego & Trânsito'}</span>
+              </div>
+            </div>
+            <span class="gestor-chamado-badge ${classeBadge}">
+              ${textoBadge}
+            </span>
+          </div>
+
+          <div class="gestor-chamado-card__metas">
+            <div class="gestor-chamado-meta-item">
+              <span class="gestor-chamado-meta-rotulo">Motorista</span>
+              <span class="gestor-chamado-meta-valor" title="${item.motorista || 'Condutor ValeBus'}">${item.motorista || 'João Silva'} (${item.matricula || 'MOT-104'})</span>
+            </div>
+            <div class="gestor-chamado-meta-item">
+              <span class="gestor-chamado-meta-rotulo">Veículo & Linha</span>
+              <span class="gestor-chamado-meta-valor" title="${item.veiculo || 'Ônibus #02'} - ${item.linha || 'Linha Anchieta'}">${item.veiculo || 'Ônibus #02'} • ${item.linha || 'Linha Anchieta'}</span>
+            </div>
+            <div class="gestor-chamado-meta-item" style="grid-column: span 2;">
+              <span class="gestor-chamado-meta-rotulo">Localização Informada</span>
+              <span class="gestor-chamado-meta-valor" title="${item.local || 'Itinerário Regular'}">📍 ${item.local || 'Itinerário Regular'}</span>
+            </div>
+          </div>
+
+          <div class="gestor-chamado-card__descricao">
+            <strong>Relato:</strong> ${descricaoTexto}
+          </div>
+
+          ${ehGaragem && item.viatura ? `
+            <div style="font-size: 11.5px; color: var(--texto-secundario); background: var(--fundo-campo); padding: 6px 10px; border-radius: var(--raio-pequeno); display: flex; align-items: center; justify-content: space-between;">
+              <span><strong>Apoio Garagem:</strong> ${item.viatura}</span>
+              ${item.tempoEstimadoMin ? `<span style="font-weight: 700; color: #d97706;">~${item.tempoEstimadoMin} min</span>` : ''}
+            </div>
+          ` : ''}
+
+          <div class="gestor-chamado-card__rodape">
+            <div class="gestor-chamado-card__tempo">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span>Enviado às <strong>${horaExibida}</strong></span>
+            </div>
+
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn-gestor-secundario" style="padding: 5px 9px; font-size: 11.5px;" onclick="window.abrirModalDetalhesChamado('${item.id}')">
+                Ver Detalhes
+              </button>
+              ${!resolvida ? `
+                <button type="button" class="btn-gestor-primario" style="padding: 5px 9px; font-size: 11.5px; background: #16a34a; border-color: #16a34a;" onclick="window.concluirChamadoGestor('${item.id}')" title="Marcar como atendido/resolvido">
+                  Concluir
+                </button>
+              ` : `
+                <button type="button" class="btn-gestor-secundario" style="padding: 5px 9px; font-size: 11.5px; color: #2563eb;" onclick="window.reabrirChamadoGestor('${item.id}')" title="Reabrir chamado">
+                  Reabrir
+                </button>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Janela Modal com os detalhes completos do chamado
+  const modalDetalhesChamado = document.getElementById('modal-detalhes-chamado');
+  const btnFecharModalChamado = document.getElementById('btn-fechar-modal-chamado');
+  const btnFecharChamadoRodape = document.getElementById('btn-fechar-chamado-rodape');
+  const btnResolverChamadoModal = document.getElementById('btn-resolver-chamado-modal');
+  const btnDespacharApoioChamado = document.getElementById('btn-despachar-apoio-chamado');
+
+  function abrirModalDetalhesChamado(idChamado) {
+    const lista = obterChamadosGestor();
+    const item = lista.find(c => c.id === idChamado);
+    if (!item || !modalDetalhesChamado) return;
+
+    chamadoSelecionadoAtual = item;
+
+    const elTitulo = document.getElementById('modal-chamado-titulo');
+    const elSub = document.getElementById('modal-chamado-subtitulo');
+    const elCorpo = document.getElementById('modal-chamado-corpo');
+    const elIconeWrap = document.getElementById('modal-chamado-icone-wrap');
+
+    const ehGaragem = item.categoria === 'garagem';
+    const icone = ehGaragem ? (item.precisaSocorro ? '🚚' : '🔧') : (item.icone || '🚦');
+
+    if (elTitulo) elTitulo.textContent = `Report do Motorista #${item.id}`;
+    if (elSub) elSub.textContent = `Enviado por ${item.motorista || 'Motorista'} (${item.matricula || 'MOT-104'}) • ${item.horaChamado || item.hora || 'Recente'}`;
+    if (elIconeWrap) {
+      elIconeWrap.textContent = icone;
+      elIconeWrap.style.background = ehGaragem ? 'rgba(220, 38, 38, 0.12)' : 'rgba(37, 99, 235, 0.12)';
+    }
+
+    const gravidade = item.condicao || item.gravidade || 'baixa';
+    const gravidadeTexto = gravidade === 'alta' ? '🚨 Alta Urgência / Parada Imediata' : (gravidade === 'moderada' ? '⚠️ Moderada / Revisão no Final da Viagem' : 'ℹ️ Baixa / Informativo Preventivo');
+
+    if (elCorpo) {
+      elCorpo.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Card de Destaque -->
+          <div style="background: var(--fundo-campo); border: 1px solid var(--borda-cor); border-radius: var(--raio-medio); padding: 14px 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--texto-secundario);">Classificação da Ocorrência</span>
+              <span class="gestor-chamado-badge ${item.emAndamento === false ? 'gestor-chamado-badge--resolvido' : (gravidade === 'alta' ? 'gestor-chamado-badge--urgente' : (gravidade === 'moderada' ? 'gestor-chamado-badge--moderada' : 'gestor-chamado-badge--baixa'))}">
+                ${item.emAndamento === false ? 'Atendido / Concluído' : (item.statusBadge || item.status || 'Ativo')}
+              </span>
+            </div>
+            <div style="font-size: 16px; font-weight: 700; color: var(--texto-principal); margin-bottom: 4px;">
+              ${ehGaragem ? (item.problemaTexto || 'Falha Técnica no Veículo') : (item.tipoTexto || 'Alerta na Pista')}
+            </div>
+            <div style="font-size: 12.5px; color: var(--texto-secundario);">
+              Gravidade reportada: <strong>${gravidadeTexto}</strong>
+            </div>
+          </div>
+
+          <!-- Metadados de Bordo -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+            <div style="background: var(--fundo-card); border: 1px solid var(--borda-cor); border-radius: var(--raio-pequeno); padding: 10px 12px;">
+              <span style="font-size: 10px; font-weight: 700; color: var(--texto-secundario); text-transform: uppercase;">Condutor em Rota</span>
+              <div style="font-size: 13px; font-weight: 600; color: var(--texto-principal); margin-top: 2px;">${item.motorista || 'João Silva'}</div>
+              <div style="font-size: 11px; color: var(--texto-secundario);">Matrícula: ${item.matricula || 'MOT-104'}</div>
+            </div>
+
+            <div style="background: var(--fundo-card); border: 1px solid var(--borda-cor); border-radius: var(--raio-pequeno); padding: 10px 12px;">
+              <span style="font-size: 10px; font-weight: 700; color: var(--texto-secundario); text-transform: uppercase;">Veículo & Escala</span>
+              <div style="font-size: 13px; font-weight: 600; color: var(--texto-principal); margin-top: 2px;">${item.veiculo || 'Ônibus #02'}</div>
+              <div style="font-size: 11px; color: var(--texto-secundario);">${item.linha || 'Linha Anchieta'}</div>
+            </div>
+
+            <div style="background: var(--fundo-card); border: 1px solid var(--borda-cor); border-radius: var(--raio-pequeno); padding: 10px 12px; grid-column: 1 / -1;">
+              <span style="font-size: 10px; font-weight: 700; color: var(--texto-secundario); text-transform: uppercase;">Localização do Ônibus (GPS)</span>
+              <div style="font-size: 13px; font-weight: 600; color: var(--cor-marca); margin-top: 2px;">📍 ${item.local || 'Av. Inatel, Centro'}</div>
+            </div>
+          </div>
+
+          <!-- Mensagem e Relato do Motorista -->
+          <div style="background: var(--fundo-card); border: 1px solid var(--borda-cor); border-radius: var(--raio-pequeno); padding: 12px 14px;">
+            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--texto-secundario); display: block; margin-bottom: 6px;">Descrição Enviada pelo Condutor:</span>
+            <p style="font-size: 13.5px; line-height: 1.5; color: var(--texto-principal); margin: 0; white-space: pre-wrap;">${item.observacao || item.detalhes || 'Sem detalhes digitados.'}</p>
+          </div>
+
+          ${item.viatura ? `
+            <div style="background: rgba(217, 119, 6, 0.08); border: 1px solid rgba(217, 119, 6, 0.25); border-radius: var(--raio-pequeno); padding: 12px 14px;">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <strong style="font-size: 13px; color: #b45309;">Viatura / Apoio Técnico Notificado:</strong>
+                  <div style="font-size: 12px; color: var(--texto-principal); margin-top: 2px;">${item.viatura}</div>
+                </div>
+                ${item.tempoEstimadoMin ? `<span style="font-weight: 800; font-size: 14px; color: #d97706;">~${item.tempoEstimadoMin} min</span>` : ''}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    if (btnResolverChamadoModal) {
+      if (item.emAndamento === false) {
+        btnResolverChamadoModal.innerHTML = '<span>🔄 Reabrir Chamado</span>';
+        btnResolverChamadoModal.style.background = '#2563eb';
+        btnResolverChamadoModal.style.borderColor = '#2563eb';
+      } else {
+        btnResolverChamadoModal.innerHTML = '<span>✅ Concluir Atendimento</span>';
+        btnResolverChamadoModal.style.background = '#16a34a';
+        btnResolverChamadoModal.style.borderColor = '#16a34a';
+      }
+    }
+
+    modalDetalhesChamado.classList.add('ativo');
+    modalDetalhesChamado.setAttribute('aria-hidden', 'false');
+  }
+
+  function fecharModalDetalhesChamado() {
+    if (!modalDetalhesChamado) return;
+    modalDetalhesChamado.classList.remove('ativo');
+    modalDetalhesChamado.setAttribute('aria-hidden', 'true');
+    chamadoSelecionadoAtual = null;
+  }
+
+  function concluirChamadoGestor(idChamado) {
+    const lista = obterChamadosGestor();
+    const item = lista.find(c => c.id === idChamado);
+    if (!item) return;
+
+    item.emAndamento = false;
+    item.statusBadge = 'Atendido / Concluído';
+    item.status = 'Concluído';
+    item.resolvidoPor = 'CCO - Gestor Operacional';
+    item.resolvidoEm = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    salvarChamadosGestor(lista);
+
+    // Também sincroniza se for o socorro garagem ativo
+    try {
+      const socorroSalvo = localStorage.getItem(CHAVE_STORAGE_SOCORRO_MOTORISTA);
+      if (socorroSalvo) {
+        const obj = JSON.parse(socorroSalvo);
+        if (obj.id === idChamado) {
+          localStorage.removeItem(CHAVE_STORAGE_SOCORRO_MOTORISTA);
+        }
+      }
+    } catch (e) {}
+
+    mostrarToast(`Chamado #${idChamado} marcado como atendido pelo CCO!`, 'sucesso');
+    renderizarPainelChamados();
+    fecharModalDetalhesChamado();
+  }
+
+  function reabrirChamadoGestor(idChamado) {
+    const lista = obterChamadosGestor();
+    const item = lista.find(c => c.id === idChamado);
+    if (!item) return;
+
+    item.emAndamento = true;
+    item.statusBadge = item.precisaSocorro ? 'Socorro Despachado' : 'Alerta Registrado';
+    item.status = 'Alerta Ativo';
+    delete item.resolvidoPor;
+    delete item.resolvidoEm;
+
+    salvarChamadosGestor(lista);
+    mostrarToast(`Chamado #${idChamado} reaberto no CCO.`, 'sucesso');
+    renderizarPainelChamados();
+    fecharModalDetalhesChamado();
+  }
+
+  window.abrirModalDetalhesChamado = abrirModalDetalhesChamado;
+  window.concluirChamadoGestor = concluirChamadoGestor;
+  window.reabrirChamadoGestor = reabrirChamadoGestor;
+
+  if (btnFecharModalChamado) btnFecharModalChamado.addEventListener('click', fecharModalDetalhesChamado);
+  if (btnFecharChamadoRodape) btnFecharChamadoRodape.addEventListener('click', fecharModalDetalhesChamado);
+  if (modalDetalhesChamado) {
+    modalDetalhesChamado.addEventListener('click', (e) => {
+      if (e.target === modalDetalhesChamado) fecharModalDetalhesChamado();
+    });
+  }
+
+  if (btnResolverChamadoModal) {
+    btnResolverChamadoModal.addEventListener('click', () => {
+      if (!chamadoSelecionadoAtual) return;
+      if (chamadoSelecionadoAtual.emAndamento === false) {
+        reabrirChamadoGestor(chamadoSelecionadoAtual.id);
+      } else {
+        concluirChamadoGestor(chamadoSelecionadoAtual.id);
+      }
+    });
+  }
+
+  if (btnDespacharApoioChamado) {
+    btnDespacharApoioChamado.addEventListener('click', () => {
+      if (!chamadoSelecionadoAtual) return;
+      chamadoSelecionadoAtual.precisaSocorro = true;
+      chamadoSelecionadoAtual.condicao = 'alta';
+      chamadoSelecionadoAtual.condicaoTexto = 'Parada Imediata / Socorro Urgente';
+      chamadoSelecionadoAtual.statusBadge = 'Socorro Despachado';
+      chamadoSelecionadoAtual.viatura = 'Viatura Móvel de Apoio Garagem #02 (Técnico: Rodrigo)';
+      chamadoSelecionadoAtual.tempoEstimadoMin = 10;
+      
+      const lista = obterChamadosGestor();
+      const idx = lista.findIndex(c => c.id === chamadoSelecionadoAtual.id);
+      if (idx !== -1) {
+        lista[idx] = chamadoSelecionadoAtual;
+        salvarChamadosGestor(lista);
+      }
+
+      mostrarToast(`Viatura de apoio mecânico despachada para o chamado #${chamadoSelecionadoAtual.id}!`, 'sucesso');
+      renderizarPainelChamados();
+      abrirModalDetalhesChamado(chamadoSelecionadoAtual.id);
+    });
+  }
+
+  // Botões de filtro e busca do painel de chamados
+  const inputBuscaChamados = document.getElementById('input-busca-chamados');
+  const filtroTipoChamado = document.getElementById('filtro-tipo-chamado');
+  const filtroUrgenciaChamado = document.getElementById('filtro-urgencia-chamado');
+  const btnAtualizarChamados = document.getElementById('btn-atualizar-chamados');
+  const btnSimularReport = document.getElementById('btn-simular-report-demo');
+
+  if (inputBuscaChamados) inputBuscaChamados.addEventListener('input', renderizarPainelChamados);
+  if (filtroTipoChamado) filtroTipoChamado.addEventListener('change', renderizarPainelChamados);
+  if (filtroUrgenciaChamado) filtroUrgenciaChamado.addEventListener('change', renderizarPainelChamados);
+  if (btnAtualizarChamados) {
+    btnAtualizarChamados.addEventListener('click', () => {
+      renderizarPainelChamados();
+      mostrarToast('Fila de chamados sincronizada com os terminais de bordo!');
+    });
+  }
+
+  if (btnSimularReport) {
+    btnSimularReport.addEventListener('click', () => {
+      const falhasExemplo = [
+        { prob: 'motor', texto: 'Motor / Temperatura', desc: 'Luz de advertência de arrefecimento acendeu na subida do Inatel.', urg: 'alta', viat: true },
+        { prob: 'freio', texto: 'Freio / Ar Comprimido', desc: 'Perda gradual de pressão de ar no circuito secundário.', urg: 'alta', viat: true },
+        { prob: 'acessibilidade', texto: 'Elevador Cadeirante', desc: 'Mecanismo da trava emperrou na Parada 4.', urg: 'moderada', viat: false },
+        { prob: 'portas', texto: 'Portas / Janelas', desc: 'Sensor de fechamento da porta central com mau contato intermitente.', urg: 'baixa', viat: false }
+      ];
+      const rand = falhasExemplo[Math.floor(Math.random() * falhasExemplo.length)];
+      const agora = new Date();
+      const hora = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+      const idSimulado = `GAR-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const novoReport = {
+        id: idSimulado,
+        categoria: 'garagem',
+        titulo: rand.urg === 'alta' ? 'Socorro Mecânico Acionado' : 'Problema Notificado à Garagem',
+        problema: rand.prob,
+        problemaTexto: rand.texto,
+        condicao: rand.urg,
+        condicaoTexto: rand.urg === 'alta' ? 'Parada Imediata / Socorro Urgente' : 'Revisar no fim da viagem',
+        precisaSocorro: rand.viat,
+        observacao: rand.desc,
+        viatura: rand.viat ? 'Viatura Garagem #01 (Mecânico: Carlos)' : null,
+        tempoEstimadoMin: rand.viat ? 15 : null,
+        horaChamado: hora,
+        statusBadge: rand.viat ? 'Socorro Despachado' : 'Alerta Registrado',
+        local: 'Praça Urbana Carolina, Centro',
+        motorista: 'João Silva',
+        matricula: 'MOT-104',
+        veiculo: 'Ônibus #02',
+        linha: 'Linha Anchieta',
+        criadoEm: agora.toISOString(),
+        emAndamento: true
+      };
+
+      const lista = obterChamadosGestor();
+      lista.unshift(novoReport);
+      salvarChamadosGestor(lista);
+
+      // Também espelha no localStorage do motorista para que ambas as telas sincronizem
+      try {
+        localStorage.setItem(CHAVE_STORAGE_SOCORRO_MOTORISTA, JSON.stringify(novoReport));
+      } catch (e) {}
+
+      mostrarToast(`Novo report recebido do Ônibus #02: ${rand.texto}!`, 'sucesso');
+      renderizarPainelChamados();
+    });
+  }
+
+  // Listener global de storage para sincronizar chamados em tempo real quando enviados de outra aba
+  window.addEventListener('storage', (e) => {
+    if (e.key === CHAVE_STORAGE_CHAMADOS || e.key === CHAVE_STORAGE_SOCORRO_MOTORISTA || e.key === CHAVE_STORAGE_OCORRENCIAS_MOTORISTA) {
+      renderizarPainelChamados();
+      renderizarFeedOcorrencias();
+    }
+  });
+
+  /* ──────────────────────────────────────────────────────────
+     7. FEED DE OCORRÊNCIAS E TELEMETRIA
      ────────────────────────────────────────────────────────── */
   function renderizarFeedOcorrencias() {
     const container = document.getElementById('lista-feed-ocorrencias');
     if (!container) return;
 
-    const ocorrencias = [
+    // Busca chamados e reports reais enviados pelos motoristas
+    const chamados = obterChamadosGestor();
+    const chamadosAtivos = chamados.slice(0, 8);
+
+    const ocorrenciasBase = [
       {
         hora: 'Agora',
         tipo: 'telemetria',
         titulo: 'Telemetria do Cockpit Ativa',
         desc: 'Ônibus #02 (Linha Fernandes) sincronizado com o GPS e terminal de bordo.',
-        icone: 'check'
-      },
-      {
-        hora: 'Há 12 min',
-        tipo: 'aviso',
-        titulo: 'Aviso de Trânsito — Ponte Nova',
-        desc: 'Motorista Marcos Vinicius (MOT-1042) reportou fluxo lento no sentido Praça Urbana Carolina.',
-        icone: 'alerta'
+        cor: 'var(--cor-marca)'
       },
       {
         hora: 'Há 45 min',
         tipo: 'info',
-        titulo: 'Início de Viagem — Turno da Manhã',
-        desc: 'Motorista Carlos Mendes (MOT-4821) efetuou login no terminal de bordo do veículo 102 com sucesso.',
-        icone: 'onibus'
+        titulo: 'Início de Viagem — Turno Operacional',
+        desc: 'Motorista Carlos Mendes (MOT-4821) efetuou login no terminal de bordo do veículo 102.',
+        cor: 'var(--cor-marca)'
       },
       {
         hora: 'Há 2h',
         tipo: 'info',
         titulo: 'Abertura da Central CCO',
-        desc: 'Supervisão iniciada por Gestor CCO (valebussrs@gmail.com). Escala matutina validada.',
-        icone: 'cco'
+        desc: 'Supervisão iniciada por Gestor CCO (valebussrs@gmail.com). Escala validada.',
+        cor: 'var(--cor-marca)'
       }
     ];
 
-    container.innerHTML = ocorrencias.map(o => `
-      <div style="background: var(--fundo-campo); border-radius: var(--raio-pequeno); padding: 12px 14px; display: flex; align-items: flex-start; gap: 12px;">
-        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--cor-marca); margin-top: 6px; flex-shrink: 0;"></div>
+    // Converte os chamados do motorista em itens de feed destacados
+    const itensChamadosFeed = chamadosAtivos.map(c => {
+      const ehGaragem = c.categoria === 'garagem';
+      const gravidade = c.condicao || c.gravidade || 'baixa';
+      const corBolinha = c.emAndamento === false ? '#16a34a' : (gravidade === 'alta' ? '#dc2626' : (gravidade === 'moderada' ? '#d97706' : '#2563eb'));
+      const tituloFeed = ehGaragem
+        ? `[${c.veiculo || 'Ônibus'}] Relato: ${c.problemaTexto || 'Falha Mecânica'}`
+        : `[Trânsito] ${c.tipoTexto || 'Alerta de Tráfego'}`;
+      const descFeed = `Motorista ${c.motorista || 'Condutor'} (${c.matricula || 'MOT-104'}): "${c.observacao || c.detalhes || 'Sem observações'}" — Local: ${c.local || 'Itinerário'}`;
+
+      return {
+        id: c.id,
+        hora: c.horaChamado || c.hora || 'Hoje',
+        titulo: tituloFeed,
+        desc: descFeed,
+        cor: corBolinha,
+        clicavel: true
+      };
+    });
+
+    const listaFinal = [...itensChamadosFeed, ...ocorrenciasBase];
+
+    container.innerHTML = listaFinal.map(o => `
+      <div style="background: var(--fundo-campo); border-radius: var(--raio-pequeno); padding: 12px 14px; display: flex; align-items: flex-start; gap: 12px; ${o.clicavel ? 'cursor: pointer; transition: background 0.15s ease;' : ''}" ${o.clicavel ? `onclick="window.abrirModalDetalhesChamado('${o.id}')"` : ''}>
+        <div style="width: 10px; height: 10px; border-radius: 50%; background: ${o.cor}; margin-top: 5px; flex-shrink: 0; box-shadow: 0 0 6px ${o.cor}55;"></div>
         <div style="flex: 1;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
             <strong style="font-size: 13px; color: var(--texto-principal);">${o.titulo}</strong>
@@ -833,11 +1437,19 @@
       aba.classList.add('ativo');
 
       const alvo = aba.getAttribute('data-aba');
-      document.getElementById('painel-motoristas').style.display = alvo === 'motoristas' ? 'block' : 'none';
-      document.getElementById('painel-escalas').style.display = alvo === 'escalas' ? 'block' : 'none';
-      document.getElementById('painel-ocorrencias').style.display = alvo === 'ocorrencias' ? 'block' : 'none';
+      const painelMotoristas = document.getElementById('painel-motoristas');
+      const painelEscalas = document.getElementById('painel-escalas');
+      const painelChamados = document.getElementById('painel-chamados-motoristas');
+      const painelOcorrencias = document.getElementById('painel-ocorrencias');
 
-      if (alvo === 'ocorrencias') {
+      if (painelMotoristas) painelMotoristas.style.display = alvo === 'motoristas' ? 'block' : 'none';
+      if (painelEscalas) painelEscalas.style.display = alvo === 'escalas' ? 'block' : 'none';
+      if (painelChamados) painelChamados.style.display = alvo === 'chamados-motoristas' ? 'block' : 'none';
+      if (painelOcorrencias) painelOcorrencias.style.display = alvo === 'ocorrencias' ? 'block' : 'none';
+
+      if (alvo === 'chamados-motoristas') {
+        renderizarPainelChamados();
+      } else if (alvo === 'ocorrencias') {
         renderizarFeedOcorrencias();
       }
     });
@@ -1124,5 +1736,6 @@
   // Inicialização
   renderizarTabela();
   renderizarFeedOcorrencias();
+  renderizarPainelChamados();
 
 })();
