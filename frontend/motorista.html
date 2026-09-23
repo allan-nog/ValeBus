@@ -382,10 +382,6 @@
               <span class="motorista-btn-flutuante__dot" id="dot-rota-ativa" style="background-color: #2563eb;"></span>
               <span id="label-toggle-rota">Rota Fernandes (10.9 km)</span>
             </button>
-            <button type="button" class="motorista-btn-flutuante" id="btn-toggle-paradas-anchieta" title="Exibir ou ocultar os pontos de parada no mapa" aria-pressed="false">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="currentColor"></circle><circle cx="16" cy="13" r="1" fill="currentColor"></circle></svg>
-              <span id="label-toggle-paradas">32 Paradas</span>
-            </button>
             <button type="button" class="btn-recenter-mapa-valebus" id="btn-recenter-gps" aria-label="Recentralizar no meu ônibus" title="Centralizar visualização no ônibus">
               <svg width="16" height="16" aria-hidden="true"><use href="#icone-mira"/></svg>
               <span>Meu Ônibus</span>
@@ -516,28 +512,10 @@
                 </div>
               </div>
               <div class="rota-card-acoes-bar">
-                <button type="button" class="btn-rota-acao btn-rota-acao--secundario" id="btn-toggle-lista-paradas-fernandes">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                  <span>Ver 32 Paradas</span>
-                </button>
                 <button type="button" class="btn-rota-acao btn-rota-acao--ativo rota-card__btn-trocar" id="btn-escala-fernandes" data-linha="fernandes">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                   <span>Ativa no Cockpit</span>
                 </button>
-              </div>
-
-              <!-- Lista Expansível das 32 Paradas da Linha Fernandes -->
-              <div class="fernandes-itinerario-box" id="box-paradas-fernandes" style="display: none;">
-                <div class="anchieta-itinerario-header">
-                  <span class="anchieta-itinerario-titulo">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="#2563eb"></circle><circle cx="16" cy="13" r="1" fill="#2563eb"></circle></svg>
-                    32 Paradas da Linha Fernandes (Fernandes / Algodoeira)
-                  </span>
-                  <span style="font-size: 11px; font-weight: 700; color: #2563eb;">Clique no ponto para ver no mapa</span>
-                </div>
-                <div class="anchieta-paradas-lista" id="lista-paradas-fernandes-container">
-                  <!-- Carregado via JS a partir de VALEBUS_PARADAS.paradasPorLinha.fernandes -->
-                </div>
               </div>
             </article>
 
@@ -563,28 +541,10 @@
                 </div>
               </div>
               <div class="rota-card-acoes-bar">
-                <button type="button" class="btn-rota-acao btn-rota-acao--secundario" id="btn-toggle-lista-paradas">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                  <span>Ver 14 Paradas</span>
-                </button>
                 <button type="button" class="btn-rota-acao btn-rota-acao--verde rota-card__btn-trocar" id="btn-escala-anchieta" data-linha="anchieta">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <span>Ativar Rota Anchieta</span>
                 </button>
-              </div>
-
-              <!-- Lista Expansível das 14 Paradas da Linha Anchieta -->
-              <div class="anchieta-itinerario-box" id="box-paradas-anchieta" style="display: none;">
-                <div class="anchieta-itinerario-header">
-                  <span class="anchieta-itinerario-titulo">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="#16a34a"></circle><circle cx="16" cy="13" r="1" fill="#16a34a"></circle></svg>
-                    14 Paradas da Linha Anchieta (Sentido Recanto)
-                  </span>
-                  <span style="font-size: 11px; font-weight: 700; color: #16a34a;">Clique no ponto para ver no mapa</span>
-                </div>
-                <div class="anchieta-paradas-lista" id="lista-paradas-anchieta-container">
-                  <!-- Carregado via JS a partir de VALEBUS_PARADAS.paradasPorLinha.anchieta -->
-                </div>
               </div>
             </article>
 
@@ -610,28 +570,10 @@
                 </div>
               </div>
               <div class="rota-card-acoes-bar">
-                <button type="button" class="btn-rota-acao btn-rota-acao--secundario" id="btn-toggle-lista-paradas-fortaleza">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                  <span>Ver 30 Paradas</span>
-                </button>
                 <button type="button" class="btn-rota-acao btn-rota-acao--roxo rota-card__btn-trocar" id="btn-escala-fortaleza" data-linha="fortaleza">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <span>Ativar Rota Fortaleza</span>
                 </button>
-              </div>
-
-              <!-- Lista Expansível das 30 Paradas da Linha Fortaleza -->
-              <div class="fortaleza-itinerario-box" id="box-paradas-fortaleza" style="display: none;">
-                <div class="anchieta-itinerario-header">
-                  <span class="anchieta-itinerario-titulo">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="#9333ea"></circle><circle cx="16" cy="13" r="1" fill="#9333ea"></circle></svg>
-                    30 Paradas da Linha Fortaleza (Fernandes / Centro / Fortaleza)
-                  </span>
-                  <span style="font-size: 11px; font-weight: 700; color: #9333ea;">Clique no ponto para ver no mapa</span>
-                </div>
-                <div class="anchieta-paradas-lista" id="lista-paradas-fortaleza-container">
-                  <!-- Carregado via JS a partir de VALEBUS_PARADAS.paradasPorLinha.fortaleza -->
-                </div>
               </div>
             </article>
 
@@ -657,28 +599,126 @@
                 </div>
               </div>
               <div class="rota-card-acoes-bar">
-                <button type="button" class="btn-rota-acao btn-rota-acao--secundario" id="btn-toggle-lista-paradas-industrial">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                  <span>Ver 12 Paradas</span>
-                </button>
                 <button type="button" class="btn-rota-acao btn-rota-acao--laranja rota-card__btn-trocar" id="btn-escala-industrial" data-linha="industrial">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <span>Ativar Rota Industrial</span>
                 </button>
               </div>
+            </article>
 
-              <!-- Lista Expansível das 12 Paradas da Linha Industrial -->
-              <div class="industrial-itinerario-box" id="box-paradas-industrial" style="display: none;">
-                <div class="anchieta-itinerario-header">
-                  <span class="anchieta-itinerario-titulo">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 10h16"></path><path d="M7 16v3"></path><path d="M17 16v3"></path><circle cx="8" cy="13" r="1" fill="#ea580c"></circle><circle cx="16" cy="13" r="1" fill="#ea580c"></circle></svg>
-                    12 Paradas da Linha Industrial (Distrito Industrial / BR-459 / Murilo)
-                  </span>
-                  <span style="font-size: 11px; font-weight: 700; color: #ea580c;">Clique no ponto para ver no mapa</span>
+            <!-- Linha Porto Sapucaí (Oficial) -->
+            <article class="linha-card" id="card-escala-porto-sapucai" style="border: 1px solid var(--borda-cor);">
+              <div class="linha-card__topo">
+                <span class="linha-card__dot" style="background-color: #0891b2;"></span>
+                <h3 class="linha-card__titulo">Linha Porto Sapucaí &mdash; Porto Sapucaí / BR-459 / Centro / Murilo</h3>
+                <span class="linha-card__status-tag" id="tag-status-porto-sapucai" style="background-color: rgba(100, 116, 139, 0.12); color: var(--texto-secundario);">18 Paradas • 13,4 km</span>
+              </div>
+              <div class="linha-card__conteudo">
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🚩 Terminal de Partida:</span>
+                  <span class="linha-card__texto">BR-459 Rod. JK, Km 116 Leste (Parada 1 &bull; Porto Sapucaí)</span>
                 </div>
-                <div class="anchieta-paradas-lista" id="lista-paradas-industrial-container">
-                  <!-- Carregado via JS a partir de VALEBUS_PARADAS.paradasPorLinha.industrial -->
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">📍 Itinerário Completo:</span>
+                  <span class="linha-card__texto">Porto Sapucaí &bull; BR-459 &bull; Linear &bull; Carreteiro &bull; Ipanema &bull; Intelbras &bull; Nitere &bull; Antiga Real &bull; Unissul &bull; Praça da Câmara &bull; São Benedito &bull; Inatel</span>
                 </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🏁 Ponto Final:</span>
+                  <span class="linha-card__texto">Praça Urbana Carolina (Parada 18 &bull; Praça do Murilo)</span>
+                </div>
+              </div>
+              <div class="rota-card-acoes-bar">
+                <button type="button" class="btn-rota-acao btn-rota-acao--ciano rota-card__btn-trocar" id="btn-escala-porto-sapucai" data-linha="porto_sapucai">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Ativar Rota Porto Sapucaí</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- Linha Reforço José G.M. (Via MCM) (Oficial) -->
+            <article class="linha-card" id="card-escala-reforco-jose-gm" style="border: 1px solid var(--borda-cor);">
+              <div class="linha-card__topo">
+                <span class="linha-card__dot" style="background-color: #dc2626;"></span>
+                <h3 class="linha-card__titulo">Linha Reforço José G.M. (Via MCM) &mdash; José Gonçalves Mendes / Via MCM / Centro / Praça da Câmara</h3>
+                <span class="linha-card__status-tag" id="tag-status-reforco-jose-gm" style="background-color: rgba(100, 116, 139, 0.12); color: var(--texto-secundario);">19 Paradas • 6,4 km</span>
+              </div>
+              <div class="linha-card__conteudo">
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🚩 Terminal de Partida:</span>
+                  <span class="linha-card__texto">R. Das Rosas, 300 (Parada 1 &bull; Caixa D'Água da Copasa)</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">📍 Itinerário Completo:</span>
+                  <span class="linha-card__texto">Copasa &bull; Ginásio &bull; Presídio &bull; Bairro José G.M. &bull; Bilac Pinto &bull; Preço Menor &bull; Santa Felicidade &bull; Empresa D.L. &bull; Qualitronix &bull; Bar do Ba &bull; Sacc &bull; Bloco do Urso &bull; Vaca Mecânica &bull; 2ª Ponte &bull; Unissul</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🏁 Ponto Final:</span>
+                  <span class="linha-card__texto">Praça Expedicionário Maurício Adami (Parada 20 &bull; Praça da Câmara)</span>
+                </div>
+              </div>
+              <div class="rota-card-acoes-bar">
+                <button type="button" class="btn-rota-acao btn-rota-acao--vermelho rota-card__btn-trocar" id="btn-escala-reforco-jose-gm" data-linha="reforco_jose_gm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Ativar Rota Reforço José G.M.</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- Linha São Benedito (Hora e Meia) (Oficial) -->
+            <article class="linha-card" id="card-escala-sao-benedito-hora-meia" style="border: 1px solid var(--borda-cor);">
+              <div class="linha-card__topo">
+                <span class="linha-card__dot" style="background-color: #db2777;"></span>
+                <h3 class="linha-card__titulo">Linha São Benedito (Hora e Meia) &mdash; José Gonçalves Mendes / Praça São Benedito / Santos Dumont / Murilo</h3>
+                <span class="linha-card__status-tag" id="tag-status-sao-benedito-hora-meia" style="background-color: rgba(100, 116, 139, 0.12); color: var(--texto-secundario);">24 Paradas • 9,1 km</span>
+              </div>
+              <div class="linha-card__conteudo">
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🚩 Terminal de Partida:</span>
+                  <span class="linha-card__texto">R. Das Rosas, 300 (Parada 1 &bull; Caixa D'Água da Copasa)</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">📍 Itinerário Completo:</span>
+                  <span class="linha-card__texto">Copasa &bull; Ginásio &bull; Presídio &bull; José G.M. &bull; Otília Vilela &bull; Praça São Benedito &bull; Preço Menor &bull; Santa Felicidade &bull; Maestro Teles &bull; Supermercado Gomes &bull; Master Auto Center &bull; Sacc &bull; Bloco do Urso &bull; Vaca Mecânica &bull; Unissul &bull; Praça da Câmara &bull; Inatel</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🏁 Ponto Final:</span>
+                  <span class="linha-card__texto">Praça Urbana Carolina (Parada 25 &bull; Praça do Murilo)</span>
+                </div>
+              </div>
+              <div class="rota-card-acoes-bar">
+                <button type="button" class="btn-rota-acao btn-rota-acao--rosa rota-card__btn-trocar" id="btn-escala-sao-benedito-hora-meia" data-linha="sao_benedito_hora_meia">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Ativar Rota São Benedito (Hora e Meia)</span>
+                </button>
+              </div>
+            </article>
+
+            <!-- Linha São Benedito (Hora) (Oficial) -->
+            <article class="linha-card" id="card-escala-sao-benedito-hora" style="border: 1px solid var(--borda-cor);">
+              <div class="linha-card__topo">
+                <span class="linha-card__dot" style="background-color: #eab308;"></span>
+                <h3 class="linha-card__titulo">Linha São Benedito (Hora) &mdash; José Gonçalves Mendes / Praça São Benedito / Empresa D.L. / Usivale / Murilo</h3>
+                <span class="linha-card__status-tag" id="tag-status-sao-benedito-hora" style="background-color: rgba(100, 116, 139, 0.12); color: var(--texto-secundario);">26 Paradas • 9,0 km</span>
+              </div>
+              <div class="linha-card__conteudo">
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🚩 Terminal de Partida:</span>
+                  <span class="linha-card__texto">R. Das Rosas, 300 (Parada 1 &bull; Caixa D'Água da Copasa)</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">📍 Itinerário Completo:</span>
+                  <span class="linha-card__texto">Copasa &bull; Ginásio &bull; Presídio &bull; José G.M. &bull; Otília Vilela &bull; Praça São Benedito &bull; Preço Menor &bull; Santa Felicidade &bull; Empresa D.L. &bull; Usivale &bull; Maestro Teles &bull; Supermercado Gomes &bull; Master Auto Center &bull; Sacc &bull; Bloco do Urso &bull; Vaca Mecânica &bull; Unissul &bull; Praça da Câmara &bull; Inatel</span>
+                </div>
+                <div class="linha-card__dado">
+                  <span class="linha-card__rotulo">🏁 Ponto Final:</span>
+                  <span class="linha-card__texto">Praça Urbana Carolina (Parada 27 &bull; Praça do Murilo)</span>
+                </div>
+              </div>
+              <div class="rota-card-acoes-bar">
+                <button type="button" class="btn-rota-acao btn-rota-acao--amarelo rota-card__btn-trocar" id="btn-escala-sao-benedito-hora" data-linha="sao_benedito_hora">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Ativar Rota São Benedito (Hora)</span>
+                </button>
               </div>
             </article>
           </div>

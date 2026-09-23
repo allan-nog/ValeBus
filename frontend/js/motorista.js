@@ -67,6 +67,38 @@
               estadoMotorista.distanciaKm = 9.4;
               estadoMotorista.tempoMin = 25;
               estadoMotorista.proximaParada = '1. Entr. MG-173 Para Cachoeira De Minas';
+            } else if (u.linha.toLowerCase().includes('porto') || u.linha.toLowerCase().includes('sapucai')) {
+              estadoMotorista.linhaAtivaChave = 'porto_sapucai';
+              estadoMotorista.linhaCodigo = 'Linha Porto Sapucaí';
+              estadoMotorista.linhaNome = 'Porto Sapucaí / BR-459 / Centro / Praça Urbana Carolina';
+              estadoMotorista.estacao = 'BR-459 Rod. JK, Km 116 Leste | Porto Sapucaí';
+              estadoMotorista.distanciaKm = 13.4;
+              estadoMotorista.tempoMin = 32;
+              estadoMotorista.proximaParada = '1. Porto Sapucaí';
+            } else if (u.linha.toLowerCase().includes('reforco') || u.linha.toLowerCase().includes('mcm')) {
+              estadoMotorista.linhaAtivaChave = 'reforco_jose_gm';
+              estadoMotorista.linhaCodigo = 'Linha Reforço José G.M.';
+              estadoMotorista.linhaNome = 'José Gonçalves Mendes / Via MCM / Centro / Praça da Câmara';
+              estadoMotorista.estacao = "R. Das Rosas, 300 | Caixa D'Água Da Copasa";
+              estadoMotorista.distanciaKm = 6.4;
+              estadoMotorista.tempoMin = 18;
+              estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
+            } else if (u.linha.toLowerCase().includes('hora e meia') || (u.linha.toLowerCase().includes('benedito') && u.linha.toLowerCase().includes('meia'))) {
+              estadoMotorista.linhaAtivaChave = 'sao_benedito_hora_meia';
+              estadoMotorista.linhaCodigo = 'Linha São Benedito (Hora e Meia)';
+              estadoMotorista.linhaNome = 'José Gonçalves Mendes / Praça São Benedito / Santos Dumont / Praça Urbana Carolina';
+              estadoMotorista.estacao = "R. Das Rosas, 300 | Caixa D'Água Da Copasa";
+              estadoMotorista.distanciaKm = 9.1;
+              estadoMotorista.tempoMin = 24;
+              estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
+            } else if (u.linha.toLowerCase().includes('benedito') || (u.linha.toLowerCase().includes('hora') && !u.linha.toLowerCase().includes('meia'))) {
+              estadoMotorista.linhaAtivaChave = 'sao_benedito_hora';
+              estadoMotorista.linhaCodigo = 'Linha São Benedito (Hora)';
+              estadoMotorista.linhaNome = 'José Gonçalves Mendes / Praça São Benedito / Empresa D.L. / Usivale / Centro / Praça Urbana Carolina';
+              estadoMotorista.estacao = "R. Das Rosas, 300 | Caixa D'Água Da Copasa";
+              estadoMotorista.distanciaKm = 9.0;
+              estadoMotorista.tempoMin = 23;
+              estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
             } else if (u.linha.toLowerCase().includes('fortaleza')) {
               estadoMotorista.linhaAtivaChave = 'fortaleza';
               estadoMotorista.linhaCodigo = 'Linha Fortaleza';
@@ -235,6 +267,46 @@
         classeInativo: 'btn-rota-acao--laranja',
         textoAtivar: 'Ativar Rota Industrial',
         tagInativa: '12 Paradas • 9,4 km'
+      },
+      {
+        chave: 'porto_sapucai',
+        btnId: 'btn-escala-porto-sapucai',
+        tagId: 'tag-status-porto-sapucai',
+        cardId: 'card-escala-porto-sapucai',
+        cor: '#0891b2',
+        classeInativo: 'btn-rota-acao--ciano',
+        textoAtivar: 'Ativar Rota Porto Sapucaí',
+        tagInativa: '18 Paradas • 13,4 km'
+      },
+      {
+        chave: 'reforco_jose_gm',
+        btnId: 'btn-escala-reforco-jose-gm',
+        tagId: 'tag-status-reforco-jose-gm',
+        cardId: 'card-escala-reforco-jose-gm',
+        cor: '#dc2626',
+        classeInativo: 'btn-rota-acao--vermelho',
+        textoAtivar: 'Ativar Rota Reforço José G.M.',
+        tagInativa: '19 Paradas • 6,4 km'
+      },
+      {
+        chave: 'sao_benedito_hora_meia',
+        btnId: 'btn-escala-sao-benedito-hora-meia',
+        tagId: 'tag-status-sao-benedito-hora-meia',
+        cardId: 'card-escala-sao-benedito-hora-meia',
+        cor: '#db2777',
+        classeInativo: 'btn-rota-acao--rosa',
+        textoAtivar: 'Ativar Rota São Benedito (Hora e Meia)',
+        tagInativa: '24 Paradas • 9,1 km'
+      },
+      {
+        chave: 'sao_benedito_hora',
+        btnId: 'btn-escala-sao-benedito-hora',
+        tagId: 'tag-status-sao-benedito-hora',
+        cardId: 'card-escala-sao-benedito-hora',
+        cor: '#eab308',
+        classeInativo: 'btn-rota-acao--amarelo',
+        textoAtivar: 'Ativar Rota São Benedito (Hora)',
+        tagInativa: '26 Paradas • 9,0 km'
       }
     ];
 
@@ -541,6 +613,18 @@
     } else if (chaveLinha === 'industrial') {
       cor = '#ea580c';
       nome = 'Linha Industrial';
+    } else if (chaveLinha === 'porto_sapucai') {
+      cor = '#0891b2';
+      nome = 'Linha Porto Sapucaí';
+    } else if (chaveLinha === 'reforco_jose_gm') {
+      cor = '#dc2626';
+      nome = 'Linha Reforço José G.M.';
+    } else if (chaveLinha === 'sao_benedito_hora_meia') {
+      cor = '#db2777';
+      nome = 'Linha São Benedito (Hora e Meia)';
+    } else if (chaveLinha === 'sao_benedito_hora') {
+      cor = '#eab308';
+      nome = 'Linha São Benedito (Hora)';
     }
 
     paradas.forEach((ponto, index) => {
@@ -598,6 +682,26 @@
       corHalo = '#431407';
       titulo = 'Linha Industrial &bull; Rota Oficial';
       desc = 'Distrito Industrial ➔ BR-459 ➔ Centro ➔ Murilo (9,4 km &bull; 12 paradas)';
+    } else if (chaveLinha === 'porto_sapucai') {
+      cor = '#0891b2';
+      corHalo = '#164e63';
+      titulo = 'Linha Porto Sapucaí &bull; Rota Oficial';
+      desc = 'Porto Sapucaí ➔ BR-459 ➔ Centro ➔ Murilo (13,4 km &bull; 18 paradas)';
+    } else if (chaveLinha === 'reforco_jose_gm') {
+      cor = '#dc2626';
+      corHalo = '#450a0a';
+      titulo = 'Linha Reforço José G.M. (Via MCM) &bull; Rota Oficial';
+      desc = 'José Gonçalves Mendes ➔ Via MCM ➔ Centro ➔ Praça da Câmara (6,4 km &bull; 19 paradas)';
+    } else if (chaveLinha === 'sao_benedito_hora_meia') {
+      cor = '#db2777';
+      corHalo = '#500724';
+      titulo = 'Linha São Benedito (Hora e Meia) &bull; Rota Oficial';
+      desc = 'José Gonçalves Mendes ➔ Praça São Benedito ➔ Santos Dumont ➔ Murilo (9,1 km &bull; 24 paradas)';
+    } else if (chaveLinha === 'sao_benedito_hora') {
+      cor = '#eab308';
+      corHalo = '#713f12';
+      titulo = 'Linha São Benedito (Hora) &bull; Rota Oficial';
+      desc = 'José Gonçalves Mendes ➔ Praça São Benedito ➔ D.L. ➔ Usivale ➔ Murilo (9,0 km &bull; 26 paradas)';
     }
 
     const polyHalo = L.polyline(coords, {
@@ -646,7 +750,11 @@
         anchieta: 'Linha Anchieta',
         fernandes: 'Linha Fernandes',
         fortaleza: 'Linha Fortaleza',
-        industrial: 'Linha Industrial'
+        industrial: 'Linha Industrial',
+        porto_sapucai: 'Linha Porto Sapucaí',
+        reforco_jose_gm: 'Linha Reforço José G.M.',
+        sao_benedito_hora_meia: 'Linha São Benedito (Hora e Meia)',
+        sao_benedito_hora: 'Linha São Benedito (Hora)'
       };
       const nome = nomes[estadoMotorista.linhaAtivaChave] || 'Linha Selecionada';
       mostrarToast(`Rota da ${nome} enquadrada no mapa.`);
@@ -684,6 +792,18 @@
     } else if (chave === 'industrial') {
       distTotal = 9.4;
       tempoTotal = 25;
+    } else if (chave === 'porto_sapucai') {
+      distTotal = 13.4;
+      tempoTotal = 32;
+    } else if (chave === 'reforco_jose_gm') {
+      distTotal = 6.4;
+      tempoTotal = 18;
+    } else if (chave === 'sao_benedito_hora_meia') {
+      distTotal = 9.1;
+      tempoTotal = 24;
+    } else if (chave === 'sao_benedito_hora') {
+      distTotal = 9.0;
+      tempoTotal = 23;
     }
     estadoMotorista.distanciaKm = parseFloat((distTotal * Math.max(0.05, fracaoRestante)).toFixed(1));
     estadoMotorista.tempoMin = Math.max(1, Math.round(tempoTotal * Math.max(0.05, fracaoRestante)));
@@ -703,168 +823,8 @@
   }
 
   /* ──────────────────────────────────────────────────────────
-     5.3. LISTAS EXPANSÍVEIS DE ITINERÁRIO (TELA DE ROTAS)
+     5.3. SINCRONIZAÇÃO DE ROTA & CONTROLES DO COCKPIT
      ────────────────────────────────────────────────────────── */
-  function preencherListaParadasFernandes() {
-    const listaContainer = document.getElementById('lista-paradas-fernandes-container');
-    if (!listaContainer || !window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.fernandes) {
-      return;
-    }
-
-    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.fernandes;
-    listaContainer.innerHTML = paradas.map((ponto, i) => {
-      const num = ponto.numero || (i + 1);
-      return `
-        <div class="fernandes-parada-card" data-indice="${i}" title="Clique para ver Parada #${num} no mapa">
-          <span class="fernandes-parada-badge" title="Ponto de Parada">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
-              <path d="M4 10h16"></path>
-              <path d="M7 16v3"></path>
-              <path d="M17 16v3"></path>
-              <circle cx="8" cy="13" r="1" fill="#ffffff"></circle>
-              <circle cx="16" cy="13" r="1" fill="#ffffff"></circle>
-            </svg>
-          </span>
-          <div class="fernandes-parada-info">
-            <div class="fernandes-parada-ref">#${num} ${ponto.referencia}</div>
-            <div class="fernandes-parada-end">${ponto.endereco}</div>
-          </div>
-          <button type="button" class="fernandes-parada-btn-mapa" aria-label="Localizar no mapa">Ver no Mapa</button>
-        </div>
-      `;
-    }).join('');
-
-    listaContainer.querySelectorAll('.fernandes-parada-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const idx = parseInt(card.getAttribute('data-indice'), 10);
-        ativarLinhaNoCockpit('fernandes');
-        trocarSecao('cockpit');
-        selecionarParadaCockpit(idx, true);
-      });
-    });
-  }
-
-  function preencherListaParadasItinerario() {
-    const listaContainer = document.getElementById('lista-paradas-anchieta-container');
-    if (!listaContainer || !window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.anchieta) {
-      return;
-    }
-
-    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.anchieta;
-    listaContainer.innerHTML = paradas.map((ponto, i) => {
-      const num = ponto.numero || (i + 1);
-      return `
-        <div class="anchieta-parada-card" data-indice="${i}" title="Clique para ver Parada #${num} no mapa">
-          <span class="anchieta-parada-badge" title="Ponto de Parada">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
-              <path d="M4 10h16"></path>
-              <path d="M7 16v3"></path>
-              <path d="M17 16v3"></path>
-              <circle cx="8" cy="13" r="1" fill="#ffffff"></circle>
-              <circle cx="16" cy="13" r="1" fill="#ffffff"></circle>
-            </svg>
-          </span>
-          <div class="anchieta-parada-info">
-            <div class="anchieta-parada-ref">#${num} ${ponto.referencia}</div>
-            <div class="anchieta-parada-end">${ponto.endereco}</div>
-          </div>
-          <button type="button" class="anchieta-parada-btn-mapa" aria-label="Localizar no mapa">Ver no Mapa</button>
-        </div>
-      `;
-    }).join('');
-
-    listaContainer.querySelectorAll('.anchieta-parada-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const idx = parseInt(card.getAttribute('data-indice'), 10);
-        ativarLinhaNoCockpit('anchieta');
-        trocarSecao('cockpit');
-        selecionarParadaCockpit(idx, true);
-      });
-    });
-  }
-
-  function preencherListaParadasFortaleza() {
-    const listaContainer = document.getElementById('lista-paradas-fortaleza-container');
-    if (!listaContainer || !window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.fortaleza) {
-      return;
-    }
-
-    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.fortaleza;
-    listaContainer.innerHTML = paradas.map((ponto, i) => {
-      const num = ponto.numero || (i + 1);
-      return `
-        <div class="fortaleza-parada-card" data-indice="${i}" title="Clique para ver Parada #${num} no mapa">
-          <span class="fortaleza-parada-badge" title="Ponto de Parada">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
-              <path d="M4 10h16"></path>
-              <path d="M7 16v3"></path>
-              <path d="M17 16v3"></path>
-              <circle cx="8" cy="13" r="1" fill="#ffffff"></circle>
-              <circle cx="16" cy="13" r="1" fill="#ffffff"></circle>
-            </svg>
-          </span>
-          <div class="fortaleza-parada-info">
-            <div class="fortaleza-parada-ref">#${num} ${ponto.referencia}</div>
-            <div class="fortaleza-parada-end">${ponto.endereco}</div>
-          </div>
-          <button type="button" class="fortaleza-parada-btn-mapa" aria-label="Localizar no mapa">Ver no Mapa</button>
-        </div>
-      `;
-    }).join('');
-
-    listaContainer.querySelectorAll('.fortaleza-parada-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const idx = parseInt(card.getAttribute('data-indice'), 10);
-        ativarLinhaNoCockpit('fortaleza');
-        trocarSecao('cockpit');
-        selecionarParadaCockpit(idx, true);
-      });
-    });
-  }
-
-  function preencherListaParadasIndustrial() {
-    const listaContainer = document.getElementById('lista-paradas-industrial-container');
-    if (!listaContainer || !window.VALEBUS_PARADAS || !window.VALEBUS_PARADAS.paradasPorLinha || !window.VALEBUS_PARADAS.paradasPorLinha.industrial) {
-      return;
-    }
-
-    const paradas = window.VALEBUS_PARADAS.paradasPorLinha.industrial;
-    listaContainer.innerHTML = paradas.map((ponto, i) => {
-      const num = ponto.numero || (i + 1);
-      return `
-        <div class="industrial-parada-card" data-indice="${i}" title="Clique para ver Parada #${num} no mapa">
-          <span class="industrial-parada-badge" title="Ponto de Parada">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="3" width="16" height="13" rx="2"></rect>
-              <path d="M4 10h16"></path>
-              <path d="M7 16v3"></path>
-              <path d="M17 16v3"></path>
-              <circle cx="8" cy="13" r="1" fill="#ffffff"></circle>
-              <circle cx="16" cy="13" r="1" fill="#ffffff"></circle>
-            </svg>
-          </span>
-          <div class="industrial-parada-info">
-            <div class="industrial-parada-ref">#${num} ${ponto.referencia}</div>
-            <div class="industrial-parada-end">${ponto.endereco}</div>
-          </div>
-          <button type="button" class="industrial-parada-btn-mapa" aria-label="Localizar no mapa">Ver no Mapa</button>
-        </div>
-      `;
-    }).join('');
-
-    listaContainer.querySelectorAll('.industrial-parada-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const idx = parseInt(card.getAttribute('data-indice'), 10);
-        ativarLinhaNoCockpit('industrial');
-        trocarSecao('cockpit');
-        selecionarParadaCockpit(idx, true);
-      });
-    });
-  }
-
   function atualizarBotoesFlutuantesLinha(chaveLinha) {
     let cor = '#2563eb';
     let labelRota = 'Rota Fernandes (10.9 km)';
@@ -882,23 +842,33 @@
       cor = '#ea580c';
       labelRota = 'Rota Industrial (9.4 km)';
       totalP = 12;
+    } else if (chaveLinha === 'porto_sapucai') {
+      cor = '#0891b2';
+      labelRota = 'Rota Porto Sapucaí (13.4 km)';
+      totalP = 18;
+    } else if (chaveLinha === 'reforco_jose_gm') {
+      cor = '#dc2626';
+      labelRota = 'Rota Reforço José G.M. (6.4 km)';
+      totalP = 19;
+    } else if (chaveLinha === 'sao_benedito_hora_meia') {
+      cor = '#db2777';
+      labelRota = 'Rota São Benedito Hora e Meia (9.1 km)';
+      totalP = 24;
+    } else if (chaveLinha === 'sao_benedito_hora') {
+      cor = '#eab308';
+      labelRota = 'Rota São Benedito Hora (9.0 km)';
+      totalP = 26;
     }
 
     const dot = document.getElementById('dot-rota-ativa');
     const txtRota = document.getElementById('label-toggle-rota');
-    const txtParadas = document.getElementById('label-toggle-paradas');
 
     if (dot) dot.style.backgroundColor = cor;
     if (txtRota) txtRota.textContent = labelRota;
-    if (txtParadas) txtParadas.textContent = `${totalP} Paradas`;
 
     if (btnToggleRotaAnchieta) {
       btnToggleRotaAnchieta.classList.toggle('motorista-btn-flutuante--ativo', rotaVisivel);
       btnToggleRotaAnchieta.setAttribute('aria-pressed', rotaVisivel ? 'true' : 'false');
-    }
-    if (btnToggleParadasAnchieta) {
-      btnToggleParadasAnchieta.classList.toggle('motorista-btn-flutuante--ativo', paradasVisiveis);
-      btnToggleParadasAnchieta.setAttribute('aria-pressed', paradasVisiveis ? 'true' : 'false');
     }
   }
 
@@ -906,7 +876,35 @@
     estadoMotorista.linhaAtivaChave = chaveLinha;
     waypointLinhaIndex = 0;
 
-    if (chaveLinha === 'industrial') {
+    if (chaveLinha === 'sao_benedito_hora') {
+      estadoMotorista.linhaCodigo = 'Linha São Benedito (Hora)';
+      estadoMotorista.linhaNome = 'José Gonçalves Mendes / Praça São Benedito / Empresa D.L. / Usivale / Centro / Praça Urbana Carolina';
+      estadoMotorista.estacao = "R. Das Rosas, 300 | Caixa D'Água Da Copasa";
+      estadoMotorista.distanciaKm = 9.0;
+      estadoMotorista.tempoMin = 23;
+      estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
+    } else if (chaveLinha === 'sao_benedito_hora_meia') {
+      estadoMotorista.linhaCodigo = 'Linha São Benedito (Hora e Meia)';
+      estadoMotorista.linhaNome = 'José Gonçalves Mendes / Praça São Benedito / Santos Dumont / Praça Urbana Carolina';
+      estadoMotorista.estacao = "R. Das Rosas, 300 | Caixa D'Água Da Copasa";
+      estadoMotorista.distanciaKm = 9.1;
+      estadoMotorista.tempoMin = 24;
+      estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
+    } else if (chaveLinha === 'reforco_jose_gm') {
+      estadoMotorista.linhaCodigo = 'Linha Reforço José G.M.';
+      estadoMotorista.linhaNome = 'José Gonçalves Mendes / Via MCM / Centro / Praça da Câmara';
+      estadoMotorista.estacao = "R. Das Rosas, 300 | Caixa D'Água Da Copasa";
+      estadoMotorista.distanciaKm = 6.4;
+      estadoMotorista.tempoMin = 18;
+      estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
+    } else if (chaveLinha === 'porto_sapucai') {
+      estadoMotorista.linhaCodigo = 'Linha Porto Sapucaí';
+      estadoMotorista.linhaNome = 'Porto Sapucaí / BR-459 / Centro / Praça Urbana Carolina';
+      estadoMotorista.estacao = 'BR-459 Rod. JK, Km 116 Leste | Porto Sapucaí';
+      estadoMotorista.distanciaKm = 13.4;
+      estadoMotorista.tempoMin = 32;
+      estadoMotorista.proximaParada = '1. Porto Sapucaí';
+    } else if (chaveLinha === 'industrial') {
       estadoMotorista.linhaCodigo = 'Linha Industrial';
       estadoMotorista.linhaNome = 'Distrito Industrial / BR-459 / Centro / Praça Urbana Carolina';
       estadoMotorista.estacao = 'BR-459 Rod. JK, Km 119,8 Leste | Entr. MG-173 Para Cachoeira de Minas';
@@ -973,7 +971,11 @@
       fernandes: { nome: 'Linha Fernandes', detalhe: '32 paradas (10,9 km)' },
       anchieta: { nome: 'Linha Anchieta', detalhe: '14 paradas (4,5 km)' },
       fortaleza: { nome: 'Linha Fortaleza', detalhe: '30 paradas (11,0 km)' },
-      industrial: { nome: 'Linha Industrial', detalhe: '12 paradas (9,4 km)' }
+      industrial: { nome: 'Linha Industrial', detalhe: '12 paradas (9,4 km)' },
+      porto_sapucai: { nome: 'Linha Porto Sapucaí', detalhe: '18 paradas (13,4 km)' },
+      reforco_jose_gm: { nome: 'Linha Reforço José G.M. (Via MCM)', detalhe: '19 paradas (6,4 km)' },
+      sao_benedito_hora_meia: { nome: 'Linha São Benedito (Hora e Meia)', detalhe: '24 paradas (9,1 km)' },
+      sao_benedito_hora: { nome: 'Linha São Benedito (Hora)', detalhe: '26 paradas (9,0 km)' }
     };
     const info = infoLinhas[chaveLinha] || { nome: chaveLinha, detalhe: '' };
     mostrarToast(`${info.nome} ativada no Cockpit com ${info.detalhe}.`);
@@ -1141,7 +1143,11 @@
         anchieta: 'Linha Anchieta',
         fernandes: 'Linha Fernandes',
         fortaleza: 'Linha Fortaleza',
-        industrial: 'Linha Industrial'
+        industrial: 'Linha Industrial',
+        porto_sapucai: 'Linha Porto Sapucaí',
+        reforco_jose_gm: 'Linha Reforço José G.M.',
+        sao_benedito_hora_meia: 'Linha São Benedito (Hora e Meia)',
+        sao_benedito_hora: 'Linha São Benedito (Hora)'
       };
       const nome = nomes[estadoMotorista.linhaAtivaChave] || 'Linha Selecionada';
       if (!rotaVisivel) {
@@ -1150,33 +1156,6 @@
       } else {
         desativarRotaNoMapa();
         mostrarToast(`Traçado da ${nome} ocultado.`);
-      }
-    });
-  }
-
-  const btnToggleParadasAnchieta = document.getElementById('btn-toggle-paradas-anchieta');
-  if (btnToggleParadasAnchieta) {
-    btnToggleParadasAnchieta.addEventListener('click', () => {
-      const totais = {
-        anchieta: 14,
-        fernandes: 32,
-        fortaleza: 30,
-        industrial: 12
-      };
-      const nomes = {
-        anchieta: 'Linha Anchieta',
-        fernandes: 'Linha Fernandes',
-        fortaleza: 'Linha Fortaleza',
-        industrial: 'Linha Industrial'
-      };
-      const total = totais[estadoMotorista.linhaAtivaChave] || 12;
-      const nome = nomes[estadoMotorista.linhaAtivaChave] || 'Linha Selecionada';
-      if (!paradasVisiveis) {
-        ativarParadasNoMapa();
-        mostrarToast(`${total} Paradas da ${nome} exibidas no mapa.`);
-      } else {
-        desativarParadasNoMapa();
-        mostrarToast('Pontos de parada ocultados.');
       }
     });
   }
@@ -1202,75 +1181,6 @@
     });
   }
 
-  // Caixa expansível de itinerário da Linha Fernandes
-  const btnToggleListaParadasFernandes = document.getElementById('btn-toggle-lista-paradas-fernandes');
-  const boxParadasFernandes = document.getElementById('box-paradas-fernandes');
-  const listaParadasFernandesContainer = document.getElementById('lista-paradas-fernandes-container');
-
-  if (btnToggleListaParadasFernandes && boxParadasFernandes) {
-    btnToggleListaParadasFernandes.addEventListener('click', () => {
-      const estaVisivel = boxParadasFernandes.style.display !== 'none';
-      boxParadasFernandes.style.display = estaVisivel ? 'none' : 'block';
-      btnToggleListaParadasFernandes.textContent = estaVisivel ? '📋 Ver 32 Paradas' : '✕ Ocultar Paradas';
-      if (!estaVisivel && listaParadasFernandesContainer && listaParadasFernandesContainer.children.length === 0) {
-        preencherListaParadasFernandes();
-      }
-    });
-  }
-
-  // Caixa expansível de itinerário da Linha Anchieta
-  const btnToggleListaParadas = document.getElementById('btn-toggle-lista-paradas');
-  const boxParadasAnchieta = document.getElementById('box-paradas-anchieta');
-  const listaParadasContainer = document.getElementById('lista-paradas-anchieta-container');
-
-  if (btnToggleListaParadas && boxParadasAnchieta) {
-    btnToggleListaParadas.addEventListener('click', () => {
-      const estaVisivel = boxParadasAnchieta.style.display !== 'none';
-      boxParadasAnchieta.style.display = estaVisivel ? 'none' : 'block';
-      btnToggleListaParadas.textContent = estaVisivel ? '📋 Ver 14 Paradas' : '✕ Ocultar Paradas';
-      if (!estaVisivel && listaParadasContainer && listaParadasContainer.children.length === 0) {
-        preencherListaParadasItinerario();
-      }
-    });
-  }
-
-  // Caixa expansível de itinerário da Linha Fortaleza
-  const btnToggleListaParadasFortaleza = document.getElementById('btn-toggle-lista-paradas-fortaleza');
-  const boxParadasFortaleza = document.getElementById('box-paradas-fortaleza');
-  const listaParadasFortalezaContainer = document.getElementById('lista-paradas-fortaleza-container');
-
-  if (btnToggleListaParadasFortaleza && boxParadasFortaleza) {
-    btnToggleListaParadasFortaleza.addEventListener('click', () => {
-      const estaVisivel = boxParadasFortaleza.style.display !== 'none';
-      boxParadasFortaleza.style.display = estaVisivel ? 'none' : 'block';
-      btnToggleListaParadasFortaleza.textContent = estaVisivel ? '📋 Ver 30 Paradas' : '✕ Ocultar Paradas';
-      if (!estaVisivel && listaParadasFortalezaContainer && listaParadasFortalezaContainer.children.length === 0) {
-        preencherListaParadasFortaleza();
-      }
-    });
-  }
-
-  // Caixa expansível de itinerário da Linha Industrial
-  const btnToggleListaParadasIndustrial = document.getElementById('btn-toggle-lista-paradas-industrial');
-  const boxParadasIndustrial = document.getElementById('box-paradas-industrial');
-  const listaParadasIndustrialContainer = document.getElementById('lista-paradas-industrial-container');
-
-  if (btnToggleListaParadasIndustrial && boxParadasIndustrial) {
-    btnToggleListaParadasIndustrial.addEventListener('click', () => {
-      const estaVisivel = boxParadasIndustrial.style.display !== 'none';
-      boxParadasIndustrial.style.display = estaVisivel ? 'none' : 'block';
-      btnToggleListaParadasIndustrial.textContent = estaVisivel ? '📋 Ver 12 Paradas' : '✕ Ocultar Paradas';
-      if (!estaVisivel && listaParadasIndustrialContainer && listaParadasIndustrialContainer.children.length === 0) {
-        preencherListaParadasIndustrial();
-      }
-    });
-  }
-
-  // Preenche inicialmente os itinerários
-  preencherListaParadasFernandes();
-  preencherListaParadasItinerario();
-  preencherListaParadasFortaleza();
-  preencherListaParadasIndustrial();
   atualizarBotoesFlutuantesLinha(estadoMotorista.linhaAtivaChave || 'fernandes');
   selecionarParadaCockpit(0, false);
 
@@ -1369,6 +1279,18 @@
         } else if (estadoMotorista.linhaAtivaChave === 'industrial') {
           distTot = 9.4;
           tempoTot = 25;
+        } else if (estadoMotorista.linhaAtivaChave === 'porto_sapucai') {
+          distTot = 13.4;
+          tempoTot = 32;
+        } else if (estadoMotorista.linhaAtivaChave === 'reforco_jose_gm') {
+          distTot = 6.4;
+          tempoTot = 18;
+        } else if (estadoMotorista.linhaAtivaChave === 'sao_benedito_hora_meia') {
+          distTot = 9.1;
+          tempoTot = 24;
+        } else if (estadoMotorista.linhaAtivaChave === 'sao_benedito_hora') {
+          distTot = 9.0;
+          tempoTot = 23;
         }
         estadoMotorista.distanciaKm = distTot;
         estadoMotorista.tempoMin = tempoTot;

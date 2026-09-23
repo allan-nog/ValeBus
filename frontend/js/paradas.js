@@ -35,17 +35,17 @@ window.VALEBUS_PARADAS = {
     reforco_jose_gm: {
       nome: 'Linha Reforço José G.M. (Via MCM)',
       cor: '#dc2626',
-      descricao: 'José Gonçalves Mendes / Via MCM / Centro / Praça Urbana Carolina'
+      descricao: 'José Gonçalves Mendes / Via MCM / Centro / Praça da Câmara'
     },
     sao_benedito_hora_meia: {
       nome: 'Linha São Benedito (Hora e Meia)',
       cor: '#db2777',
-      descricao: 'Bairro Fernandes / São Benedito / Centro / Praça Urbana Carolina'
+      descricao: 'José Gonçalves Mendes / Praça São Benedito / Santos Dumont / Praça Urbana Carolina'
     },
     sao_benedito_hora: {
       nome: 'Linha São Benedito (Hora)',
       cor: '#eab308',
-      descricao: 'Bairro Fernandes / São Benedito / D.L. / Usivale / Centro / Praça Urbana Carolina'
+      descricao: 'José Gonçalves Mendes / Praça São Benedito / Empresa D.L. / Usivale / Centro / Praça Urbana Carolina'
     }
   },
 
@@ -1178,7 +1178,7 @@ window.VALEBUS_PARADAS = {
         endereco: "Av. Sinhá Moreira, 126",
         referencia: "Supermercado Unissul",
         posicao: [-22.254594652465972, -45.70462648686856],
-        sentido: 'Sentido Bairro / Via MCM / Centro / Murilo'
+        sentido: 'Sentido Bairro / Via MCM / Centro / Praça da Câmara'
       },
       {
         id: 'reforco_jose_gm-20',
@@ -1187,34 +1187,7 @@ window.VALEBUS_PARADAS = {
         endereco: "Praça Expedicionário Maurício Adami",
         referencia: "Praça Da Câmara",
         posicao: [-22.255874373033315, -45.70258645411661],
-        sentido: 'Sentido Bairro / Via MCM / Centro / Murilo'
-      },
-      {
-        id: 'reforco_jose_gm-21',
-        numero: 21,
-        linha: 'reforco_jose_gm',
-        endereco: "Av. João De Camargo, 19",
-        referencia: "Igreja De São Benedito - Sentido Praça Do Murilo",
-        posicao: [-22.254187, -45.700724],
-        sentido: 'Sentido Bairro / Via MCM / Centro / Murilo'
-      },
-      {
-        id: 'reforco_jose_gm-22',
-        numero: 22,
-        linha: 'reforco_jose_gm',
-        endereco: "R. José Ribeiro De Barros, 10",
-        referencia: "Inatel - Sentido Praça Do Murilo",
-        posicao: [-22.25600885770437, -45.69756063944413],
-        sentido: 'Sentido Bairro / Via MCM / Centro / Murilo'
-      },
-      {
-        id: 'reforco_jose_gm-23',
-        numero: 23,
-        linha: 'reforco_jose_gm',
-        endereco: "Praça Urbana Carolina",
-        referencia: "Praça Do Murilo",
-        posicao: [-22.254164, -45.696709],
-        sentido: 'Sentido Bairro / Via MCM / Centro / Murilo'
+        sentido: 'Sentido Bairro / Via MCM / Centro / Praça da Câmara'
       }
     ],
     sao_benedito_hora_meia: [
@@ -2175,15 +2148,7 @@ window.VALEBUS_PARADAS = {
       [-22.253609, -45.705273], [-22.254225, -45.704861], [-22.254492, -45.704690],
       [-22.254591, -45.704620], [-22.254637, -45.704588], [-22.254726, -45.704533],
       [-22.255140, -45.704254], [-22.256320, -45.703443], [-22.256277, -45.703347],
-      [-22.256004, -45.702864], [-22.255897, -45.702666], [-22.255874, -45.702632],
-      [-22.255853, -45.702607], [-22.255702, -45.702426], [-22.255643, -45.702331],
-      [-22.255452, -45.702471], [-22.254830, -45.701763], [-22.254238, -45.701091],
-      [-22.254056, -45.700914], [-22.254189, -45.700725], [-22.254258, -45.700627],
-      [-22.254342, -45.700511], [-22.254527, -45.700242], [-22.254708, -45.699998],
-      [-22.254899, -45.699725], [-22.255144, -45.699336], [-22.255858, -45.698349],
-      [-22.256256, -45.697758], [-22.255981, -45.697633], [-22.255773, -45.697538],
-      [-22.255534, -45.697423], [-22.255124, -45.697243], [-22.254706, -45.697053],
-      [-22.254247, -45.696839], [-22.254186, -45.696698]
+      [-22.256004, -45.702864], [-22.255897, -45.702666], [-22.255874, -45.702586]
     ],
     sao_benedito_hora_meia: [
       [-22.225827, -45.718187], [-22.226018, -45.718120], [-22.226244, -45.718038],
