@@ -1316,7 +1316,7 @@
 
           if (bannerEmRota) bannerEmRota.style.display = 'flex';
           if (elStatusTexto) elStatusTexto.textContent = 'Em Rota';
-          if (elTopStatus) elTopStatus.textContent = 'Em Rota • Transmitindo ao CCO';
+          if (elTopStatus) elTopStatus.textContent = 'Em Rota';
 
           // Traçar automaticamente a rota no mapa e exibir as paradas da linha
           ativarRotaNoMapa(false);
