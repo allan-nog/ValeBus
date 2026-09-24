@@ -142,6 +142,19 @@
   const iconeLoading     = document.getElementById('icone-loading');
   const iconeSucesso     = document.getElementById('icone-sucesso');
 
+  function salvarSessaoLogin(usuario) {
+    if (window.ValeBusAPI && typeof window.ValeBusAPI.salvarSessao === 'function') {
+      return window.ValeBusAPI.salvarSessao(usuario);
+    }
+    try {
+      localStorage.setItem('valebus_usuario', JSON.stringify(usuario));
+      return true;
+    } catch (e) {
+      console.warn('Erro ao salvar usuário no storage:', e);
+      return false;
+    }
+  }
+
   function abrirModalGoogle() {
     if (modalGoogle) {
       modalGoogle.classList.remove('fechando');
@@ -212,18 +225,14 @@
           return;
         }
 
-        // Salva usuário logado no localStorage
-        try {
-          localStorage.setItem('valebus_usuario', JSON.stringify({
-            nome: nome,
-            email: email,
-            cargo: 'Passageiro / Avaliador',
-            perfil: 'passageiro',
-            metodo: 'Google'
-          }));
-        } catch (e) {
-          console.warn('Erro ao salvar no localStorage:', e);
-        }
+        // Salva usuário logado via serviço unificado
+        salvarSessaoLogin({
+          nome: nome,
+          email: email,
+          cargo: 'Passageiro / Avaliador',
+          perfil: 'passageiro',
+          metodo: 'Google'
+        });
 
         // Feedback visual no botão principal
         if (botaoEntrar) {
@@ -462,17 +471,15 @@
       }
 
       // Salva nome derivado do e-mail para a sessão
-      try {
-        const parteNome = email.split('@')[0];
-        const nomeFormatado = parteNome.charAt(0).toUpperCase() + parteNome.slice(1);
-        localStorage.setItem('valebus_usuario', JSON.stringify({
-          nome: nomeFormatado,
-          email: email,
-          cargo: 'Passageiro / Usuário da Linha',
-          perfil: 'passageiro',
-          metodo: 'Email/Senha'
-        }));
-      } catch (e) {}
+      const parteNome = email.split('@')[0];
+      const nomeFormatado = parteNome.charAt(0).toUpperCase() + parteNome.slice(1);
+      salvarSessaoLogin({
+        nome: nomeFormatado,
+        email: email,
+        cargo: 'Passageiro / Usuário da Linha',
+        perfil: 'passageiro',
+        metodo: 'Email/Senha'
+      });
 
       await simularLogin(email, senha);
     });
@@ -1181,7 +1188,7 @@
           perfil: 'passageiro',
           metodo: 'Cadastro com E-mail Verificado'
         };
-        localStorage.setItem('valebus_usuario', JSON.stringify(usuario));
+        salvarSessaoLogin(usuario);
       } catch (e) {}
 
       if (cadastroSucesso) cadastroSucesso.style.display = 'flex';
@@ -1224,13 +1231,9 @@
       if (!val || val.length < 3) return;
 
       try {
-        const salvos = localStorage.getItem('valebus_motoristas_cadastrados');
-        if (!salvos) return;
-        const motoristasCadastrados = JSON.parse(salvos);
-        const mot = motoristasCadastrados.find(m =>
-          m.matricula.toUpperCase() === val ||
-          m.matricula.replace('MOT-', '').toUpperCase() === val.replace('MOT-', '')
-        );
+        const mot = (window.ValeBusAPI && typeof window.ValeBusAPI.buscarMotoristaPorMatricula === 'function')
+          ? window.ValeBusAPI.buscarMotoristaPorMatricula(val)
+          : null;
 
         if (mot) {
           if (selectMotLinha && mot.linha) {
@@ -1284,8 +1287,14 @@
       e.preventDefault();
       const id = inputMotId ? inputMotId.value.trim() : '';
       const pin = inputMotPin ? inputMotPin.value.trim() : '';
-      const linhaNome = selectMotLinha ? selectMotLinha.options[selectMotLinha.selectedIndex].text : 'Linha Fernandes';
-      const veiculoNome = selectMotVeiculo ? selectMotVeiculo.options[selectMotVeiculo.selectedIndex].text : 'Ônibus #02';
+      const linhaValor = selectMotLinha ? selectMotLinha.value : 'fernandes';
+      const linhaNome = (selectMotLinha && selectMotLinha.selectedIndex >= 0)
+        ? selectMotLinha.options[selectMotLinha.selectedIndex].text
+        : 'Linha Fernandes';
+      const veiculoValor = selectMotVeiculo ? selectMotVeiculo.value : '02';
+      const veiculoNome = (selectMotVeiculo && selectMotVeiculo.selectedIndex >= 0)
+        ? selectMotVeiculo.options[selectMotVeiculo.selectedIndex].text
+        : 'Ônibus #02';
 
       if (!id || id.length < 3) {
         if (motoristaErro) {
@@ -1310,13 +1319,17 @@
       // Validação de credenciais contra a base do Gestor CCO
       let motoristaCadastrado = null;
       try {
-        const salvos = localStorage.getItem('valebus_motoristas_cadastrados');
-        if (salvos) {
-          const lista = JSON.parse(salvos);
-          motoristaCadastrado = lista.find(m =>
-            m.matricula.toUpperCase() === id.toUpperCase() ||
-            m.matricula.replace('MOT-', '').toUpperCase() === id.replace('MOT-', '').toUpperCase()
-          );
+        if (window.ValeBusAPI && typeof window.ValeBusAPI.buscarMotoristaPorMatricula === 'function') {
+          motoristaCadastrado = window.ValeBusAPI.buscarMotoristaPorMatricula(id);
+        } else {
+          const salvos = localStorage.getItem('valebus_motoristas_cadastrados');
+          if (salvos) {
+            const lista = JSON.parse(salvos);
+            motoristaCadastrado = lista.find(m =>
+              m.matricula.toUpperCase() === id.toUpperCase() ||
+              m.matricula.replace('MOT-', '').toUpperCase() === id.replace('MOT-', '').toUpperCase()
+            );
+          }
         }
       } catch (e) {}
 
@@ -1348,19 +1361,25 @@
       await esperar(800);
 
       const nomeFinal = motoristaCadastrado ? motoristaCadastrado.nome : `Motorista ${id.toUpperCase()}`;
+      const sessaoMotorista = {
+        nome: nomeFinal,
+        email: `${id.toLowerCase()}@motorista.valebus.com.br`,
+        cargo: `Motorista Operacional — ${linhaNome}`,
+        matricula: motoristaCadastrado ? motoristaCadastrado.matricula : id,
+        perfil: 'motorista',
+        linha: linhaNome,
+        linhaChave: linhaValor,
+        veiculo: veiculoNome,
+        veiculoNumero: veiculoValor,
+        metodo: 'Terminal de Bordo',
+        logado: true
+      };
+
+      salvarSessaoLogin(sessaoMotorista);
       try {
-        localStorage.setItem('valebus_usuario', JSON.stringify({
-          nome: nomeFinal,
-          email: `${id.toLowerCase()}@motorista.valebus.com.br`,
-          cargo: `Motorista Operacional — ${linhaNome}`,
-          matricula: motoristaCadastrado ? motoristaCadastrado.matricula : id,
-          linha: linhaNome,
-          veiculo: veiculoNome,
-          metodo: 'Terminal de Bordo'
-        }));
-      } catch (err) {
-        console.warn('Erro ao salvar dados do motorista:', err);
-      }
+        localStorage.setItem('valebus_linha_motorista_ativa', linhaValor);
+        localStorage.setItem('valebus_veiculo_motorista_ativo', veiculoNome);
+      } catch (e) {}
 
       if (motoristaSucesso) motoristaSucesso.style.display = 'flex';
 
@@ -1466,7 +1485,7 @@
         autenticado2FA: true,
         dataAcesso: new Date().toISOString()
       };
-      localStorage.setItem('valebus_usuario', JSON.stringify(usuarioFinal));
+      salvarSessaoLogin(usuarioFinal);
     } catch (e) {
       console.warn('Erro ao gravar sessão do gestor:', e);
     }

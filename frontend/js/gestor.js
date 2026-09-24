@@ -24,15 +24,8 @@
 
   function garantirSessaoGestor() {
     try {
-      const salvo = localStorage.getItem('valebus_usuario');
-      let usuario = null;
-      if (salvo) {
-        try {
-          usuario = JSON.parse(salvo);
-        } catch (e) {}
-      }
-
-      if (!usuario || typeof usuario !== 'object') {
+      let usuario = window.ValeBusAPI ? window.ValeBusAPI.obterSessao() : null;
+      if (!usuario || !usuario.logado) {
         usuario = { ...USUARIO_PADRAO_GESTOR };
       } else {
         usuario.nome = (usuario.nome && usuario.nome !== 'João da Silva') ? usuario.nome : USUARIO_PADRAO_GESTOR.nome;
@@ -44,7 +37,11 @@
         usuario.veiculo = usuario.veiculo || USUARIO_PADRAO_GESTOR.veiculo;
       }
 
-      localStorage.setItem('valebus_usuario', JSON.stringify(usuario));
+      if (window.ValeBusAPI && typeof window.ValeBusAPI.salvarSessao === 'function') {
+        window.ValeBusAPI.salvarSessao(usuario);
+      } else {
+        localStorage.setItem('valebus_usuario', JSON.stringify(usuario));
+      }
       return usuario;
     } catch (e) {
       console.warn('Erro ao garantir sessão do gestor:', e);
@@ -212,6 +209,9 @@
   ];
 
   function obterMotoristas() {
+    if (window.ValeBusAPI && typeof window.ValeBusAPI.obterMotoristas === 'function') {
+      return window.ValeBusAPI.obterMotoristas();
+    }
     try {
       const salvos = localStorage.getItem(CHAVE_STORAGE_MOTORISTAS);
       if (salvos) {
@@ -226,6 +226,9 @@
   }
 
   function salvarMotoristas(lista) {
+    if (window.ValeBusAPI && typeof window.ValeBusAPI.salvarMotoristas === 'function') {
+      return window.ValeBusAPI.salvarMotoristas(lista);
+    }
     try {
       localStorage.setItem(CHAVE_STORAGE_MOTORISTAS, JSON.stringify(lista));
     } catch (e) {
@@ -520,11 +523,52 @@
   }
 
   /* ──────────────────────────────────────────────────────────
-     5. RENDERIZAÇÃO DAS ESCALAS DO DIA
+     5. RENDERIZAÇÃO DAS ESCALAS DO DIA & ATIVAÇÃO DE LINHAS
      ────────────────────────────────────────────────────────── */
+  const CHAVE_STORAGE_LINHAS_ATIVAS = 'valebus_linhas_ativas';
+
+  function obterLinhasAtivasGestor() {
+    if (window.ValeBusAPI && typeof window.ValeBusAPI.obterLinhasAtivas === 'function') {
+      return window.ValeBusAPI.obterLinhasAtivas();
+    }
+    try {
+      const salvas = localStorage.getItem(CHAVE_STORAGE_LINHAS_ATIVAS);
+      if (salvas) return JSON.parse(salvas);
+    } catch (e) {}
+    return ['Linha Anchieta', 'Linha Fernandes', 'Linha Fortaleza'];
+  }
+
+  function salvarLinhasAtivasGestor(linhas) {
+    if (window.ValeBusAPI && typeof window.ValeBusAPI.salvarLinhasAtivas === 'function') {
+      return window.ValeBusAPI.salvarLinhasAtivas(linhas);
+    }
+    try {
+      localStorage.setItem(CHAVE_STORAGE_LINHAS_ATIVAS, JSON.stringify(linhas));
+    } catch (e) {}
+  }
+
+  function ativarLinhaGestor(nomeLinha, botaoEl) {
+    if (!nomeLinha) return;
+    setBotaoLoading(botaoEl, true);
+    setTimeout(() => {
+      const ativas = obterLinhasAtivasGestor();
+      if (!ativas.includes(nomeLinha)) {
+        ativas.push(nomeLinha);
+        salvarLinhasAtivasGestor(ativas);
+      }
+      setBotaoLoading(botaoEl, false);
+      mostrarToast('Linha ativada com sucesso!', 'sucesso');
+      renderizarEscalasDia(obterMotoristas());
+    }, 350);
+  }
+
+  window.ativarLinhaGestor = ativarLinhaGestor;
+
   function renderizarEscalasDia(lista) {
     const grid = document.getElementById('grid-escalas-dia');
     if (!grid) return;
+
+    const linhasAtivas = obterLinhasAtivasGestor();
 
     const veiculos = [
       { numero: 'Ônibus #01', linha: 'Linha Anchieta' },
@@ -545,12 +589,16 @@
       const matMot = motEscalado ? motEscalado.matricula : '—';
       const statusMot = motEscalado ? (motEscalado.status === 'viagem' ? 'Em Viagem' : 'Escalado') : 'Pendente';
       const corLinha = obterCorLinha(v.linha);
+      const isLinhaAtiva = linhasAtivas.includes(v.linha);
 
       return `
         <div class="gestor-escala-card">
           <div class="gestor-escala-card__header">
             <span class="gestor-escala-veiculo">${v.numero}</span>
-            <span class="gestor-escala-linha" style="border-left: 3px solid ${corLinha};">${v.linha}</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              ${isLinhaAtiva ? '<span class="badge-linha-ativa" title="Linha ativa no sistema CCO">🟢 Ativa</span>' : ''}
+              <span class="gestor-escala-linha" style="border-left: 3px solid ${corLinha};">${v.linha}</span>
+            </div>
           </div>
           <div class="gestor-escala-motorista">
             <div class="gestor-motorista-avatar" style="background:${corLinha};">
@@ -561,11 +609,16 @@
               <div style="font-size: 11px; color: var(--texto-secundario);">Matrícula: ${matMot}</div>
             </div>
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size: 12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size: 12px; gap:6px; flex-wrap:wrap;">
             <span style="color: var(--texto-secundario);">Status: <strong>${statusMot}</strong></span>
-            <button type="button" class="btn-gestor-secundario" style="padding: 4px 8px; font-size: 11px;" onclick="window.abrirModalEdicao('${motEscalado?.id || ''}')">
-              ${motEscalado ? 'Editar Escala' : 'Alocar Motorista'}
-            </button>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <button type="button" class="${isLinhaAtiva ? 'btn-gestor-secundario' : 'btn-gestor-primario'}" style="padding: 4px 8px; font-size: 11px;" onclick="window.ativarLinhaGestor('${v.linha}', this)">
+                ${isLinhaAtiva ? 'Reativar Linha' : 'Ativar Linha'}
+              </button>
+              <button type="button" class="btn-gestor-secundario" style="padding: 4px 8px; font-size: 11px;" onclick="window.abrirModalEdicao('${motEscalado?.id || ''}')">
+                ${motEscalado ? 'Editar' : 'Alocar'}
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -648,6 +701,9 @@
   ];
 
   function obterChamadosGestor() {
+    if (window.ValeBusAPI && typeof window.ValeBusAPI.obterOcorrencias === 'function') {
+      return window.ValeBusAPI.obterOcorrencias();
+    }
     let lista = [];
     try {
       const salvos = localStorage.getItem(CHAVE_STORAGE_CHAMADOS);
@@ -663,31 +719,6 @@
       lista = [...CHAMADOS_PADRAO_INICIAIS];
       salvarChamadosGestor(lista);
     }
-
-    // Sincroniza dinamicamente qualquer chamado ativo enviado recentemente pelo terminal do motorista
-    try {
-      const socorroAtivo = localStorage.getItem(CHAVE_STORAGE_SOCORRO_MOTORISTA);
-      if (socorroAtivo) {
-        const itemSocorro = JSON.parse(socorroAtivo);
-        const jaExiste = lista.find(c => c.id === itemSocorro.id);
-        if (!jaExiste) {
-          lista.unshift(itemSocorro);
-          salvarChamadosGestor(lista);
-        }
-      }
-
-      const ocsAtivas = localStorage.getItem(CHAVE_STORAGE_OCORRENCIAS_MOTORISTA);
-      if (ocsAtivas) {
-        const listaOcs = JSON.parse(ocsAtivas);
-        listaOcs.forEach(oc => {
-          const jaExiste = lista.find(c => c.id === oc.id);
-          if (!jaExiste) {
-            lista.unshift(oc);
-            salvarChamadosGestor(lista);
-          }
-        });
-      }
-    } catch (e) {}
 
     return lista;
   }
@@ -1101,51 +1132,56 @@
 
   if (btnSimularReport) {
     btnSimularReport.addEventListener('click', () => {
-      const falhasExemplo = [
-        { prob: 'motor', texto: 'Motor / Temperatura', desc: 'Luz de advertência de arrefecimento acendeu na subida do Inatel.', urg: 'alta', viat: true },
-        { prob: 'freio', texto: 'Freio / Ar Comprimido', desc: 'Perda gradual de pressão de ar no circuito secundário.', urg: 'alta', viat: true },
-        { prob: 'acessibilidade', texto: 'Elevador Cadeirante', desc: 'Mecanismo da trava emperrou na Parada 4.', urg: 'moderada', viat: false },
-        { prob: 'portas', texto: 'Portas / Janelas', desc: 'Sensor de fechamento da porta central com mau contato intermitente.', urg: 'baixa', viat: false }
-      ];
-      const rand = falhasExemplo[Math.floor(Math.random() * falhasExemplo.length)];
-      const agora = new Date();
-      const hora = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
-      const idSimulado = `GAR-${Math.floor(1000 + Math.random() * 9000)}`;
+      setBotaoLoading(btnSimularReport, true);
 
-      const novoReport = {
-        id: idSimulado,
-        categoria: 'garagem',
-        titulo: rand.urg === 'alta' ? 'Socorro Mecânico Acionado' : 'Problema Notificado à Garagem',
-        problema: rand.prob,
-        problemaTexto: rand.texto,
-        condicao: rand.urg,
-        condicaoTexto: rand.urg === 'alta' ? 'Parada Imediata / Socorro Urgente' : 'Revisar no fim da viagem',
-        precisaSocorro: rand.viat,
-        observacao: rand.desc,
-        viatura: rand.viat ? 'Viatura Garagem #01 (Mecânico: Carlos)' : null,
-        tempoEstimadoMin: rand.viat ? 15 : null,
-        horaChamado: hora,
-        statusBadge: rand.viat ? 'Socorro Despachado' : 'Alerta Registrado',
-        local: 'Praça Urbana Carolina, Centro',
-        motorista: 'João Silva',
-        matricula: 'MOT-104',
-        veiculo: 'Ônibus #02',
-        linha: 'Linha Anchieta',
-        criadoEm: agora.toISOString(),
-        emAndamento: true
-      };
+      setTimeout(() => {
+        const falhasExemplo = [
+          { prob: 'motor', texto: 'Motor / Temperatura', desc: 'Luz de advertência de arrefecimento acendeu na subida do Inatel.', urg: 'alta', viat: true },
+          { prob: 'freio', texto: 'Freio / Ar Comprimido', desc: 'Perda gradual de pressão de ar no circuito secundário.', urg: 'alta', viat: true },
+          { prob: 'acessibilidade', texto: 'Elevador Cadeirante', desc: 'Mecanismo da trava emperrou na Parada 4.', urg: 'moderada', viat: false },
+          { prob: 'portas', texto: 'Portas / Janelas', desc: 'Sensor de fechamento da porta central com mau contato intermitente.', urg: 'baixa', viat: false }
+        ];
+        const rand = falhasExemplo[Math.floor(Math.random() * falhasExemplo.length)];
+        const agora = new Date();
+        const hora = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+        const idSimulado = `GAR-${Math.floor(1000 + Math.random() * 9000)}`;
 
-      const lista = obterChamadosGestor();
-      lista.unshift(novoReport);
-      salvarChamadosGestor(lista);
+        const novoReport = {
+          id: idSimulado,
+          categoria: 'garagem',
+          titulo: rand.urg === 'alta' ? 'Socorro Mecânico Acionado' : 'Problema Notificado à Garagem',
+          problema: rand.prob,
+          problemaTexto: rand.texto,
+          condicao: rand.urg,
+          condicaoTexto: rand.urg === 'alta' ? 'Parada Imediata / Socorro Urgente' : 'Revisar no fim da viagem',
+          precisaSocorro: rand.viat,
+          observacao: rand.desc,
+          viatura: rand.viat ? 'Viatura Garagem #01 (Mecânico: Carlos)' : null,
+          tempoEstimadoMin: rand.viat ? 15 : null,
+          horaChamado: hora,
+          statusBadge: rand.viat ? 'Socorro Despachado' : 'Alerta Registrado',
+          local: 'Praça Urbana Carolina, Centro',
+          motorista: 'João Silva',
+          matricula: 'MOT-104',
+          veiculo: 'Ônibus #02',
+          linha: 'Linha Anchieta',
+          criadoEm: agora.toISOString(),
+          emAndamento: true
+        };
 
-      // Também espelha no localStorage do motorista para que ambas as telas sincronizem
-      try {
-        localStorage.setItem(CHAVE_STORAGE_SOCORRO_MOTORISTA, JSON.stringify(novoReport));
-      } catch (e) {}
+        const lista = obterChamadosGestor();
+        lista.unshift(novoReport);
+        salvarChamadosGestor(lista);
 
-      mostrarToast(`Novo report recebido do Ônibus #02: ${rand.texto}!`, 'sucesso');
-      renderizarPainelChamados();
+        // Também espelha no localStorage do motorista para que ambas as telas sincronizem
+        try {
+          localStorage.setItem(CHAVE_STORAGE_SOCORRO_MOTORISTA, JSON.stringify(novoReport));
+        } catch (e) {}
+
+        setBotaoLoading(btnSimularReport, false);
+        mostrarToast('Ocorrência registrada com sucesso!', 'sucesso');
+        renderizarPainelChamados();
+      }, 350);
     });
   }
 
@@ -1229,6 +1265,136 @@
   }
 
   /* ──────────────────────────────────────────────────────────
+     ESTADOS VISUAIS DE AÇÃO (LOADING / SPINNERS)
+     ────────────────────────────────────────────────────────── */
+  function setBotaoLoading(btn, estaCarregando) {
+    if (!btn) return;
+    if (estaCarregando) {
+      if (!btn.dataset.textoOriginal) {
+        btn.dataset.textoOriginal = btn.innerHTML;
+      }
+      btn.classList.add('btn-loading');
+      btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+    } else {
+      btn.classList.remove('btn-loading');
+      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
+      if (btn.dataset.textoOriginal) {
+        btn.innerHTML = btn.dataset.textoOriginal;
+        delete btn.dataset.textoOriginal;
+      }
+    }
+  }
+
+  window.setBotaoLoading = setBotaoLoading;
+
+  /* ──────────────────────────────────────────────────────────
+     MÁSCARAS E VALIDAÇÕES (CPF, TELEFONE, CNH)
+     ────────────────────────────────────────────────────────── */
+  function formatarCPF(valor) {
+    let v = (valor || '').replace(/\D/g, '').slice(0, 11);
+    if (v.length > 9) {
+      return v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+    } else if (v.length > 6) {
+      return v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    } else if (v.length > 3) {
+      return v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+    }
+    return v;
+  }
+
+  function validarCPF(cpfFormatadoOuLimpo) {
+    const limpo = (cpfFormatadoOuLimpo || '').replace(/\D/g, '');
+    if (!limpo) return true; // campo opcional quando em branco
+    if (limpo.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(limpo)) return false;
+
+    let soma = 0;
+    for (let i = 0; i < 9; i++) {
+      soma += parseInt(limpo.charAt(i), 10) * (10 - i);
+    }
+    let resto = 11 - (soma % 11);
+    let dig1 = resto >= 10 ? 0 : resto;
+    if (dig1 !== parseInt(limpo.charAt(9), 10)) return false;
+
+    soma = 0;
+    for (let i = 0; i < 10; i++) {
+      soma += parseInt(limpo.charAt(i), 10) * (11 - i);
+    }
+    resto = 11 - (soma % 11);
+    let dig2 = resto >= 10 ? 0 : resto;
+    return dig2 === parseInt(limpo.charAt(10), 10);
+  }
+
+  function formatarTelefone(valor) {
+    let v = (valor || '').replace(/\D/g, '').slice(0, 11);
+    if (v.length > 10) {
+      return v.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else if (v.length > 6) {
+      return v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    } else if (v.length > 2) {
+      return v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+    }
+    return v;
+  }
+
+  function validarTelefone(telFormatadoOuLimpo) {
+    const limpo = (telFormatadoOuLimpo || '').replace(/\D/g, '');
+    if (!limpo) return true;
+    if (limpo.length < 10 || limpo.length > 11) return false;
+    if (/^(\d)\1+$/.test(limpo)) return false;
+
+    const ddd = parseInt(limpo.substring(0, 2), 10);
+    if (ddd < 11 || ddd > 99) return false;
+    if (limpo.length === 11 && limpo.charAt(2) !== '9') return false;
+    return true;
+  }
+
+  function formatarCNH(valor) {
+    return (valor || '').replace(/\D/g, '').slice(0, 11);
+  }
+
+  function validarCNH(cnhFormatadaOuLimpa) {
+    const limpo = (cnhFormatadaOuLimpa || '').replace(/\D/g, '');
+    if (!limpo) return true;
+    if (limpo.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(limpo)) return false;
+    return true;
+  }
+
+  function mostrarErroCampo(inputEl, spanErroEl, mensagem) {
+    if (inputEl) {
+      inputEl.classList.add('is-invalid', 'gestor-form-input--invalido', 'campo-shake');
+      setTimeout(() => inputEl.classList.remove('campo-shake'), 350);
+    }
+    if (spanErroEl) {
+      spanErroEl.textContent = mensagem;
+      spanErroEl.classList.add('ativo');
+    }
+  }
+
+  function limparErroCampo(inputEl, spanErroEl) {
+    if (inputEl) {
+      inputEl.classList.remove('is-invalid', 'gestor-form-input--invalido');
+    }
+    if (spanErroEl) {
+      spanErroEl.textContent = '';
+      spanErroEl.classList.remove('ativo');
+    }
+  }
+
+  function limparTodosErrosModal() {
+    const inputs = modal?.querySelectorAll('.is-invalid, .gestor-form-input--invalido') || [];
+    inputs.forEach(el => el.classList.remove('is-invalid', 'gestor-form-input--invalido', 'campo-shake'));
+    const erros = modal?.querySelectorAll('.gestor-form-msg-erro') || [];
+    erros.forEach(el => {
+      el.textContent = '';
+      el.classList.remove('ativo');
+    });
+  }
+
+  /* ──────────────────────────────────────────────────────────
      7. MODAL DE CADASTRO E EDIÇÃO
      ────────────────────────────────────────────────────────── */
   const modal = document.getElementById('modal-motorista');
@@ -1238,8 +1404,117 @@
   const formCadastro = document.getElementById('form-cadastro-motorista');
   const btnGerarMatricula = document.getElementById('btn-gerar-matricula');
 
+  // Listeners de máscaras e checagem em tempo real
+  const inputMotNome = document.getElementById('form-mot-nome');
+  const spanErroMotNome = document.getElementById('erro-mot-nome');
+  if (inputMotNome) {
+    inputMotNome.addEventListener('input', () => {
+      if (inputMotNome.value.trim().length >= 3) {
+        limparErroCampo(inputMotNome, spanErroMotNome);
+      }
+    });
+  }
+
+  const inputMotMatricula = document.getElementById('form-mot-matricula');
+  const spanErroMotMatricula = document.getElementById('erro-mot-matricula');
+  if (inputMotMatricula) {
+    inputMotMatricula.addEventListener('input', () => {
+      if (inputMotMatricula.value.trim().length >= 3) {
+        limparErroCampo(inputMotMatricula, spanErroMotMatricula);
+      }
+    });
+  }
+
+  const inputMotPin = document.getElementById('form-mot-pin');
+  const spanErroMotPin = document.getElementById('erro-mot-pin');
+  if (inputMotPin) {
+    inputMotPin.addEventListener('input', () => {
+      inputMotPin.value = inputMotPin.value.replace(/\D/g, '').slice(0, 6);
+      if (inputMotPin.value.length >= 4) {
+        limparErroCampo(inputMotPin, spanErroMotPin);
+      }
+    });
+  }
+
+  const inputMotCpf = document.getElementById('form-mot-cpf');
+  const spanErroMotCpf = document.getElementById('erro-mot-cpf');
+  if (inputMotCpf) {
+    inputMotCpf.addEventListener('input', () => {
+      inputMotCpf.value = formatarCPF(inputMotCpf.value);
+      if (inputMotCpf.value.length === 14) {
+        if (!validarCPF(inputMotCpf.value)) {
+          mostrarErroCampo(inputMotCpf, spanErroMotCpf, 'CPF inválido. Verifique os dígitos digitados.');
+        } else {
+          limparErroCampo(inputMotCpf, spanErroMotCpf);
+        }
+      } else if (inputMotCpf.value.length === 0) {
+        limparErroCampo(inputMotCpf, spanErroMotCpf);
+      }
+    });
+    inputMotCpf.addEventListener('blur', () => {
+      if (inputMotCpf.value.length > 0 && !validarCPF(inputMotCpf.value)) {
+        mostrarErroCampo(inputMotCpf, spanErroMotCpf, 'CPF inválido. Formato esperado: 000.000.000-00.');
+      }
+    });
+  }
+
+  const inputMotTelefone = document.getElementById('form-mot-telefone');
+  const spanErroMotTelefone = document.getElementById('erro-mot-telefone');
+  if (inputMotTelefone) {
+    inputMotTelefone.addEventListener('input', () => {
+      inputMotTelefone.value = formatarTelefone(inputMotTelefone.value);
+      if (inputMotTelefone.value.length >= 14) {
+        if (!validarTelefone(inputMotTelefone.value)) {
+          mostrarErroCampo(inputMotTelefone, spanErroMotTelefone, 'Telefone inválido. Formato: (35) 99999-0000.');
+        } else {
+          limparErroCampo(inputMotTelefone, spanErroMotTelefone);
+        }
+      } else if (inputMotTelefone.value.length === 0) {
+        limparErroCampo(inputMotTelefone, spanErroMotTelefone);
+      }
+    });
+    inputMotTelefone.addEventListener('blur', () => {
+      if (inputMotTelefone.value.length > 0 && !validarTelefone(inputMotTelefone.value)) {
+        mostrarErroCampo(inputMotTelefone, spanErroMotTelefone, 'Telefone inválido. Formato esperado: (35) 99999-0000.');
+      }
+    });
+  }
+
+  const inputMotCnh = document.getElementById('form-mot-cnh');
+  const spanErroMotCnh = document.getElementById('erro-mot-cnh');
+  if (inputMotCnh) {
+    inputMotCnh.addEventListener('input', () => {
+      inputMotCnh.value = formatarCNH(inputMotCnh.value);
+      if (inputMotCnh.value.length === 11) {
+        if (!validarCNH(inputMotCnh.value)) {
+          mostrarErroCampo(inputMotCnh, spanErroMotCnh, 'Número de CNH inválido.');
+        } else {
+          limparErroCampo(inputMotCnh, spanErroMotCnh);
+        }
+      } else if (inputMotCnh.value.length === 0) {
+        limparErroCampo(inputMotCnh, spanErroMotCnh);
+      }
+    });
+    inputMotCnh.addEventListener('blur', () => {
+      if (inputMotCnh.value.length > 0 && !validarCNH(inputMotCnh.value)) {
+        mostrarErroCampo(inputMotCnh, spanErroMotCnh, 'CNH deve conter exatamente 11 dígitos numéricos.');
+      }
+    });
+  }
+
+  const inputMotValidade = document.getElementById('form-mot-cnh-validade');
+  const spanErroMotValidade = document.getElementById('erro-mot-cnh-validade');
+  if (inputMotValidade) {
+    inputMotValidade.addEventListener('change', () => {
+      if (inputMotValidade.value) {
+        limparErroCampo(inputMotValidade, spanErroMotValidade);
+      }
+    });
+  }
+
   function abrirModal(idMotorista) {
     if (!modal) return;
+    limparTodosErrosModal();
 
     const inputId = document.getElementById('input-motorista-id-edit');
     const inputNome = document.getElementById('form-mot-nome');
@@ -1266,9 +1541,9 @@
         if (inputNome) inputNome.value = mot.nome;
         if (inputMatricula) inputMatricula.value = mot.matricula;
         if (inputPin) inputPin.value = mot.pin;
-        if (inputCpf) inputCpf.value = mot.cpf || '';
-        if (inputTelefone) inputTelefone.value = mot.telefone || '';
-        if (inputCnh) inputCnh.value = mot.cnh || '';
+        if (inputCpf) inputCpf.value = formatarCPF(mot.cpf || '');
+        if (inputTelefone) inputTelefone.value = formatarTelefone(mot.telefone || '');
+        if (inputCnh) inputCnh.value = formatarCNH(mot.cnh || '');
         if (selectCnhCat) selectCnhCat.value = mot.cnhCat || 'D';
         if (inputValidade) inputValidade.value = mot.cnhValidade || '';
         if (selectLinha) selectLinha.value = mot.linha;
@@ -1307,6 +1582,7 @@
 
   function fecharModal() {
     if (!modal) return;
+    limparTodosErrosModal();
     modal.classList.remove('ativo');
     modal.setAttribute('aria-hidden', 'true');
   }
@@ -1328,7 +1604,10 @@
   if (btnGerarMatricula) {
     btnGerarMatricula.addEventListener('click', () => {
       const input = document.getElementById('form-mot-matricula');
-      if (input) input.value = gerarMatriculaAleatoria();
+      if (input) {
+        input.value = gerarMatriculaAleatoria();
+        limparErroCampo(input, spanErroMotMatricula);
+      }
     });
   }
 
@@ -1343,7 +1622,7 @@
 
   window.abrirModalEdicao = abrirModal;
 
-  // Submissão do Formulário
+  // Submissão do Formulário com Validação Estrita e Feedback Visual
   if (formCadastro) {
     formCadastro.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1362,56 +1641,116 @@
       const turno = document.getElementById('form-mot-turno')?.value;
       const status = document.getElementById('form-mot-status')?.value;
 
-      if (!nome || !matricula || !pin) {
-        mostrarToast('Preencha os campos obrigatórios (Nome, Matrícula e PIN).', 'erro');
-        return;
+      limparTodosErrosModal();
+      let temErros = false;
+      let primeiroCampoInvalido = null;
+
+      // 1. Validação de campos obrigatórios
+      if (!nome || nome.length < 3) {
+        mostrarErroCampo(inputMotNome, spanErroMotNome, 'Nome completo é obrigatório (mínimo 3 caracteres).');
+        temErros = true;
+        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotNome;
       }
 
-      const lista = obterMotoristas();
+      if (!matricula || matricula.length < 3) {
+        mostrarErroCampo(inputMotMatricula, spanErroMotMatricula, 'Matrícula operacional é obrigatória.');
+        temErros = true;
+        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotMatricula;
+      }
 
-      if (inputId) {
-        // Atualizar
-        const index = lista.findIndex(m => m.id === inputId);
-        if (index !== -1) {
-          lista[index] = {
-            ...lista[index],
-            nome, matricula, pin, cpf, telefone, cnh, cnhCat, cnhValidade, linha, veiculo, turno, status
+      if (!pin || pin.length < 4 || pin.length > 6 || !/^\d{4,6}$/.test(pin)) {
+        mostrarErroCampo(inputMotPin, spanErroMotPin, 'PIN de bordo deve conter de 4 a 6 dígitos numéricos.');
+        temErros = true;
+        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotPin;
+      }
+
+      if (!cnhValidade) {
+        mostrarErroCampo(inputMotValidade, spanErroMotValidade, 'Validade da CNH é obrigatória para a escala.');
+        temErros = true;
+        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotValidade;
+      }
+
+      // 2. Validação de formato (CPF, Telefone, CNH)
+      if (cpf && !validarCPF(cpf)) {
+        mostrarErroCampo(inputMotCpf, spanErroMotCpf, 'CPF inválido. Verifique os dígitos informados.');
+        temErros = true;
+        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotCpf;
+      }
+
+      if (telefone && !validarTelefone(telefone)) {
+        mostrarErroCampo(inputMotTelefone, spanErroMotTelefone, 'Telefone inválido. Formato esperado: (35) 99999-0000.');
+        temErros = true;
+        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotTelefone;
+      }
+
+      if (cnh && !validarCNH(cnh)) {
+        mostrarErroCampo(inputMotCnh, spanErroMotCnh, 'Número da CNH deve ter exatamente 11 dígitos numéricos.');
+        temErros = true;
+        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotCnh;
+      }
+
+      // Bloqueio se houver qualquer erro de formulário
+      if (temErros) {
+        mostrarToast('Preencha os campos obrigatórios destacados corretamente.', 'alerta');
+        if (primeiroCampoInvalido) {
+          primeiroCampoInvalido.focus();
+        }
+        return; // Interrompe! Evita gravar dados inválidos no localStorage
+      }
+
+      const btnSalvar = document.getElementById('btn-salvar-motorista');
+      setBotaoLoading(btnSalvar, true);
+
+      setTimeout(() => {
+        const lista = obterMotoristas();
+
+        if (inputId) {
+          // Atualizar Motorista existente
+          const index = lista.findIndex(m => m.id === inputId);
+          if (index !== -1) {
+            lista[index] = {
+              ...lista[index],
+              nome, matricula, pin, cpf, telefone, cnh, cnhCat, cnhValidade, linha, veiculo, turno, status
+            };
+            salvarMotoristas(lista);
+            mostrarToast(`Motorista ${nome} atualizado com sucesso!`, 'sucesso');
+          }
+        } else {
+          // Criar Novo Motorista
+          if (lista.some(m => m.matricula === matricula)) {
+            setBotaoLoading(btnSalvar, false);
+            mostrarErroCampo(inputMotMatricula, spanErroMotMatricula, 'Esta matrícula já está em uso por outro condutor.');
+            inputMotMatricula.focus();
+            mostrarToast('Já existe um motorista cadastrado com esta matrícula.', 'erro');
+            return;
+          }
+
+          const novoMotorista = {
+            id: 'mot-' + Date.now(),
+            nome,
+            matricula,
+            pin,
+            cpf,
+            telefone,
+            cnh,
+            cnhCat,
+            cnhValidade,
+            linha,
+            veiculo,
+            turno,
+            status,
+            observacoes: 'Cadastrado pelo Gestor CCO via portal administrativo.'
           };
+
+          lista.unshift(novoMotorista);
           salvarMotoristas(lista);
-          mostrarToast(`Motorista ${nome} atualizado com sucesso!`);
-        }
-      } else {
-        // Criar Novo
-        // Verifica duplicidade de matrícula
-        if (lista.some(m => m.matricula === matricula)) {
-          mostrarToast('Já existe um motorista cadastrado com esta matrícula.', 'erro');
-          return;
+          mostrarToast('Motorista cadastrado com sucesso!', 'sucesso');
         }
 
-        const novoMotorista = {
-          id: 'mot-' + Date.now(),
-          nome,
-          matricula,
-          pin,
-          cpf,
-          telefone,
-          cnh,
-          cnhCat,
-          cnhValidade,
-          linha,
-          veiculo,
-          turno,
-          status,
-          observacoes: 'Cadastrado pelo Gestor CCO via portal administrativo.'
-        };
-
-        lista.unshift(novoMotorista);
-        salvarMotoristas(lista);
-        mostrarToast(`Motorista ${nome} (${matricula}) credenciado com sucesso!`);
-      }
-
-      fecharModal();
-      renderizarTabela();
+        setBotaoLoading(btnSalvar, false);
+        fecharModal();
+        renderizarTabela();
+      }, 350);
     });
   }
 
@@ -1733,8 +2072,12 @@
       fecharMenuMobile();
 
       if (destino.tela === 'sair') {
-        localStorage.removeItem('valebus_usuario');
-        window.location.href = 'login.html';
+        if (window.ValeBusAPI && typeof window.ValeBusAPI.encerrarSessao === 'function') {
+          window.ValeBusAPI.encerrarSessao('login.html');
+        } else {
+          localStorage.removeItem('valebus_usuario');
+          window.location.href = 'login.html';
+        }
       } else if (destino.url) {
         // Assegura que o usuário vá logado com o usuário padrão de gestor
         garantirSessaoGestor();
@@ -1777,16 +2120,70 @@
   function mostrarToast(mensagem, tipo = 'sucesso') {
     const toast = document.getElementById('gestor-toast');
     const toastTexto = document.getElementById('gestor-toast-texto');
+    const toastIcone = document.getElementById('gestor-toast-icone');
     if (!toast || !toastTexto) return;
 
     toastTexto.textContent = mensagem;
-    toast.style.borderLeftColor = tipo === 'erro' ? 'var(--cor-erro)' : 'var(--cor-sucesso)';
+
+    toast.classList.remove('gestor-toast--sucesso', 'gestor-toast--alerta', 'gestor-toast--erro', 'gestor-toast--info');
+
+    let iconeSvg = '';
+    if (tipo === 'erro') {
+      toast.classList.add('gestor-toast--erro');
+      iconeSvg = `
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      `;
+    } else if (tipo === 'alerta') {
+      toast.classList.add('gestor-toast--alerta');
+      iconeSvg = `
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      `;
+    } else if (tipo === 'info') {
+      toast.classList.add('gestor-toast--info');
+      iconeSvg = `
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+      `;
+    } else {
+      toast.classList.add('gestor-toast--sucesso');
+      iconeSvg = `
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      `;
+    }
+
+    if (toastIcone) {
+      toastIcone.innerHTML = iconeSvg;
+    }
+
     toast.classList.add('ativo');
 
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toast.classList.remove('ativo');
-    }, 4000);
+    }, 4500);
+  }
+
+  window.mostrarToastGestor = mostrarToast;
+
+  const elToast = document.getElementById('gestor-toast');
+  if (elToast) {
+    elToast.addEventListener('click', () => {
+      elToast.classList.remove('ativo');
+      clearTimeout(toastTimer);
+    });
   }
 
   // Inicialização

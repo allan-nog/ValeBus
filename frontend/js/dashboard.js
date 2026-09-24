@@ -32,20 +32,25 @@
       let cargo = 'Avaliador Feira';
       let metodo = 'Google Workspace / Feira Tech';
 
-      const salvo = localStorage.getItem('valebus_usuario');
-      if (salvo) {
-        const usuario = JSON.parse(salvo);
-        if (usuario && usuario.nome) {
-          nome = usuario.nome;
-          email = usuario.email || `${usuario.nome.toLowerCase().replace(/\s+/g, '.')}@feiratech.com.br`;
-          const ehGestor = (usuario.email && usuario.email.toLowerCase().trim() === 'valebussrs@gmail.com') || usuario.perfil === 'gestor';
-          if (ehGestor) {
-            cargo = usuario.cargo || 'Gestor CCO & Frotas Master';
-          } else {
-            cargo = usuario.metodo === 'Google' ? 'Avaliador Feira Tech' : (usuario.cargo || 'Operador CCO');
-          }
-          if (usuario.metodo) metodo = usuario.metodo;
+      const usuario = (window.ValeBusAPI && typeof window.ValeBusAPI.obterSessao === 'function')
+        ? window.ValeBusAPI.obterSessao()
+        : (function () {
+            try {
+              const salvo = localStorage.getItem('valebus_usuario');
+              return salvo ? JSON.parse(salvo) : null;
+            } catch (e) { return null; }
+          })();
+
+      if (usuario && (usuario.logado || usuario.nome)) {
+        if (usuario.nome) nome = usuario.nome;
+        if (usuario.email) email = usuario.email || `${usuario.nome.toLowerCase().replace(/\s+/g, '.')}@feiratech.com.br`;
+        const ehGestor = (usuario.email && usuario.email.toLowerCase().trim() === 'valebussrs@gmail.com') || usuario.perfil === 'gestor';
+        if (ehGestor) {
+          cargo = usuario.cargo || 'Gestor CCO & Frotas Master';
+        } else {
+          cargo = usuario.metodo === 'Google' ? 'Avaliador Feira Tech' : (usuario.cargo || 'Operador CCO');
         }
+        if (usuario.metodo) metodo = usuario.metodo;
       }
 
       // Iniciais do Avatar
@@ -170,13 +175,13 @@
 
   const FROTA = [
     { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               veiculo: 'Ônibus #01', prefixo: '101', posicao: [-22.254164, -45.696709], velocidade: 0 },
-    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              veiculo: 'Ônibus #02', prefixo: '102', posicao: [-22.225829, -45.718194], velocidade: 0 },
-    { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              veiculo: 'Ônibus #03', prefixo: '103', posicao: [-22.225829, -45.718194], velocidade: 0 },
-    { chaveLinha: 'industrial',             linha: LINHAS.industrial,             veiculo: 'Ônibus #04', prefixo: '104', posicao: [-22.261352, -45.771513], velocidade: 0 },
-    { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          veiculo: 'Ônibus #05', prefixo: '105', posicao: [-22.257161, -45.803458], velocidade: 0 },
-    { chaveLinha: 'reforco_jose_gm',        linha: LINHAS.reforco_jose_gm,        veiculo: 'Ônibus #06', prefixo: '106', posicao: [-22.225829, -45.718194], velocidade: 0 },
-    { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      veiculo: 'Ônibus #07', prefixo: '107', posicao: [-22.225829, -45.718194], velocidade: 0 },
-    { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, veiculo: 'Ônibus #08', prefixo: '108', posicao: [-22.225829, -45.718194], velocidade: 0 }
+    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              veiculo: 'Ônibus #02', prefixo: '102', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 },
+    { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              veiculo: 'Ônibus #03', prefixo: '103', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 },
+    { chaveLinha: 'industrial',             linha: LINHAS.industrial,             veiculo: 'Ônibus #04', prefixo: '104', posicao: [-22.261351790494068, -45.771512667995346], velocidade: 0 },
+    { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          veiculo: 'Ônibus #05', prefixo: '105', posicao: [-22.257161337562074, -45.80345771571105], velocidade: 0 },
+    { chaveLinha: 'reforco_jose_gm',        linha: LINHAS.reforco_jose_gm,        veiculo: 'Ônibus #06', prefixo: '106', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 },
+    { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      veiculo: 'Ônibus #07', prefixo: '107', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 },
+    { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, veiculo: 'Ônibus #08', prefixo: '108', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 }
   ];
 
 
@@ -300,38 +305,161 @@
     `;
   }
 
-  // Micro-deslocamento na baia do terminal (Rua das Rosas) para visualização clara de todos os ônibus em "Todas as Linhas"
-  const OFFSETS_BAIA_ROSAS = {
-    fernandes: [0, 0],
-    fortaleza: [0.00007, -0.00015],
-    reforco_jose_gm: [-0.00007, 0.00015],
-    sao_benedito_hora_meia: [0.00014, -0.00030],
-    sao_benedito_hora: [-0.00014, 0.00030]
-  };
-
-  function obterPosicaoVisual(bus, linhaSelecionada) {
-    if (linhaSelecionada && linhaSelecionada !== 'todas') {
-      return bus.posicao; // Exatamente a parada 1 oficial
+  function obterPontoInicialLinha(chaveLinha) {
+    if (window.VALEBUS_PARADAS && window.VALEBUS_PARADAS.paradasPorLinha && window.VALEBUS_PARADAS.paradasPorLinha[chaveLinha]) {
+      const paradas = window.VALEBUS_PARADAS.paradasPorLinha[chaveLinha];
+      if (paradas && paradas.length > 0 && paradas[0].posicao) {
+        return [paradas[0].posicao[0], paradas[0].posicao[1]];
+      }
     }
-    const offset = OFFSETS_BAIA_ROSAS[bus.chaveLinha];
-    if (offset) {
-      return [bus.posicao[0] + offset[0], bus.posicao[1] + offset[1]];
-    }
-    return bus.posicao;
+    const COORDENADAS_EXATAS = {
+      anchieta: [-22.254164, -45.696709],
+      fernandes: [-22.22582948032013, -45.71819403549861],
+      fortaleza: [-22.22582948032013, -45.71819403549861],
+      industrial: [-22.261351790494068, -45.771512667995346],
+      porto_sapucai: [-22.257161337562074, -45.80345771571105],
+      reforco_jose_gm: [-22.22582948032013, -45.71819403549861],
+      sao_benedito_hora: [-22.22582948032013, -45.71819403549861],
+      sao_benedito_hora_meia: [-22.22582948032013, -45.71819403549861]
+    };
+    return COORDENADAS_EXATAS[chaveLinha] || [-22.22582948032013, -45.71819403549861];
   }
 
-  function renderizarMarcadores() {
-    FROTA.forEach(bus => {
-      const icone = criarIconeBus(bus.linha.cor);
-      const conteudoPopup = gerarHtmlPopup(bus);
-      const posInicial = obterPosicaoVisual(bus, 'todas');
+  function normalizarChaveLinha(str) {
+    if (!str) return 'fernandes';
+    const s = String(str).toLowerCase().trim();
+    if (s === 'industrial' || s.includes('industrial')) return 'industrial';
+    if (s === 'porto_sapucai' || s.includes('porto') || s.includes('sapucai') || s.includes('sapucaí')) return 'porto_sapucai';
+    if (s === 'reforco_jose_gm' || s.includes('reforco') || s.includes('reforço') || s.includes('mcm')) return 'reforco_jose_gm';
+    if (s === 'sao_benedito_hora_meia' || s.includes('hora e meia') || (s.includes('benedito') && s.includes('meia'))) return 'sao_benedito_hora_meia';
+    if (s === 'sao_benedito_hora' || s.includes('benedito') || s.includes('hora')) return 'sao_benedito_hora';
+    if (s === 'fortaleza' || s.includes('fortaleza')) return 'fortaleza';
+    if (s === 'anchieta' || s.includes('anchieta')) return 'anchieta';
+    return 'fernandes';
+  }
 
-      const marker = L.marker(posInicial, { icon: icone })
-        .addTo(map)
-        .bindPopup(conteudoPopup);
+  function obterOperacaoMotorista() {
+    let linhaChave = localStorage.getItem('valebus_linha_motorista_ativa');
+    let veiculoNome = localStorage.getItem('valebus_veiculo_motorista_ativo');
 
-      marcadoresMap.set(bus.chaveLinha, { marker, bus });
+    try {
+      const sessao = (window.ValeBusAPI && typeof window.ValeBusAPI.obterSessao === 'function')
+        ? window.ValeBusAPI.obterSessao()
+        : JSON.parse(localStorage.getItem('valebus_usuario') || 'null');
+
+      if (sessao && (sessao.perfil === 'motorista' || sessao.linha || sessao.veiculo)) {
+        if (sessao.linhaChave || sessao.linha) {
+          linhaChave = sessao.linhaChave || sessao.linha;
+        }
+        if (sessao.veiculo) {
+          veiculoNome = sessao.veiculo;
+        }
+      }
+    } catch (e) {}
+
+    linhaChave = normalizarChaveLinha(linhaChave || 'fernandes');
+    if (!veiculoNome) {
+      const padroes = {
+        anchieta: 'Ônibus #01',
+        fernandes: 'Ônibus #02',
+        fortaleza: 'Ônibus #03',
+        industrial: 'Ônibus #04',
+        porto_sapucai: 'Ônibus #05',
+        reforco_jose_gm: 'Ônibus #06',
+        sao_benedito_hora: 'Ônibus #07',
+        sao_benedito_hora_meia: 'Ônibus #08'
+      };
+      veiculoNome = padroes[linhaChave] || 'Ônibus #02';
+    }
+
+    veiculoNome = veiculoNome.replace(/\s*\(Prefixo\s*\d+\)/i, '').trim();
+
+    return { linhaChave, veiculoNome };
+  }
+
+  function atualizarCardsProximos(operacao) {
+    const cards = document.querySelectorAll('.proximo-card');
+    cards.forEach(card => {
+      const chave = card.getAttribute('data-linha');
+      const badgeStatus = card.querySelector('.status-badge');
+      if (chave === operacao.linhaChave) {
+        card.classList.add('proximo-card--destaque');
+        card.style.borderColor = 'var(--cor-marca)';
+        card.style.boxShadow = '0 0 0 2px rgba(37, 99, 235, 0.2)';
+        if (badgeStatus) {
+          badgeStatus.textContent = `${operacao.veiculoNome} • Em rota`;
+          badgeStatus.className = 'status-badge status-badge--horario';
+          badgeStatus.style.background = 'rgba(34, 197, 94, 0.15)';
+          badgeStatus.style.color = '#16a34a';
+          badgeStatus.style.fontWeight = '700';
+        }
+      } else {
+        card.classList.remove('proximo-card--destaque');
+        card.style.borderColor = '';
+        card.style.boxShadow = '';
+        if (badgeStatus) {
+          badgeStatus.textContent = 'Aguardando';
+          badgeStatus.className = 'status-badge';
+          badgeStatus.style.background = 'rgba(148, 163, 184, 0.12)';
+          badgeStatus.style.color = '#64748b';
+          badgeStatus.style.fontWeight = '500';
+        }
+      }
     });
+  }
+
+  function obterPosicaoVisual(bus) {
+    return obterPontoInicialLinha(bus.chaveLinha);
+  }
+
+  let operacaoAtual = obterOperacaoMotorista();
+
+  function renderizarMarcadores() {
+    operacaoAtual = obterOperacaoMotorista();
+
+    // Limpa marcadores anteriores
+    marcadoresMap.forEach(({ marker }) => {
+      if (map.hasLayer(marker)) map.removeLayer(marker);
+    });
+    marcadoresMap.clear();
+
+    // Mostra APENAS o ônibus que o motorista está operando
+    const busOperando = FROTA.find(b => b.chaveLinha === operacaoAtual.linhaChave) || FROTA[1];
+    busOperando.veiculo = operacaoAtual.veiculoNome;
+
+    // Posiciona exatamente no ponto inicial oficial da linha (Parada 1)
+    const posInicial = obterPontoInicialLinha(busOperando.chaveLinha);
+    busOperando.posicao = [posInicial[0], posInicial[1]];
+
+    const icone = criarIconeBus(busOperando.linha.cor);
+    const conteudoPopup = gerarHtmlPopup(busOperando);
+
+    const marker = L.marker(posInicial, { icon: icone })
+      .addTo(map)
+      .bindPopup(conteudoPopup);
+
+    marcadoresMap.set(busOperando.chaveLinha, { marker, bus: busOperando });
+
+    // Atualiza contadores
+    const elTotal = document.getElementById('total-onibus-ativo');
+    if (elTotal) {
+      const spanNumDestaque = elTotal.querySelector('.num-destaque');
+      const spanNumTotal = elTotal.querySelector('.num-total');
+      if (spanNumDestaque && spanNumTotal) {
+        spanNumDestaque.textContent = '1';
+        spanNumTotal.textContent = '1';
+      } else {
+        elTotal.textContent = '1 / 1';
+      }
+    }
+
+    const elMainLiveLabel = document.getElementById('main-header-live-label');
+    if (elMainLiveLabel) {
+      elMainLiveLabel.textContent = `GPS Ao Vivo • ${busOperando.veiculo} em Operação`;
+    }
+
+    // Atualiza cards da lateral
+    atualizarCardsProximos(operacaoAtual);
   }
 
   renderizarMarcadores();
@@ -343,7 +471,7 @@
      Preparada para escalar para ~115 paradas de todas as rotas municipais
      ────────────────────────────────────────────────────────── */
   const camadaParadas = L.layerGroup();
-  let paradasVisiveis = true; // Ativo por padrão
+  let paradasVisiveis = false; // Desativado por padrão na visão 'todas' para manter o mapa limpo
   let linhaAtivaFiltro = 'todas';
 
   function criarIconeParada(ponto) {
@@ -484,7 +612,7 @@
      Traçado vetorial fiel à malha viária real de Santa Rita do Sapucaí
      ────────────────────────────────────────────────────────── */
   const camadaTrajetos = L.layerGroup();
-  let trajetosVisiveis = true; // Ativo por padrão
+  let trajetosVisiveis = false; // Desativado por padrão na visão 'todas' para manter o mapa limpo
   let polylineAtivaRef = null;
 
   function renderizarTrajetos(linhaSelecionada = linhaAtivaFiltro) {
@@ -586,26 +714,16 @@
 
 
   /* ──────────────────────────────────────────────────────────
-     5. SIMULAÇÃO DE MOVIMENTAÇÃO GPS
+     5. TELEMETRIA GPS (ÔNIBUS NO PONTO INICIAL EXATO)
      ────────────────────────────────────────────────────────── */
   setInterval(() => {
     marcadoresMap.forEach(({ marker, bus }) => {
-      const latAtual = marker.getLatLng().lat;
-      const lngAtual = marker.getLatLng().lng;
+      // Mantém o ônibus posicionado fielmente no ponto inicial oficial
+      const posExata = obterPontoInicialLinha(bus.chaveLinha);
+      bus.posicao = [posExata[0], posExata[1]];
+      marker.setLatLng(posExata);
 
-      // Deslocamento suave aleatório
-      const deltaLat = (Math.random() - 0.5) * 0.0005;
-      const deltaLng = (Math.random() - 0.5) * 0.0005;
-
-      const novaLat = latAtual + deltaLat;
-      const novaLng = lngAtual + deltaLng;
-
-      marker.setLatLng([novaLat, novaLng]);
-
-      // Variação leve na velocidade simulada
-      bus.velocidade = Math.min(45, Math.max(15, bus.velocidade + Math.floor((Math.random() - 0.5) * 4)));
-
-      // Atualiza conteúdo do popup mantendo dados dinâmicos
+      // Atualiza conteúdo do popup caso aberto
       if (marker.isPopupOpen()) {
         marker.setPopupContent(gerarHtmlPopup(bus));
       }
@@ -633,6 +751,8 @@
 
   function mostrarAlertaLinhaVazia(chaveLinha) {
     const nomeLinha = LINHAS[chaveLinha] ? LINHAS[chaveLinha].nome : 'desta linha';
+    const operacao = obterOperacaoMotorista();
+    const nomeLinhaOp = LINHAS[operacao.linhaChave] ? LINHAS[operacao.linhaChave].nome : operacao.linhaChave;
 
     // Alerta no Mapa
     if (elMapaAlertaVazio) {
@@ -640,7 +760,7 @@
         elMapaAlertaTitulo.textContent = 'Nenhum ônibus desta linha está disponível no momento.';
       }
       if (elMapaAlertaDesc) {
-        elMapaAlertaDesc.textContent = `Não há veículos com telemetria GPS transmitindo sinal para ${nomeLinha} agora.`;
+        elMapaAlertaDesc.textContent = `No momento, o motorista está operando o ${operacao.veiculoNome} na ${nomeLinhaOp}. Não há veículos com telemetria GPS ativa operando na ${nomeLinha} agora.`;
       }
       elMapaAlertaVazio.style.display = 'flex';
     }
@@ -648,7 +768,7 @@
     // Alerta no Painel Lateral
     if (elPainelAlertaVazio) {
       if (elPainelAlertaTitulo) {
-        elPainelAlertaTitulo.textContent = 'Nenhum ônibus desta linha está disponível no momento.';
+        elPainelAlertaTitulo.textContent = `Nenhum veículo em operação na ${nomeLinha}.`;
       }
       elPainelAlertaVazio.style.display = 'flex';
     }
@@ -733,13 +853,41 @@
 
       marcadoresMap.forEach(({ marker, bus }) => {
         if (linhaSelecionada === 'todas' || bus.chaveLinha === linhaSelecionada) {
-          marker.setLatLng(obterPosicaoVisual(bus, linhaSelecionada));
+          const pos = obterPontoInicialLinha(bus.chaveLinha);
+          bus.posicao = [pos[0], pos[1]];
+          marker.setLatLng(pos);
           if (!map.hasLayer(marker)) map.addLayer(marker);
           totalVisivel++;
         } else {
           if (map.hasLayer(marker)) map.removeLayer(marker);
         }
       });
+
+      // No filtro 'todas', paradas e trajeto vêm DESATIVADOS por padrão para manter o mapa limpo
+      if (linhaSelecionada === 'todas') {
+        paradasVisiveis = false;
+        trajetosVisiveis = false;
+        if (btnToggleParadas) {
+          btnToggleParadas.classList.remove('mapa-btn-flutuante--ativo', 'mapa-btn-paradas--ativo');
+          btnToggleParadas.setAttribute('aria-pressed', 'false');
+        }
+        if (btnToggleTrajeto) {
+          btnToggleTrajeto.classList.remove('mapa-btn-flutuante--ativo');
+          btnToggleTrajeto.setAttribute('aria-pressed', 'false');
+        }
+      } else {
+        // Ao filtrar uma linha específica, ativa o trajeto e as paradas daquela linha
+        paradasVisiveis = true;
+        trajetosVisiveis = true;
+        if (btnToggleParadas) {
+          btnToggleParadas.classList.add('mapa-btn-flutuante--ativo', 'mapa-btn-paradas--ativo');
+          btnToggleParadas.setAttribute('aria-pressed', 'true');
+        }
+        if (btnToggleTrajeto) {
+          btnToggleTrajeto.classList.add('mapa-btn-flutuante--ativo');
+          btnToggleTrajeto.setAttribute('aria-pressed', 'true');
+        }
+      }
 
       // Atualiza visibilidade dos pontos de parada e trajetos conforme a linha
       atualizarVisibilidadeParadas(linhaSelecionada);
@@ -752,10 +900,17 @@
         const spanNumTotal = elTotal.querySelector('.num-total');
         if (spanNumDestaque && spanNumTotal) {
           spanNumDestaque.textContent = totalVisivel;
-          spanNumTotal.textContent = FROTA.length;
+          spanNumTotal.textContent = '1';
         } else {
-          elTotal.textContent = `${totalVisivel} / ${FROTA.length}`;
+          elTotal.textContent = `${totalVisivel} / 1`;
         }
+      }
+
+      const elMainLiveLabel = document.getElementById('main-header-live-label');
+      if (elMainLiveLabel) {
+        elMainLiveLabel.textContent = totalVisivel > 0
+          ? `GPS Ao Vivo • ${operacaoAtual.veiculoNome} em Operação`
+          : 'GPS Ao Vivo • Nenhum Veículo nesta Linha';
       }
 
       // ESTADO QUANDO NENHUM ÔNIBUS ESTIVER VISÍVEL
@@ -799,12 +954,25 @@
     if (itemBus) {
       ocultarAlertaLinhaVazia();
       const { marker, bus } = itemBus;
-      marker.setLatLng(bus.posicao);
-      const latLng = bus.posicao;
+      const latLng = obterPontoInicialLinha(bus.chaveLinha);
+      bus.posicao = [latLng[0], latLng[1]];
+      marker.setLatLng(latLng);
 
       // Garantir que a camada do marcador está visível se houver filtro
       if (!map.hasLayer(marker)) {
         map.addLayer(marker);
+      }
+
+      // Ao focar na linha ativa, habilita as paradas e trajeto desta rota
+      paradasVisiveis = true;
+      trajetosVisiveis = true;
+      if (btnToggleParadas) {
+        btnToggleParadas.classList.add('mapa-btn-flutuante--ativo', 'mapa-btn-paradas--ativo');
+        btnToggleParadas.setAttribute('aria-pressed', 'true');
+      }
+      if (btnToggleTrajeto) {
+        btnToggleTrajeto.classList.add('mapa-btn-flutuante--ativo');
+        btnToggleTrajeto.setAttribute('aria-pressed', 'true');
       }
 
       // Atualiza visibilidade dos pontos de parada e trajetos para a linha focada
@@ -838,8 +1006,15 @@
         const spanNumTotal = elTotal.querySelector('.num-total');
         if (spanNumDestaque && spanNumTotal) {
           spanNumDestaque.textContent = '1';
-          spanNumTotal.textContent = FROTA.length;
+          spanNumTotal.textContent = '1';
+        } else {
+          elTotal.textContent = '1 / 1';
         }
+      }
+
+      const elMainLiveLabel = document.getElementById('main-header-live-label');
+      if (elMainLiveLabel) {
+        elMainLiveLabel.textContent = `GPS Ao Vivo • ${bus.veiculo} em Operação`;
       }
 
       // Se estiver no celular/tablet, fecha o painel lateral para mostrar o mapa
@@ -858,8 +1033,15 @@
         const spanNumTotal = elTotal.querySelector('.num-total');
         if (spanNumDestaque && spanNumTotal) {
           spanNumDestaque.textContent = '0';
-          spanNumTotal.textContent = FROTA.length;
+          spanNumTotal.textContent = '1';
+        } else {
+          elTotal.textContent = '0 / 1';
         }
+      }
+
+      const elMainLiveLabel = document.getElementById('main-header-live-label');
+      if (elMainLiveLabel) {
+        elMainLiveLabel.textContent = 'GPS Ao Vivo • Nenhum Veículo nesta Linha';
       }
 
       mostrarAlertaLinhaVazia(chaveLinha);
@@ -1571,24 +1753,73 @@
   if (formNovoAlerta) {
     formNovoAlerta.addEventListener('submit', (e) => {
       e.preventDefault();
-      const linha = document.getElementById('alerta-input-linha').value;
-      const tipo = document.getElementById('alerta-input-tipo').value;
-      const titulo = document.getElementById('alerta-input-titulo').value.trim();
-      const desc = document.getElementById('alerta-input-desc').value.trim();
-      const dispararToast = document.getElementById('alerta-input-toast').checked;
+      const inputTitulo = document.getElementById('alerta-input-titulo');
+      const inputDesc = document.getElementById('alerta-input-desc');
+      const linha = document.getElementById('alerta-input-linha')?.value;
+      const tipo = document.getElementById('alerta-input-tipo')?.value;
+      const titulo = inputTitulo?.value.trim();
+      const desc = inputDesc?.value.trim();
+      const dispararToast = document.getElementById('alerta-input-toast')?.checked;
 
-      if (!titulo || !desc) return;
+      // Validação simples de campos obrigatórios
+      let temErro = false;
+      if (!titulo) {
+        inputTitulo?.classList.add('is-invalid', 'campo-shake');
+        setTimeout(() => inputTitulo?.classList.remove('campo-shake'), 350);
+        temErro = true;
+      } else {
+        inputTitulo?.classList.remove('is-invalid');
+      }
 
-      adicionarNovoAlerta({
-        linha,
-        tipo,
-        titulo,
-        mensagem: desc,
-        dispararToast
-      });
+      if (!desc) {
+        inputDesc?.classList.add('is-invalid', 'campo-shake');
+        setTimeout(() => inputDesc?.classList.remove('campo-shake'), 350);
+        temErro = true;
+      } else {
+        inputDesc?.classList.remove('is-invalid');
+      }
 
-      formNovoAlerta.reset();
-      fecharModalDash(modalNovoAlerta);
+      if (temErro) {
+        exibirToast({
+          titulo: 'Campos Obrigatórios',
+          mensagem: 'Preencha o título e o detalhamento da ocorrência.',
+          tipo: 'alerta',
+          duracaoMs: 4000
+        });
+        return;
+      }
+
+      const btnSubmit = formNovoAlerta.querySelector('button[type="submit"]');
+      if (btnSubmit) {
+        btnSubmit.classList.add('btn-loading');
+        btnSubmit.disabled = true;
+      }
+
+      setTimeout(() => {
+        adicionarNovoAlerta({
+          linha,
+          tipo,
+          titulo,
+          mensagem: desc,
+          dispararToast: false
+        });
+
+        if (btnSubmit) {
+          btnSubmit.classList.remove('btn-loading');
+          btnSubmit.disabled = false;
+        }
+
+        exibirToast({
+          titulo: 'Ocorrência registrada com sucesso!',
+          mensagem: `Chamado para ${obterNomeLinha(linha)} cadastrado no CCO.`,
+          tipo: 'sucesso',
+          linha: linha,
+          duracaoMs: 5000
+        });
+
+        formNovoAlerta.reset();
+        fecharModalDash(modalNovoAlerta);
+      }, 350);
     });
   }
 
@@ -1639,10 +1870,14 @@
   // Sincroniza dados do usuário logado na Topbar e Dropdown
   function sincronizarUsuarioLogado() {
     try {
-      const raw = localStorage.getItem('valebus_usuario');
-      if (!raw) return;
-      const user = JSON.parse(raw);
-      if (!user) return;
+      const user = (window.ValeBusAPI && typeof window.ValeBusAPI.obterSessao === 'function')
+        ? window.ValeBusAPI.obterSessao()
+        : (function () {
+            const raw = localStorage.getItem('valebus_usuario');
+            return raw ? JSON.parse(raw) : null;
+          })();
+
+      if (!user || (!user.nome && !user.logado)) return;
 
       const nomeEl = document.getElementById('topbar-usuario-nome');
       const cargoEl = document.getElementById('topbar-usuario-cargo');
@@ -1679,6 +1914,19 @@
     }
   }
   sincronizarUsuarioLogado();
+
+  // Ações de Logout unificadas via ValeBusAPI
+  document.querySelectorAll('#dropdown-btn-sair, .nav__item--sair, .btn-modal--perigo').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (window.ValeBusAPI && typeof window.ValeBusAPI.encerrarSessao === 'function') {
+        window.ValeBusAPI.encerrarSessao('login.html');
+      } else {
+        localStorage.removeItem('valebus_usuario');
+        window.location.href = 'login.html';
+      }
+    });
+  });
 
   // Fecha dropdowns se clicar fora
   document.addEventListener('click', (e) => {
@@ -2082,6 +2330,13 @@
     if (window.innerWidth >= 1100) {
       fecharSidebar();
       fecharPainel();
+    }
+  });
+
+  // Sincronização em tempo real caso o motorista altere linha/veículo em outra aba
+  window.addEventListener('storage', e => {
+    if (e.key === 'valebus_linha_motorista_ativa' || e.key === 'valebus_veiculo_motorista_ativo' || e.key === 'valebus_usuario') {
+      renderizarMarcadores();
     }
   });
 

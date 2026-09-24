@@ -15,7 +15,8 @@
   <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/motorista.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 
 <body>
@@ -371,9 +372,9 @@
           <div id="mapa-motorista"></div>
 
           <!-- Indicador Flutuante Oficial de Localização -->
-          <div class="motorista-mapa-pill-loc" aria-label="Cidade de operação">
+          <div class="motorista-mapa-pill-loc" id="mapa-pill-loc" aria-label="Cidade de operação">
             <svg class="motorista-mapa-pill-loc__icone" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-            <span>Santa Rita do Sapucaí &bull; Cockpit do Motorista</span>
+            <span id="mapa-pill-texto">Santa Rita do Sapucaí &bull; Cockpit do Motorista</span>
           </div>
 
           <!-- Controles Flutuantes do Mapa do Motorista -->
@@ -384,14 +385,14 @@
             </button>
             <button type="button" class="btn-recenter-mapa-valebus" id="btn-recenter-gps" aria-label="Recentralizar no meu ônibus" title="Centralizar visualização no ônibus">
               <svg width="16" height="16" aria-hidden="true"><use href="#icone-mira"/></svg>
-              <span>Meu Ônibus</span>
+              <span id="btn-recenter-gps-texto">Meu Ônibus</span>
             </button>
           </div>
 
           <!-- Banner de Status de Viagem em Andamento -->
           <div class="motorista-banner-em-rota" id="banner-em-rota" style="display: none;">
             <span class="live-dot" aria-hidden="true"></span>
-            <span class="motorista-banner-em-rota__txt">VIAGEM EM ANDAMENTO</span>
+            <span class="motorista-banner-em-rota__txt" id="banner-em-rota-txt">VIAGEM EM ANDAMENTO</span>
           </div>
 
           <!-- Card Cockpit Flutuante do Motorista (Compacto, Responsivo e Colapsável) -->
@@ -400,8 +401,9 @@
             <!-- Linha de Resumo Mobile & Alternância de Visualização -->
             <div class="cockpit-card__mobile-bar">
               <div class="cockpit-card__mobile-info">
-                <span class="cockpit-card__mobile-badge" id="cockpit-mobile-badge">Linha 01</span>
-                <span class="cockpit-card__mobile-destino" id="cockpit-mobile-destino">Centro / Bairro Industrial</span>
+                <span class="cockpit-card__mobile-badge" id="cockpit-mobile-badge">Linha Fernandes</span>
+                <span class="cockpit-card__mobile-veiculo" id="cockpit-mobile-veiculo" style="font-size: 11px; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">Ônibus #02</span>
+                <span class="cockpit-card__mobile-destino" id="cockpit-mobile-destino">Centro / Bairro Fernandes</span>
               </div>
               <button type="button" class="cockpit-card__btn-colapsar" id="btn-colapsar-cockpit" aria-label="Minimizar ou expandir card de rota" title="Alternar visão compacta">
                 <span class="btn-colapsar-txt" id="btn-colapsar-texto">Minimizar</span>
@@ -424,6 +426,8 @@
                       <span class="status-bolinha">●</span>
                       <span id="motorista-status-texto">Conectado</span>
                       <span class="status-separador">&bull;</span>
+                      <span id="motorista-veiculo-status" style="font-weight: 700; color: #38bdf8;">Ônibus #02</span>
+                      <span class="status-separador">&bull;</span>
                       <span id="motorista-estacao-texto">Inatel</span>
                     </div>
                   </div>
@@ -437,9 +441,15 @@
 
               <!-- Linha 2: Rota Atribuída (Desktop) -->
               <div class="cockpit-card__rota">
-                <div class="cockpit-rota-header">
-                  <span class="cockpit-rota-tag">ROTA ATRIBUÍDA</span>
-                  <span class="cockpit-rota-codigo" id="motorista-linha-display">Linha 01</span>
+                <div class="cockpit-rota-header" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="cockpit-rota-tag">ROTA ATRIBUÍDA</span>
+                    <span class="cockpit-rota-codigo" id="motorista-linha-display">Linha 01</span>
+                  </div>
+                  <span class="cockpit-rota-veiculo" id="motorista-veiculo-display" style="font-size: 11.5px; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 3px 9px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.35); display: inline-flex; align-items: center; gap: 5px;" title="Veículo escalado para esta operação">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="7" cy="15" r="1.5"/><circle cx="17" cy="15" r="1.5"/></svg>
+                    <span id="motorista-veiculo-badge">Ônibus #02</span>
+                  </span>
                 </div>
                 <h4 class="cockpit-rota-nome" id="motorista-destino-display">Centro / Bairro Industrial</h4>
               </div>
@@ -1220,9 +1230,15 @@
   <!-- Container de Notificações Toast -->
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
-  <!-- Scripts do Leaflet e Lógica do Motorista -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Scripts do Leaflet Local + Fallback CDN, Serviço de API e Lógica do Motorista -->
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script>
+    if (typeof L === 'undefined') {
+      document.write('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>');
+    }
+  </script>
   <script src="js/paradas.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/motorista.js"></script>
 </body>
 </html>

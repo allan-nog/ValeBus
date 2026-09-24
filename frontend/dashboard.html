@@ -432,7 +432,7 @@
         </div>
         <div class="main__header-status" id="main-header-status" aria-label="Status da frota">
           <span class="live-dot" aria-hidden="true"></span>
-          <span class="live-label">GPS Ativo &bull; 8 Veículos</span>
+          <span class="live-label" id="main-header-live-label">GPS Ao Vivo &bull; Ônibus em Operação</span>
         </div>
       </div>
 
@@ -466,7 +466,7 @@
 
           <!-- Controles Flutuantes do Mapa (Trajeto e Paradas) -->
           <div class="mapa-controles-flutuantes">
-            <button type="button" class="mapa-btn-flutuante mapa-btn-flutuante--ativo" id="btn-toggle-trajeto" aria-pressed="true" title="Alternar visibilidade do trajeto no mapa">
+            <button type="button" class="mapa-btn-flutuante" id="btn-toggle-trajeto" aria-pressed="false" title="Alternar visibilidade do trajeto no mapa">
               <span class="mapa-btn-flutuante__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="5" cy="19" r="2.5"></circle>
@@ -477,7 +477,7 @@
               <span class="mapa-btn-flutuante__texto">Trajeto</span>
             </button>
 
-            <button type="button" class="mapa-btn-flutuante mapa-btn-flutuante--ativo" id="btn-toggle-paradas" aria-pressed="true" title="Alternar visibilidade das paradas no mapa">
+            <button type="button" class="mapa-btn-flutuante" id="btn-toggle-paradas" aria-pressed="false" title="Alternar visibilidade das paradas no mapa">
               <span class="mapa-btn-flutuante__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3">
                   <rect x="4" y="3" width="16" height="13" rx="2"></rect>
@@ -1266,8 +1266,8 @@
             <div class="resumo-item__info">
               <span class="resumo-item__label">Ônibus em circulação</span>
               <div class="resumo-item__dados">
-                <span class="resumo-item__valor" id="total-onibus-ativo"><strong class="num-destaque">8</strong><span class="num-barra">/</span><span class="num-total">8</span></span>
-                <span class="resumo-item__tag resumo-item__tag--online">100% online</span>
+                <span class="resumo-item__valor" id="total-onibus-ativo"><strong class="num-destaque">1</strong><span class="num-barra">/</span><span class="num-total">1</span></span>
+                <span class="resumo-item__tag resumo-item__tag--online">Em circulação</span>
               </div>
             </div>
           </div>
@@ -1544,6 +1544,7 @@
   <!-- Bibliotecas de Terceiros e Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/paradas.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
 </html>

@@ -460,15 +460,21 @@
 .gestor-toolbar__esquerda {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 280px;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .gestor-busca-wrapper {
   position: relative;
-  flex: 1;
-  max-width: 380px;
+  display: flex;
+  align-items: center;
+  flex: 0 1 320px;
+  min-width: 220px;
+  max-width: 360px;
+  height: 38px;
+  box-sizing: border-box;
 }
 
 .gestor-busca-icone {
@@ -476,21 +482,27 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
   color: var(--texto-secundario);
   pointer-events: none;
+  z-index: 2;
+  display: block;
 }
 
 .gestor-busca-input {
+  display: block;
   width: 100%;
   height: 38px;
   background: var(--fundo-campo);
   border: 1px solid var(--borda-cor);
   border-radius: var(--raio-pequeno);
-  padding: 0 12px 0 38px;
+  padding: 0 12px 0 36px;
   font-size: 13px;
   color: var(--texto-principal);
   outline: none;
   transition: all var(--transicao);
+  box-sizing: border-box;
 }
 
 .gestor-busca-input:focus {
@@ -499,15 +511,18 @@
 }
 
 .gestor-select-filtro {
+  display: block;
   height: 38px;
   background: var(--fundo-campo);
   border: 1px solid var(--borda-cor);
   border-radius: var(--raio-pequeno);
-  padding: 0 12px;
-  font-size: 13px;
+  padding: 0 10px;
+  font-size: 12.5px;
   color: var(--texto-principal);
   outline: none;
   cursor: pointer;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .gestor-select-filtro:focus {
@@ -1612,33 +1627,47 @@
   .gestor-toolbar {
     flex-direction: column;
     align-items: stretch;
-    padding: 12px;
-    gap: 12px;
+    padding: 10px 12px;
+    gap: 8px;
+    margin-bottom: 12px;
   }
 
   .gestor-toolbar__esquerda {
+    display: flex;
     flex-direction: column;
     align-items: stretch;
     min-width: 0;
     width: 100%;
+    gap: 8px;
+    flex: none;
   }
 
   .gestor-busca-wrapper {
-    max-width: 100%;
+    flex: none;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 38px;
   }
 
   .gestor-select-filtro {
     width: 100%;
+    flex: none;
+    height: 38px;
   }
 
   .gestor-toolbar__direita {
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: none;
   }
 
   .gestor-toolbar__direita .btn-gestor-secundario {
     width: 100%;
     justify-content: center;
+    height: 38px;
   }
 
   .gestor-form-grid {
@@ -1677,6 +1706,7 @@
   .gestor-abas {
     gap: 4px;
     padding-bottom: 2px;
+    margin-bottom: 12px;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -1874,3 +1904,48 @@
     display: none;
   }
 }
+
+/* ── BOTÃO GLOBAL EM ESTADO DE LOADING / SPINNER ─────────────────────── */
+.btn-loading,
+.btn--loading,
+.is-loading {
+  position: relative !important;
+  color: transparent !important;
+  pointer-events: none !important;
+  cursor: wait !important;
+  user-select: none !important;
+}
+
+.btn-loading > *,
+.btn--loading > *,
+.is-loading > * {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.btn-loading::after,
+.btn--loading::after,
+.is-loading::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-top: -9px !important;
+  margin-left: -9px !important;
+  border: 2.5px solid rgba(255, 255, 255, 0.35) !important;
+  border-top-color: #ffffff !important;
+  border-radius: 50% !important;
+  animation: animGirarSpinnerGlobal 0.6s linear infinite !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 2 !important;
+}
+
+@keyframes animGirarSpinnerGlobal {
+  to { transform: rotate(360deg); }
+}
+

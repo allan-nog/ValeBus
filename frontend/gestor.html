@@ -308,7 +308,7 @@
       <div class="gestor-toolbar">
         <div class="gestor-toolbar__esquerda">
           <div class="gestor-busca-wrapper">
-            <svg class="gestor-busca-icone" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="gestor-busca-icone" aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input type="text" class="gestor-busca-input" id="input-busca-motorista" placeholder="Buscar motorista, matrícula...">
@@ -381,10 +381,10 @@
     <!-- ═══ PAINEL: CHAMADOS & REPORTS DOS MOTORISTAS (NOVO) ═══ -->
     <div class="gestor-painel-secao" id="painel-chamados-motoristas" style="display: none;">
       <!-- Barra Superior de Controle de Chamados -->
-      <div class="gestor-toolbar" style="margin-bottom: 20px;">
+      <div class="gestor-toolbar">
         <div class="gestor-toolbar__esquerda">
           <div class="gestor-busca-wrapper">
-            <svg class="gestor-busca-icone" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="gestor-busca-icone" aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input type="text" class="gestor-busca-input" id="input-busca-chamados" placeholder="Buscar por motorista, veículo, falha ou protocolo...">
@@ -510,39 +510,45 @@
             <div class="gestor-form-grupo gestor-form-col-2">
               <label class="gestor-form-rotulo" for="form-mot-nome">Nome Completo *</label>
               <input type="text" class="gestor-form-input" id="form-mot-nome" placeholder="Ex: Carlos Alberto Mendes" required autocomplete="name">
+              <span class="gestor-form-msg-erro" id="erro-mot-nome"></span>
             </div>
 
             <!-- Matrícula + Gerador -->
             <div class="gestor-form-grupo">
               <label class="gestor-form-rotulo" for="form-mot-matricula">Matrícula Operacional *</label>
               <div class="gestor-input-com-btn">
-                <input type="text" class="gestor-form-input" id="form-mot-matricula" placeholder="Ex: MOT-1042" required>
+                <input type="text" class="gestor-form-input" id="form-mot-matricula" placeholder="Ex: MOT-1042" required maxlength="12">
                 <button type="button" class="gestor-btn-mini" id="btn-gerar-matricula" title="Gerar código aleatório">Gerar</button>
               </div>
+              <span class="gestor-form-msg-erro" id="erro-mot-matricula"></span>
             </div>
 
             <!-- PIN do Terminal -->
             <div class="gestor-form-grupo">
               <label class="gestor-form-rotulo" for="form-mot-pin">PIN de Bordo (4 a 6 dígitos) *</label>
               <input type="text" class="gestor-form-input" id="form-mot-pin" placeholder="Ex: 4821" maxlength="6" pattern="[0-9]*" inputmode="numeric" required>
+              <span class="gestor-form-msg-erro" id="erro-mot-pin"></span>
             </div>
 
             <!-- CPF -->
             <div class="gestor-form-grupo">
               <label class="gestor-form-rotulo" for="form-mot-cpf">CPF do Motorista</label>
-              <input type="text" class="gestor-form-input" id="form-mot-cpf" placeholder="000.000.000-00" inputmode="numeric">
+              <input type="text" class="gestor-form-input" id="form-mot-cpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14">
+              <span class="gestor-form-msg-erro" id="erro-mot-cpf"></span>
             </div>
 
             <!-- Telefone -->
             <div class="gestor-form-grupo">
               <label class="gestor-form-rotulo" for="form-mot-telefone">Telefone / WhatsApp</label>
-              <input type="tel" class="gestor-form-input" id="form-mot-telefone" placeholder="(35) 99999-0000" autocomplete="tel">
+              <input type="tel" class="gestor-form-input" id="form-mot-telefone" placeholder="(35) 99999-0000" autocomplete="tel" maxlength="15">
+              <span class="gestor-form-msg-erro" id="erro-mot-telefone"></span>
             </div>
 
             <!-- CNH Número -->
             <div class="gestor-form-grupo">
               <label class="gestor-form-rotulo" for="form-mot-cnh">Número da CNH</label>
-              <input type="text" class="gestor-form-input" id="form-mot-cnh" placeholder="Ex: 04829104820" inputmode="numeric">
+              <input type="text" class="gestor-form-input" id="form-mot-cnh" placeholder="Ex: 04829104820" inputmode="numeric" maxlength="11">
+              <span class="gestor-form-msg-erro" id="erro-mot-cnh"></span>
             </div>
 
             <!-- Categoria CNH -->
@@ -563,6 +569,7 @@
               <div class="gestor-date-input-wrap">
                 <input type="date" class="gestor-form-input gestor-form-input--date" id="form-mot-cnh-validade" required>
               </div>
+              <span class="gestor-form-msg-erro" id="erro-mot-cnh-validade"></span>
             </div>
 
             <!-- Linha Principal -->
@@ -729,14 +736,17 @@
   </div>
 
   <!-- TOAST DE FEEDBACK -->
-  <div class="gestor-toast" id="gestor-toast" role="status" aria-live="polite">
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
+  <div class="gestor-toast gestor-toast--sucesso" id="gestor-toast" role="status" aria-live="polite">
+    <div class="gestor-toast__icone" id="gestor-toast-icone" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
     <span id="gestor-toast-texto">Operação concluída com sucesso.</span>
   </div>
 
-  <!-- SCRIPT DO GESTOR -->
+  <!-- SERVIÇO MOCK API & SCRIPT DO GESTOR -->
+  <script src="js/api.js"></script>
   <script src="js/gestor.js"></script>
 </body>
 </html>

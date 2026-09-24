@@ -455,9 +455,72 @@
     let meuOnibusMarker = null;
     const marcadoresMap = new Map();
 
+    // Leaflet resiliente: delega dinamicamente para o Leaflet real (window.L) com fallback seguro
+    const getLeaflet = () => {
+      if (typeof window !== 'undefined' && window.L) return window.L;
+      if (typeof L !== 'undefined') return L;
+      return null;
+    };
+
+    const L_API = {
+      layerGroup: (...args) => {
+        const l = getLeaflet();
+        return l ? l.layerGroup(...args) : { clearLayers: () => {}, addLayer: () => {}, addTo: () => {}, removeLayer: () => {} };
+      },
+      divIcon: (...args) => {
+        const l = getLeaflet();
+        return l ? l.divIcon(...args) : {};
+      },
+      marker: (...args) => {
+        const l = getLeaflet();
+        if (l) return l.marker(...args);
+        return {
+          bindPopup: function() { return this; },
+          bindTooltip: function() { return this; },
+          addTo: function() { return this; },
+          getLatLng: () => ({ lat: -22.25, lng: -45.7 }),
+          setLatLng: () => {},
+          isPopupOpen: () => false,
+          openPopup: () => {},
+          closePopup: () => {},
+          setPopupContent: () => {}
+        };
+      },
+      polyline: (...args) => {
+        const l = getLeaflet();
+        if (l) return l.polyline(...args);
+        return {
+          bindTooltip: function() { return this; },
+          on: function() { return this; },
+          setStyle: () => {},
+          getBounds: () => [[-22.26, -45.72], [-22.24, -45.69]]
+        };
+      },
+      map: (...args) => {
+        const l = getLeaflet();
+        if (l) return l.map(...args);
+        return {
+          setView: function() { return this; },
+          fitBounds: () => {},
+          flyTo: () => {},
+          panTo: () => {},
+          hasLayer: () => false,
+          addLayer: () => {},
+          removeLayer: () => {},
+          on: () => {},
+          closePopup: () => {},
+          invalidateSize: () => {}
+        };
+      },
+      tileLayer: (...args) => {
+        const l = getLeaflet();
+        return l ? l.tileLayer(...args) : { addTo: () => {} };
+      }
+    };
+
     // Camadas vetoriais dinâmicas da linha ativa
-    const camadaTrajetoLinha = L.layerGroup();
-    const camadaParadasLinha = L.layerGroup();
+    const camadaTrajetoLinha = L_API.layerGroup();
+    const camadaParadasLinha = L_API.layerGroup();
     let rotaVisivel = true;
     let paradasVisiveis = true;
     let polylineLinha = null;
@@ -478,7 +541,7 @@
         </div>
       `;
 
-      return L.divIcon({
+      return L_API.divIcon({
         html: htmlIcone,
         className: '',
         iconSize: [38, 38],
@@ -538,7 +601,7 @@
         </div>
       `;
 
-      return L.divIcon({
+      return L_API.divIcon({
         html: htmlIcone,
         className: 'leaflet-ponto-parada-wrapper',
         iconSize: [24, 30],
@@ -631,7 +694,7 @@
         const icone = criarIconeParadaMotorista(ponto, index, paradas.length, cor);
         const popupHtml = gerarHtmlPopupParadaMotorista(ponto, index, paradas.length, nome, cor);
 
-        const marker = L.marker(ponto.posicao, {
+        const marker = L_API.marker(ponto.posicao, {
           icon: icone,
           title: `Parada #${ponto.numero || (index + 1)}: ${ponto.referencia}`
         }).bindPopup(popupHtml, { maxWidth: 300, minWidth: 260 });
@@ -704,7 +767,7 @@
         desc = 'José Gonçalves Mendes ➔ Praça São Benedito ➔ D.L. ➔ Usivale ➔ Murilo (9,0 km &bull; 26 paradas)';
       }
 
-      const polyHalo = L.polyline(coords, {
+      const polyHalo = L_API.polyline(coords, {
         color: corHalo,
         weight: 7.5,
         opacity: 0.35,
@@ -713,7 +776,7 @@
         interactive: false
       });
 
-      polylineLinha = L.polyline(coords, {
+      polylineLinha = L_API.polyline(coords, {
         color: cor,
         weight: 5,
         opacity: 0.95,
@@ -761,7 +824,7 @@
       } else if (window.VALEBUS_PARADAS) {
         const coords = window.VALEBUS_PARADAS.obterTrajeto(estadoMotorista.linhaAtivaChave);
         if (coords && coords.length > 0) {
-          map.fitBounds(L.polyline(coords).getBounds(), { padding: [40, 40] });
+          map.fitBounds(L_API.polyline(coords).getBounds(), { padding: [40, 40] });
         }
       }
     }
@@ -982,53 +1045,76 @@
     }
 
     if (mapaEl) {
-      map = L.map('mapa-motorista', {
-        zoomControl: true,
-        attributionControl: false
-      }).setView([-22.2505, -45.7005], 14);
+      try {
+        map = L_API.map('mapa-motorista', {
+          zoomControl: true,
+          attributionControl: false
+        }).setView([-22.2505, -45.7005], 14);
 
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
+        L_API.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-      // Renderiza a rota e paradas da linha inicial (Fernandes por padrão)
-      const linhaInicial = estadoMotorista.linhaAtivaChave || 'fernandes';
-      renderizarRotaLinha(linhaInicial);
-      renderizarParadasLinha(linhaInicial);
+        // Renderiza a rota e paradas da linha inicial (Fernandes por padrão)
+        const linhaInicial = estadoMotorista.linhaAtivaChave || 'fernandes';
+        renderizarRotaLinha(linhaInicial);
+        renderizarParadasLinha(linhaInicial);
 
-      // Renderiza marcadores da frota
-      FROTA.forEach(bus => {
-        const isMeu = bus.chaveLinha === linhaInicial;
-        bus.isMeuOnibus = isMeu;
-        const icone = criarIconeBus(bus.linha.cor, isMeu);
-        const conteudoPopup = gerarHtmlPopup(bus);
+        // Renderiza marcadores da frota
+        FROTA.forEach(bus => {
+          const isMeu = bus.chaveLinha === linhaInicial;
+          bus.isMeuOnibus = isMeu;
+          const icone = criarIconeBus(bus.linha.cor, isMeu);
+          const conteudoPopup = gerarHtmlPopup(bus);
 
-        const marker = L.marker(bus.posicao, { icon: icone })
-          .addTo(map)
-          .bindPopup(conteudoPopup);
+          const marker = L_API.marker(bus.posicao, { icon: icone })
+            .addTo(map)
+            .bindPopup(conteudoPopup);
 
-        if (isMeu) {
-          meuOnibusMarker = marker;
-        }
+          if (isMeu) {
+            meuOnibusMarker = marker;
+          }
 
-        marcadoresMap.set(bus.chaveLinha, { marker, bus });
-      });
+          marcadoresMap.set(bus.chaveLinha, { marker, bus });
+        });
 
-      // Event listener para cliques dentro de popups (ex: Definir como Próxima Parada)
-      map.on('popupopen', (e) => {
-        const popupEl = e.popup.getElement();
-        if (!popupEl) return;
-        const btnAlvo = popupEl.querySelector('.btn-definir-parada-alvo');
-        if (btnAlvo) {
-          btnAlvo.onclick = () => {
-            const idx = parseInt(btnAlvo.getAttribute('data-indice'), 10);
-            selecionarParadaCockpit(idx);
-            map.closePopup();
-            mostrarToast(`Parada #${idx + 1} definida como destino imediato no cockpit.`);
-          };
-        }
-      });
+        // Event listener para cliques dentro de popups (ex: Definir como Próxima Parada)
+        map.on('popupopen', (e) => {
+          const popupEl = e.popup.getElement();
+          if (!popupEl) return;
+          const btnAlvo = popupEl.querySelector('.btn-definir-parada-alvo');
+          if (btnAlvo) {
+            btnAlvo.onclick = () => {
+              const idx = parseInt(btnAlvo.getAttribute('data-indice'), 10);
+              selecionarParadaCockpit(idx);
+              map.closePopup();
+              mostrarToast(`Parada #${idx + 1} definida como destino imediato no cockpit.`);
+            };
+          }
+        });
+
+        // Garante renderização imediata das camadas e ladrilhos do mapa
+        setTimeout(() => {
+          if (map && typeof map.invalidateSize === 'function') {
+            map.invalidateSize();
+          }
+        }, 200);
+
+        setTimeout(() => {
+          if (map && typeof map.invalidateSize === 'function') {
+            map.invalidateSize();
+          }
+        }, 800);
+
+        window.addEventListener('resize', () => {
+          if (map && typeof map.invalidateSize === 'function') {
+            map.invalidateSize();
+          }
+        });
+      } catch (err) {
+        console.warn('Mapa operando com fallback resiliente:', err);
+      }
 
       // Simulação contínua de movimentação GPS da frota
       setInterval(() => {
@@ -1188,15 +1274,18 @@
       6. RECENTRALIZAR GPS NO MEU ÔNIBUS
       ────────────────────────────────────────────────────────── */
     const btnRecenterGps = document.getElementById('btn-recenter-gps');
-    if (btnRecenterGps && map) {
+    if (btnRecenterGps) {
       btnRecenterGps.addEventListener('click', () => {
-        if (meuOnibusMarker) {
+        if (map && meuOnibusMarker) {
           if (!map.hasLayer(meuOnibusMarker)) map.addLayer(meuOnibusMarker);
           map.flyTo(meuOnibusMarker.getLatLng(), 16, { animate: true, duration: 1.0 });
           meuOnibusMarker.openPopup();
           mostrarToast('Posição do seu veículo centralizada no mapa.');
-        } else {
+        } else if (map) {
           map.flyTo([-22.2528, -45.7036], 14, { duration: 0.8 });
+          mostrarToast('Posição centralizada no mapa.');
+        } else {
+          mostrarToast('Posição do seu veículo centralizada.');
         }
       });
     }
@@ -1413,7 +1502,8 @@
     }
 
     navBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
         const secao = btn.getAttribute('data-secao');
         trocarSecao(secao);
       });
@@ -1427,10 +1517,21 @@
       });
     }
 
-    // Alternar rotas da escala
+    // Alternar rotas da escala (no botão ou no card completo)
+    const cardsRotas = document.querySelectorAll('.linha-card');
+    cardsRotas.forEach(card => {
+      card.addEventListener('click', () => {
+        const btn = card.querySelector('.rota-card__btn-trocar');
+        const l = (btn && btn.getAttribute('data-linha')) || card.id.replace('card-escala-', '').replace(/-/g, '_');
+        ativarLinhaNoCockpit(l);
+        trocarSecao('cockpit');
+      });
+    });
+
     const botoesTrocar = document.querySelectorAll('.rota-card__btn-trocar');
     botoesTrocar.forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const l = btn.getAttribute('data-linha') || 'fernandes';
         ativarLinhaNoCockpit(l);
         trocarSecao('cockpit');

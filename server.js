@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -30,7 +30,12 @@ app.get(['/motorista', '/motorista.html'], (req, res) => {
   res.redirect('/frontend/motorista.html');
 });
 
-// Serve static assets from project root (serves /frontend/..., /index.html, etc.)
+// Serve static assets: support both /frontend/... and direct paths (/vendor, /css, /js)
+app.use(express.static(path.join(__dirname, 'frontend')));
+app.use('/vendor', express.static(path.join(__dirname, 'frontend/vendor')));
+app.use('/css', express.static(path.join(__dirname, 'frontend/css')));
+app.use('/js', express.static(path.join(__dirname, 'frontend/js')));
+app.use('/assets', express.static(path.join(__dirname, 'frontend/assets')));
 app.use(express.static(__dirname));
 
 // Fallback: redirect unmatched routes to login
