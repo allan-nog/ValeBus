@@ -169,14 +169,14 @@
   };
 
   const FROTA = [
-    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               posicao: [-22.254164, -45.696709], velocidade: 0 },
-    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              posicao: [-22.225829, -45.718194], velocidade: 0 },
-    { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              posicao: [-22.225829, -45.718194], velocidade: 0 },
-    { chaveLinha: 'industrial',             linha: LINHAS.industrial,             posicao: [-22.261352, -45.771513], velocidade: 0 },
-    { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          posicao: [-22.257161, -45.803458], velocidade: 0 },
-    { chaveLinha: 'reforco_jose_gm',        linha: LINHAS.reforco_jose_gm,        posicao: [-22.225829, -45.718194], velocidade: 0 },
-    { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, posicao: [-22.225829, -45.718194], velocidade: 0 },
-    { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      posicao: [-22.225829, -45.718194], velocidade: 0 }
+    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               veiculo: 'Ônibus #01', prefixo: '101', posicao: [-22.254164, -45.696709], velocidade: 0 },
+    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              veiculo: 'Ônibus #02', prefixo: '102', posicao: [-22.225829, -45.718194], velocidade: 0 },
+    { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              veiculo: 'Ônibus #03', prefixo: '103', posicao: [-22.225829, -45.718194], velocidade: 0 },
+    { chaveLinha: 'industrial',             linha: LINHAS.industrial,             veiculo: 'Ônibus #04', prefixo: '104', posicao: [-22.261352, -45.771513], velocidade: 0 },
+    { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          veiculo: 'Ônibus #05', prefixo: '105', posicao: [-22.257161, -45.803458], velocidade: 0 },
+    { chaveLinha: 'reforco_jose_gm',        linha: LINHAS.reforco_jose_gm,        veiculo: 'Ônibus #06', prefixo: '106', posicao: [-22.225829, -45.718194], velocidade: 0 },
+    { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      veiculo: 'Ônibus #07', prefixo: '107', posicao: [-22.225829, -45.718194], velocidade: 0 },
+    { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, veiculo: 'Ônibus #08', prefixo: '108', posicao: [-22.225829, -45.718194], velocidade: 0 }
   ];
 
 
@@ -269,13 +269,18 @@
   }
 
   function gerarHtmlPopup(bus) {
+    const nomeVeiculo = bus.veiculo || 'Ônibus Municipal';
+    const numPrefixo = bus.prefixo ? `• Prefixo ${bus.prefixo}` : '';
     return `
       <div class="popup-onibus">
         <div class="popup-onibus__header">
           <span class="popup-onibus__dot" style="background-color: ${bus.linha.cor};"></span>
-          <h3 class="popup-onibus__titulo" style="color: ${bus.linha.cor};">
-            ${bus.linha.nome}
-          </h3>
+          <div style="display:flex; flex-direction:column; gap: 2px;">
+            <h3 class="popup-onibus__titulo" style="color: ${bus.linha.cor}; margin: 0;">
+              ${bus.linha.nome}
+            </h3>
+            <span style="font-size: 11px; font-weight: 700; color: var(--texto-secundario);">${nomeVeiculo} ${numPrefixo}</span>
+          </div>
         </div>
         <div class="popup-onibus__corpo">
           <div class="popup-onibus__item">

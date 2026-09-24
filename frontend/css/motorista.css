@@ -6,6 +6,11 @@
  */
 
 /* ── Ajustes do Container do Cockpit no Mapa ──────────────── */
+button, [role="button"], a, select, input {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 #mapa-motorista {
   width: 100%;
   height: 100%;
@@ -2225,7 +2230,7 @@
   .motorista-cockpit-overlay-card {
     left: 12px;
     right: 12px;
-    bottom: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom, 12px));
     transform: none;
     width: auto;
     max-width: none;

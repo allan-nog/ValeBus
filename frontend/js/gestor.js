@@ -163,6 +163,22 @@
     },
     {
       id: 'mot-6',
+      nome: 'Renato Alcantara Lima',
+      matricula: 'MOT-6623',
+      cpf: '614.392.105-88',
+      telefone: '(35) 99182-4410',
+      cnh: '06192830194',
+      cnhCat: 'D',
+      cnhValidade: '2027-03-14',
+      linha: 'Linha Reforço José G.M',
+      veiculo: 'Ônibus #06',
+      turno: 'Manhã (05:30 - 13:30)',
+      pin: '6623',
+      status: 'ativo',
+      observacoes: 'Reforço matutino de alta demanda escolar e trabalhadores via MCM.'
+    },
+    {
+      id: 'mot-7',
       nome: 'Marcelo Antunes Prado',
       matricula: 'MOT-7712',
       cpf: '602.819.346-55',
@@ -170,12 +186,28 @@
       cnh: '05192840192',
       cnhCat: 'D',
       cnhValidade: '2027-04-18',
-      linha: 'Linha São Benedito',
-      veiculo: 'Ônibus #06',
+      linha: 'Linha São Benedito (Hora)',
+      veiculo: 'Ônibus #07',
       turno: 'Manhã (05:30 - 13:30)',
       pin: '7712',
       status: 'ativo',
-      observacoes: 'Linha circular com reforço na Vila Operária.'
+      observacoes: 'Linha circular regular de hora em hora via Empresa D.L. e Usivale.'
+    },
+    {
+      id: 'mot-8',
+      nome: 'Vanderlei Soares Neves',
+      matricula: 'MOT-8834',
+      cpf: '719.304.516-90',
+      telefone: '(35) 99872-3319',
+      cnh: '07192840182',
+      cnhCat: 'D',
+      cnhValidade: '2028-09-22',
+      linha: 'Linha São Benedito (Hora e Meia)',
+      veiculo: 'Ônibus #08',
+      turno: 'Tarde (13:30 - 21:30)',
+      pin: '8834',
+      status: 'ativo',
+      observacoes: 'Linha circular com intervalos de 1h30 via Santos Dumont e Murilo.'
     }
   ];
 
@@ -211,12 +243,24 @@
     'Linha Industrial': '#ea580c',
     'Linha Porto Sapucaí': '#0891b2',
     'Linha Reforço José G.M': '#dc2626',
+    'Linha São Benedito (Hora e Meia)': '#db2777',
+    'Linha São Benedito (Hora)': '#eab308',
     'Linha São Benedito': '#eab308'
   };
 
   function obterCorLinha(nomeLinha) {
+    if (!nomeLinha) return '#1a6fd4';
+    const l = nomeLinha.toLowerCase();
+    if (l.includes('hora e meia') || (l.includes('benedito') && l.includes('meia'))) return '#db2777';
+    if (l.includes('hora') || l.includes('benedito')) return '#eab308';
+    if (l.includes('reforco') || l.includes('mcm')) return '#dc2626';
+    if (l.includes('porto') || l.includes('sapucai')) return '#0891b2';
+    if (l.includes('industrial')) return '#ea580c';
+    if (l.includes('fortaleza')) return '#9333ea';
+    if (l.includes('anchieta')) return '#16a34a';
+    if (l.includes('fernandes')) return '#2563eb';
     for (const [chave, cor] of Object.entries(CORES_LINHAS)) {
-      if (nomeLinha.toLowerCase().includes(chave.toLowerCase().replace('linha ', ''))) {
+      if (l.includes(chave.toLowerCase().replace('linha ', ''))) {
         return cor;
       }
     }
@@ -243,7 +287,17 @@
         m.linha.toLowerCase().includes(termoBusca);
 
       const matchStatus = filtroStatus === 'todos' || m.status === filtroStatus;
-      const matchLinha = filtroLinha === 'todas' || m.linha.toLowerCase().includes(filtroLinha.toLowerCase());
+      let matchLinha = (filtroLinha === 'todas');
+      if (!matchLinha) {
+        const mLinha = (m.linha || '').toLowerCase();
+        if (filtroLinha === 'São Benedito (Hora)') {
+          matchLinha = mLinha.includes('hora') && !mLinha.includes('meia');
+        } else if (filtroLinha === 'São Benedito (Hora e Meia)') {
+          matchLinha = mLinha.includes('hora e meia') || mLinha.includes('meia');
+        } else {
+          matchLinha = mLinha.includes(filtroLinha.toLowerCase());
+        }
+      }
 
       return matchBusca && matchStatus && matchLinha;
     });
@@ -478,7 +532,9 @@
       { numero: 'Ônibus #03', linha: 'Linha Fortaleza' },
       { numero: 'Ônibus #04', linha: 'Linha Industrial' },
       { numero: 'Ônibus #05', linha: 'Linha Porto Sapucaí' },
-      { numero: 'Ônibus #06', linha: 'Linha São Benedito' }
+      { numero: 'Ônibus #06', linha: 'Linha Reforço José G.M' },
+      { numero: 'Ônibus #07', linha: 'Linha São Benedito (Hora)' },
+      { numero: 'Ônibus #08', linha: 'Linha São Benedito (Hora e Meia)' }
     ];
 
     grid.innerHTML = veiculos.map(v => {

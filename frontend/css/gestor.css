@@ -12,6 +12,11 @@ html, body {
   overflow-x: hidden;
 }
 
+button, [role="button"], a, select, input {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .gestor-layout {
   min-height: 100vh;
   min-height: 100dvh;
@@ -1918,7 +1923,7 @@ html, body {
   }
 
   .gestor-modal__footer {
-    padding: 14px 18px;
+    padding: 14px 18px max(14px, env(safe-area-inset-bottom, 14px));
     flex-direction: row;
     gap: 10px;
     background: var(--fundo-card);

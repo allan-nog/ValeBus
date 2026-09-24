@@ -20,6 +20,11 @@ html, body {
   width: 100%;
 }
 
+button, [role="button"], a, select, input {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .dashboard {
   display: grid;
   grid-template-columns: var(--sidebar-largura) 1fr var(--painel-largura);
@@ -1990,6 +1995,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .horario-card__header {
@@ -2014,6 +2021,7 @@ html, body {
   font-size: 12px;
   font-weight: 600;
   color: var(--texto-secundario);
+  word-break: break-word;
 }
 
 .horario-card__grade {
@@ -2026,6 +2034,8 @@ html, body {
   padding: 10px 12px;
   border-radius: var(--raio-pequeno);
   border: 1px solid var(--borda-cor);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .btn-link-mapa {
@@ -4224,13 +4234,19 @@ html, body {
     border-left: none;
     border-top: 1px solid var(--borda-cor);
     transform: translateY(100%);
-    padding: 0 14px 18px 14px;
+    padding: 0 14px max(18px, env(safe-area-inset-bottom, 18px)) 14px;
     box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.35);
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 850;
     overflow-y: auto;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .mapa-legenda__nav-btn {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
   }
 
   .painel.aberto {
