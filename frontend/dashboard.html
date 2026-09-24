@@ -432,7 +432,7 @@
         </div>
         <div class="main__header-status" id="main-header-status" aria-label="Status da frota">
           <span class="live-dot" aria-hidden="true"></span>
-          <span class="live-label" id="main-header-live-label">GPS Ao Vivo &bull; Ônibus em Operação</span>
+          <span class="live-label" id="main-header-live-label">Aguardando início de viagem</span>
         </div>
       </div>
 
@@ -1062,14 +1062,14 @@
 
       <!-- Próximos ônibus -->
       <section aria-labelledby="titulo-proximos">
-        <h2 class="painel__secao-titulo" id="titulo-proximos">Próximos ônibus por Parada</h2>
+        <h2 class="painel__secao-titulo" id="titulo-proximos">Viagens por linha</h2>
 
         <!-- Aviso no Painel quando filtrada linha sem ônibus ativo -->
         <div class="painel-alerta-vazio" id="painel-alerta-vazio" style="display: none;" role="status">
           <div class="painel-alerta-vazio__icone" aria-hidden="true">⚠️</div>
           <div class="painel-alerta-vazio__texto">
             <strong id="painel-alerta-vazio-titulo">Nenhum ônibus desta linha está disponível no momento.</strong>
-            <span>Veículos fora do horário de pico ou sem sinal GPS ativo.</span>
+            <span>As viagens aparecem quando o motorista inicia a rota.</span>
           </div>
         </div>
 
@@ -1085,7 +1085,7 @@
               <span class="proximo-card__parada">Rua José Ribeiro De Barros | Inatel</span>
             </div>
             <div class="proximo-card__lado-direito">
-              <span class="proximo-card__tempo">2 min</span>
+              <span class="proximo-card__tempo"></span>
               <span class="status-badge status-badge--horario">No horário</span>
             </div>
           </article>
@@ -1100,7 +1100,7 @@
               <span class="proximo-card__parada">Rua Das Rosas | Ginásio Poliesportivo</span>
             </div>
             <div class="proximo-card__lado-direito">
-              <span class="proximo-card__tempo">5 min</span>
+              <span class="proximo-card__tempo"></span>
               <span class="status-badge status-badge--horario">No horário</span>
             </div>
           </article>
@@ -1115,7 +1115,7 @@
               <span class="proximo-card__parada">Br-459 Rod. JK | Linear</span>
             </div>
             <div class="proximo-card__lado-direito">
-              <span class="proximo-card__tempo">6 min</span>
+              <span class="proximo-card__tempo"></span>
               <span class="status-badge status-badge--adiantado">Adiantado</span>
             </div>
           </article>
@@ -1130,7 +1130,7 @@
               <span class="proximo-card__parada">Br-459 Rod. JK | Acesso Porto</span>
             </div>
             <div class="proximo-card__lado-direito">
-              <span class="proximo-card__tempo">8 min</span>
+              <span class="proximo-card__tempo"></span>
               <span class="status-badge status-badge--horario">No horário</span>
             </div>
           </article>
@@ -1145,7 +1145,7 @@
               <span class="proximo-card__parada">Rua Das Rosas | Ginásio</span>
             </div>
             <div class="proximo-card__lado-direito">
-              <span class="proximo-card__tempo">5 min</span>
+              <span class="proximo-card__tempo"></span>
               <span class="status-badge status-badge--horario">No horário</span>
             </div>
           </article>
@@ -1160,7 +1160,7 @@
               <span class="proximo-card__parada">Rua Das Rosas | Ginásio</span>
             </div>
             <div class="proximo-card__lado-direito">
-              <span class="proximo-card__tempo">12 min</span>
+              <span class="proximo-card__tempo"></span>
               <span class="status-badge status-badge--horario">No horário</span>
             </div>
           </article>
@@ -1175,7 +1175,7 @@
               <span class="proximo-card__parada">Rua Das Rosas | Ginásio</span>
             </div>
             <div class="proximo-card__lado-direito">
-              <span class="proximo-card__tempo">15 min</span>
+              <span class="proximo-card__tempo"></span>
               <span class="status-badge status-badge--adiantado">Adiantado</span>
             </div>
           </article>
@@ -1205,8 +1205,8 @@
             <div class="resumo-item__info">
               <span class="resumo-item__label">Ônibus em circulação</span>
               <div class="resumo-item__dados">
-                <span class="resumo-item__valor" id="total-onibus-ativo"><strong class="num-destaque">1</strong><span class="num-barra">/</span><span class="num-total">1</span></span>
-                <span class="resumo-item__tag resumo-item__tag--online">Em circulação</span>
+                <span class="resumo-item__valor" id="total-onibus-ativo"><strong class="num-destaque">0</strong><span class="num-barra">/</span><span class="num-total">0</span></span>
+                <span class="resumo-item__tag resumo-item__tag--online" data-status-operacao>Aguardando</span>
               </div>
             </div>
           </div>
@@ -1219,22 +1219,22 @@
             <div class="resumo-item__info">
               <span class="resumo-item__label">Linhas ativas</span>
               <div class="resumo-item__dados">
-                <span class="resumo-item__valor"><strong class="num-destaque">7</strong><span class="num-sufixo">linhas</span></span>
-                <span class="resumo-item__tag resumo-item__tag--operacao">Em operação</span>
+                <span class="resumo-item__valor"><strong class="num-destaque" id="total-linhas-ativas">0</strong><span class="num-sufixo">linhas</span></span>
+                <span class="resumo-item__tag resumo-item__tag--operacao" data-status-operacao>Aguardando</span>
               </div>
             </div>
           </div>
 
-          <!-- Intervalo Médio -->
-          <div class="resumo-item">
+          <!-- Sem estimativa de frequência confirmada pela operação. -->
+          <div class="resumo-item" style="display: none;">
             <div class="resumo-item__icone resumo-item__icone--chegadas" aria-hidden="true">
               <svg><use href="#icone-relogio"/></svg>
             </div>
             <div class="resumo-item__info">
               <span class="resumo-item__label">Frequência média</span>
               <div class="resumo-item__dados">
-                <span class="resumo-item__valor"><strong class="num-destaque">12</strong><span class="num-sufixo">min</span></span>
-                <span class="resumo-item__sub">Pico ativo</span>
+                <span class="resumo-item__valor">—</span>
+                <span class="resumo-item__sub">Sem estimativa confirmada</span>
               </div>
             </div>
           </div>
@@ -1364,10 +1364,10 @@
 
           <div class="config-opcao-item">
             <div class="config-opcao-item__info">
-              <span class="config-opcao-item__titulo">Taxa de Atualização GPS</span>
-              <span class="config-opcao-item__desc">Intervalo de telemetria simulada dos 8 ônibus</span>
+              <span class="config-opcao-item__titulo">Atualização das viagens</span>
+              <span class="config-opcao-item__desc">Inícios e encerramentos informados pelos motoristas</span>
             </div>
-            <span class="config-badge-info">A cada 3.5s (Tempo Real)</span>
+            <span class="config-badge-info">A cada 5s</span>
           </div>
 
           <div class="config-opcao-item">
@@ -1483,7 +1483,9 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/paradas.js"></script>
   <script src="js/catalogo-operacional.js"></script>
+  <script src="js/config.js"></script>
   <script src="js/api.js"></script>
+  <script src="js/viagem-automatica.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
 </html>

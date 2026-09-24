@@ -12,7 +12,14 @@ export function cookiesDaRequisicao(req) {
   return cookies;
 }
 function opcoes() {
-  return { httpOnly: true, sameSite: 'lax', secure: config.nodeEnv === 'production', path: '/api' };
+  const frontendSeparado = config.nodeEnv === 'production' && config.frontendOrigins.length > 0;
+  return {
+    httpOnly: true,
+    // GitHub Pages e Render usam domínios distintos; a sessão precisa ser enviada à API.
+    sameSite: frontendSeparado ? 'none' : 'lax',
+    secure: config.nodeEnv === 'production',
+    path: '/api'
+  };
 }
 export function removerCookiesSessao(res) {
   for (const nome of ['valebus_access_token', 'valebus_refresh_token']) res.clearCookie(nome, opcoes());

@@ -1005,45 +1005,37 @@
     chamadoSelecionadoAtual = null;
   }
 
-  function concluirChamadoGestor(idChamado) {
-    const lista = obterChamadosGestor();
-    const item = lista.find(c => c.id === idChamado);
-    if (!item) return;
-
-    item.emAndamento = false;
-    item.statusBadge = 'Atendido / Concluído';
-    item.status = 'Concluído';
-    item.resolvidoPor = 'CCO - Gestor Operacional';
-    item.resolvidoEm = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-    salvarChamadosGestor(lista);
-
-    // Também sincroniza se for o socorro de garagem ativo.
-    const socorroAtivo = window.ValeBusAPI.obterSocorroGaragem();
-    if (socorroAtivo?.id === idChamado) {
-      window.ValeBusAPI.limparSocorroGaragem();
-    }
-
-    mostrarToast(`Chamado #${idChamado} marcado como atendido pelo CCO!`, 'sucesso');
-    renderizarPainelChamados();
-    fecharModalDetalhesChamado();
+  async function atualizarStatusChamadoNoServidor(idChamado, status) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idChamado)) return null;
+    return window.ValeBusAPI.atualizarStatusOcorrenciaAsync(idChamado, status);
   }
 
-  function reabrirChamadoGestor(idChamado) {
+  async function concluirChamadoGestor(idChamado) {
     const lista = obterChamadosGestor();
-    const item = lista.find(c => c.id === idChamado);
-    if (!item) return;
+    const index = lista.findIndex(c => c.id === idChamado);
+    if (index === -1) return;
+    try {
+      const atualizado = await atualizarStatusChamadoNoServidor(idChamado, 'resolvida');
+      lista[index] = atualizado || { ...lista[index], emAndamento: false, statusBadge: 'Atendido / Concluído', status: 'Concluído', resolvidoEm: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) };
+      salvarChamadosGestor(lista);
+      mostrarToast(`Chamado #${idChamado} marcado como atendido pelo CCO!`, 'sucesso');
+      renderizarPainelChamados();
+      fecharModalDetalhesChamado();
+    } catch (erro) { mostrarToast(erro.message || 'Não foi possível concluir o chamado.', 'alerta'); }
+  }
 
-    item.emAndamento = true;
-    item.statusBadge = item.precisaSocorro ? 'Socorro Despachado' : 'Alerta Registrado';
-    item.status = 'Alerta Ativo';
-    delete item.resolvidoPor;
-    delete item.resolvidoEm;
-
-    salvarChamadosGestor(lista);
-    mostrarToast(`Chamado #${idChamado} reaberto no CCO.`, 'sucesso');
-    renderizarPainelChamados();
-    fecharModalDetalhesChamado();
+  async function reabrirChamadoGestor(idChamado) {
+    const lista = obterChamadosGestor();
+    const index = lista.findIndex(c => c.id === idChamado);
+    if (index === -1) return;
+    try {
+      const atualizado = await atualizarStatusChamadoNoServidor(idChamado, 'aberta');
+      lista[index] = atualizado || { ...lista[index], emAndamento: true, statusBadge: lista[index].precisaSocorro ? 'Socorro Despachado' : 'Alerta Registrado', status: 'Alerta Ativo' };
+      salvarChamadosGestor(lista);
+      mostrarToast(`Chamado #${idChamado} reaberto no CCO.`, 'sucesso');
+      renderizarPainelChamados();
+      fecharModalDetalhesChamado();
+    } catch (erro) { mostrarToast(erro.message || 'Não foi possível reabrir o chamado.', 'alerta'); }
   }
 
   window.abrirModalDetalhesChamado = abrirModalDetalhesChamado;
@@ -1070,8 +1062,17 @@
   }
 
   if (btnDespacharApoioChamado) {
-    btnDespacharApoioChamado.addEventListener('click', () => {
+    btnDespacharApoioChamado.addEventListener('click', async () => {
       if (!chamadoSelecionadoAtual) return;
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(chamadoSelecionadoAtual.id)) {
+        try {
+          const atualizado = await window.ValeBusAPI.atualizarStatusOcorrenciaAsync(chamadoSelecionadoAtual.id, 'em_atendimento');
+          Object.assign(chamadoSelecionadoAtual, atualizado);
+        } catch (erro) {
+          mostrarToast(erro.message || 'Não foi possível despachar o apoio.', 'alerta');
+          return;
+        }
+      }
       chamadoSelecionadoAtual.precisaSocorro = true;
       chamadoSelecionadoAtual.condicao = 'alta';
       chamadoSelecionadoAtual.condicaoTexto = 'Parada Imediata / Socorro Urgente';
@@ -1102,12 +1103,22 @@
   if (inputBuscaChamados) inputBuscaChamados.addEventListener('input', renderizarPainelChamados);
   if (filtroTipoChamado) filtroTipoChamado.addEventListener('change', renderizarPainelChamados);
   if (filtroUrgenciaChamado) filtroUrgenciaChamado.addEventListener('change', renderizarPainelChamados);
-  if (btnAtualizarChamados) {
-    btnAtualizarChamados.addEventListener('click', () => {
+  async function sincronizarChamadosDoServidor(mostrarResultado = false) {
+    try {
+      const chamados = await window.ValeBusAPI.obterOcorrenciasAsync();
+      salvarChamadosGestor(chamados);
       renderizarPainelChamados();
-      mostrarToast('Fila de chamados sincronizada com os terminais de bordo!');
-    });
+      if (mostrarResultado) mostrarToast('Fila de chamados atualizada com o servidor.', 'sucesso');
+    } catch (erro) {
+      console.error('Não foi possível atualizar chamados do servidor:', erro);
+      if (mostrarResultado) mostrarToast(erro.message || 'Não foi possível atualizar os chamados agora.', 'alerta');
+    }
   }
+
+  if (btnAtualizarChamados) {
+    btnAtualizarChamados.addEventListener('click', () => sincronizarChamadosDoServidor(true));
+  }
+  sincronizarChamadosDoServidor();
 
   if (btnSimularReport) {
     btnSimularReport.addEventListener('click', () => {
@@ -1535,8 +1546,8 @@
         if (inputCnh) inputCnh.value = formatarCNH(mot.cnh || '');
         if (selectCnhCat) selectCnhCat.value = mot.cnhCat || 'D';
         if (inputValidade) inputValidade.value = mot.cnhValidade || '';
-        if (selectLinha) selectLinha.value = mot.linha;
-        if (selectVeiculo) selectVeiculo.value = mot.veiculo;
+        if (selectLinha) selectLinha.value = [...selectLinha.options].some(o => o.value === mot.linha) ? mot.linha : '';
+        if (selectVeiculo) selectVeiculo.value = [...selectVeiculo.options].some(o => o.value === mot.veiculo) ? mot.veiculo : '';
         if (selectTurno) selectTurno.value = mot.turno;
         if (selectStatus) selectStatus.value = mot.status;
       }

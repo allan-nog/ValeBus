@@ -42,6 +42,18 @@
       return;
     }
 
+    let viagemInicial;
+    try { viagemInicial = await window.ValeBusAPI.obterViagemAtivaAsync(); }
+    catch (erro) { window.ValeBusAPI.mostrarFalhaSessao(erro.message); return; }
+    let operacaoEscolhida = viagemInicial
+      ? { ...viagemInicial, usuarioId: sessaoMotorista.id }
+      : window.ValeBusAPI.obterOperacaoMotorista(sessaoMotorista.id);
+    if (!operacaoEscolhida?.linhaChave || !operacaoEscolhida?.veiculoId) {
+      window.location.replace('login.html?operacao=1');
+      return;
+    }
+    estadoMotorista.veiculoId = operacaoEscolhida.veiculoId;
+
     function atualizarRelogio() {
       const el = document.getElementById('topbar-hora');
       if (!el) return;
@@ -53,7 +65,7 @@
 
     function carregarDadosSessao() {
       try {
-        const u = window.ValeBusAPI.obterSessao();
+        const u = { ...sessaoMotorista, ...operacaoEscolhida, logado: true };
         if (u.logado) {
           const ehGestor = (u.email && u.email.toLowerCase().trim() === 'valebussrs@gmail.com') || u.perfil === 'gestor';
           if (ehGestor) {
@@ -82,7 +94,7 @@
                 estadoMotorista.distanciaKm = 13.4;
                 estadoMotorista.tempoMin = 32;
                 estadoMotorista.proximaParada = '1. Porto Sapucaí';
-              } else if (u.linha.toLowerCase().includes('reforco') || u.linha.toLowerCase().includes('mcm')) {
+              } else if (u.linha.toLowerCase().includes('reforco') || u.linha.toLowerCase().includes('reforço') || u.linha.toLowerCase().includes('mcm')) {
                 estadoMotorista.linhaAtivaChave = 'reforco_jose_gm';
                 estadoMotorista.linhaCodigo = 'Linha Reforço José G.M.';
                 estadoMotorista.linhaNome = 'José Gonçalves Mendes / Via MCM / Centro / Praça da Câmara';
@@ -133,6 +145,7 @@
               }
             }
             if (u.veiculo) estadoMotorista.veiculo = u.veiculo.replace(/\s*\(Prefixo\s*\d+\)/i, '').trim();
+            if (u.linhaChave && Object.hasOwn(window.VALEBUS_CATALOGO_OPERACIONAL.linhas, u.linhaChave)) estadoMotorista.linhaAtivaChave = u.linhaChave;
           }
         }
 
@@ -171,7 +184,6 @@
       3. RENDERIZAÇÃO DOS DADOS DO MOTORISTA
       ────────────────────────────────────────────────────────── */
     let indiceParadaAtual = 0;
-    const marcadoresParadasAnchieta = [];
 
     function renderizarDadosMotorista() {
       // Iniciais
@@ -219,6 +231,10 @@
       if (elDestinoDisplay) elDestinoDisplay.textContent = estadoMotorista.linhaNome;
       if (elMobileBadge) elMobileBadge.textContent = estadoMotorista.linhaCodigo;
       if (elMobileDestino) elMobileDestino.textContent = estadoMotorista.linhaNome;
+      ['motorista-veiculo-status', 'motorista-veiculo-badge', 'cockpit-mobile-veiculo', 'dropdown-usuario-cargo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = estadoMotorista.veiculo || '';
+      });
 
       // Sincronizar subtítulo
       const mainSubtitulo = document.getElementById('main-subtitulo');
@@ -368,7 +384,7 @@
 
       if (elPerfilNome) elPerfilNome.textContent = estadoMotorista.nome;
       if (elPerfilMatricula) elPerfilMatricula.textContent = `Matrícula: ${estadoMotorista.matricula} • CNH Categoria D`;
-      if (elPerfilVeiculo) elPerfilVeiculo.textContent = `${estadoMotorista.veiculo} • Placa RTA-4B29`;
+      if (elPerfilVeiculo) elPerfilVeiculo.textContent = estadoMotorista.veiculo;
       if (elPerfilStatViagens) elPerfilStatViagens.textContent = estadoMotorista.viagensHoje;
     }
 
@@ -378,12 +394,6 @@
       4. DADOS DAS LINHAS E FROTA COMPLETA (Santa Rita do Sapucaí)
       ────────────────────────────────────────────────────────── */
     const LINHAS = window.VALEBUS_CATALOGO_OPERACIONAL.linhas;
-    const FROTA = window.VALEBUS_CATALOGO_OPERACIONAL.frota.map((onibus) => ({
-      ...onibus,
-      linha: LINHAS[onibus.chaveLinha],
-      posicao: [...onibus.posicao],
-      isMeuOnibus: onibus.chaveLinha === 'fernandes'
-    }));
 
     /* ──────────────────────────────────────────────────────────
       5. INICIALIZAÇÃO DO MAPA LEAFLET & MARCADORES INTERATIVOS
@@ -462,18 +472,17 @@
     let rotaVisivel = true;
     let paradasVisiveis = true;
     let polylineLinha = null;
-    let waypointLinhaIndex = 0;
+    let quadroMovimento = null;
+    let trajetoMovimento = null;
     const marcadoresParadasLinha = [];
 
     function renderizarMarcadorMeuOnibus(chaveLinha) {
       if (!map) return null;
 
-      const meuOnibus = FROTA.find(bus => bus.chaveLinha === chaveLinha) || FROTA[0];
-      FROTA.forEach(bus => {
-        bus.isMeuOnibus = bus === meuOnibus;
-      });
-
-      meuOnibus.veiculo = estadoMotorista.veiculo || meuOnibus.veiculo;
+      const coords = window.VALEBUS_PARADAS.obterTrajeto(chaveLinha);
+      if (!Object.hasOwn(LINHAS, chaveLinha) || coords.length < 2) return null;
+      const meuOnibus = { chaveLinha, linha: LINHAS[chaveLinha],
+        veiculo: estadoMotorista.veiculo, posicao: [...coords[0]], isMeuOnibus: true };
 
       if (meuOnibusMarker && map.hasLayer(meuOnibusMarker)) {
         map.removeLayer(meuOnibusMarker);
@@ -515,28 +524,24 @@
     }
 
     function gerarHtmlPopup(bus) {
-      const isMeu = bus.isMeuOnibus;
+      const escapar = valor => String(valor || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const partida = window.VALEBUS_PARADAS.paradasPorLinha[bus.chaveLinha]?.[0]?.referencia;
       return `
         <div class="popup-onibus">
           <div class="popup-onibus__header">
             <span class="popup-onibus__dot" style="background-color: ${bus.linha.cor};"></span>
             <h3 class="popup-onibus__titulo" style="color: ${bus.linha.cor};">
-              ${isMeu ? 'Seu Veículo (#02) • ' : ''}${bus.linha.nome}
+              ${escapar(bus.veiculo)} • ${escapar(window.VALEBUS_PARADAS.metadadosLinhas[bus.chaveLinha]?.nome)}
             </h3>
           </div>
-          ${bus.linha.partida && bus.linha.proximaParada ?             `<div class="popup-onibus__corpo">
+          ${partida ? `<div class="popup-onibus__corpo">
               <div class="popup-onibus__item">
                 <span class="popup-onibus__rotulo">🚩 Partida:</span>
-                <span class="popup-onibus__valor">${bus.linha.partida}</span>
-              </div>
-              <div class="popup-onibus__item">
-                <span class="popup-onibus__rotulo">📍 Próxima Parada:</span>
-                <span class="popup-onibus__valor">${bus.linha.proximaParada}</span>
+                <span class="popup-onibus__valor">${escapar(partida)}</span>
               </div>
             </div>` : ''}
           <div class="popup-onibus__footer">
-            <span class="popup-onibus__velocidade">⚡ <strong>${bus.velocidade} km/h</strong></span>
-            <span class="popup-onibus__gps-badge">${isMeu ? 'Transmissão Ao Vivo' : 'GPS Online'}</span>
+            <span class="popup-onibus__gps-badge">${estadoMotorista.emRota ? 'Viagem ativa • Posição simulada' : 'Aguardando início da viagem'}</span>
           </div>
         </div>
       `;
@@ -900,8 +905,15 @@
     }
 
     function ativarLinhaNoCockpit(chaveLinha) {
+      if (!Object.hasOwn(LINHAS, chaveLinha) || !window.VALEBUS_PARADAS.temTrajeto(chaveLinha)) {
+        mostrarToast('Esta linha não possui trajeto cadastrado.', 'alerta');
+        return;
+      }
+      if (estadoMotorista.emRota && chaveLinha !== estadoMotorista.linhaAtivaChave) {
+        mostrarToast('Encerre a viagem antes de alterar a rota visualizada.', 'alerta');
+        return;
+      }
       estadoMotorista.linhaAtivaChave = chaveLinha;
-      waypointLinhaIndex = 0;
 
       if (chaveLinha === 'sao_benedito_hora') {
         estadoMotorista.linhaCodigo = 'Linha São Benedito (Hora)';
@@ -963,11 +975,15 @@
 
       renderizarMarcadorMeuOnibus(chaveLinha);
 
-      // Posiciona o ônibus do motorista na Parada 1 da linha
+      operacaoEscolhida = { ...operacaoEscolhida, linhaChave: chaveLinha, linha: estadoMotorista.linhaCodigo,
+        veiculoId: estadoMotorista.veiculoId, veiculo: estadoMotorista.veiculo };
+      window.ValeBusAPI.salvarOperacaoMotorista(operacaoEscolhida);
+
+      // Usa exatamente o início da geometria exibida ao passageiro.
       if (meuOnibusMarker && window.VALEBUS_PARADAS) {
-        const paradas = window.VALEBUS_PARADAS.paradasPorLinha[chaveLinha];
-        if (paradas && paradas.length > 0) {
-          meuOnibusMarker.setLatLng(paradas[0].posicao);
+        const coords = window.VALEBUS_PARADAS.obterTrajeto(chaveLinha);
+        if (coords.length > 0) {
+          meuOnibusMarker.setLatLng(coords[0]);
         }
       }
 
@@ -994,6 +1010,7 @@
       };
       const info = infoLinhas[chaveLinha] || { nome: chaveLinha, detalhe: '' };
       mostrarToast(`${info.nome} ativada no Cockpit com ${info.detalhe}.`);
+      if (estadoMotorista.emRota) iniciarMovimentoViagem();
     }
 
     if (mapaEl) {
@@ -1053,60 +1070,25 @@
         console.warn('Mapa operando com fallback resiliente:', err);
       }
 
-      // Simulação contínua de movimentação GPS da frota
-      setInterval(() => {
-        const chaveAtiva = estadoMotorista.linhaAtivaChave || 'fernandes';
+    }
 
-        // Se estiver em rota, o veículo do motorista navega fielmente pelos waypoints da linha ativa
-        if (meuOnibusMarker && estadoMotorista.emRota && window.VALEBUS_PARADAS) {
-          const coords = window.VALEBUS_PARADAS.obterTrajeto(chaveAtiva);
-          if (coords && coords.length > 0) {
-            waypointLinhaIndex = (waypointLinhaIndex + 1) % coords.length;
-            const novoPonto = coords[waypointLinhaIndex];
-            meuOnibusMarker.setLatLng(novoPonto);
-
-            // Checa proximidade com as paradas da linha ativa para avanço automático suave
-            const paradas = window.VALEBUS_PARADAS.paradasPorLinha[chaveAtiva] || [];
-            for (let i = 0; i < paradas.length; i++) {
-              const dLat = Math.abs(novoPonto[0] - paradas[i].posicao[0]);
-              const dLng = Math.abs(novoPonto[1] - paradas[i].posicao[1]);
-              if (dLat < 0.0012 && dLng < 0.0012 && i !== indiceParadaAtual) {
-                selecionarParadaCockpit(i);
-                break;
-              }
-            }
-          }
-        }
-
-        marcadoresMap.forEach(({ marker, bus }) => {
-          // Se for o ônibus do motorista e estiver seguindo o traçado da rota, não aplica desvio aleatório
-          if (bus.isMeuOnibus && estadoMotorista.emRota) {
-            return;
-          }
-
-          const latAtual = marker.getLatLng().lat;
-          const lngAtual = marker.getLatLng().lng;
-
-          // Deslocamento simulado para os demais ônibus da frota
-          const fator = (bus.isMeuOnibus && estadoMotorista.emRota) ? 0.0006 : 0.0004;
-          const deltaLat = (Math.random() - 0.49) * fator;
-          const deltaLng = (Math.random() - 0.49) * fator;
-
-          const novaLat = latAtual + deltaLat;
-          const novaLng = lngAtual + deltaLng;
-
-          marker.setLatLng([novaLat, novaLng]);
-
-          // Variação leve na velocidade
-          const velMin = (bus.isMeuOnibus && estadoMotorista.emRota) ? 25 : 15;
-          const velMax = (bus.isMeuOnibus && estadoMotorista.emRota) ? 45 : 38;
-          bus.velocidade = Math.min(velMax, Math.max(velMin, bus.velocidade + Math.floor((Math.random() - 0.5) * 4)));
-
-          if (marker.isPopupOpen()) {
-            marker.setPopupContent(gerarHtmlPopup(bus));
-          }
-        });
-      }, 3000);
+    // Mesmo cálculo do Passageiro: apenas a viagem confirmada move o veículo.
+    function iniciarMovimentoViagem() {
+      cancelAnimationFrame(quadroMovimento);
+      const inicio = Date.parse(estadoMotorista.viagemAtiva?.iniciadaEm);
+      if (!estadoMotorista.emRota || !Number.isFinite(inicio) || !map?.project) return;
+      const movimento = window.ValeBusViagemAutomatica;
+      trajetoMovimento = movimento.preparar(window.VALEBUS_PARADAS.obterTrajeto(estadoMotorista.linhaAtivaChave), c => map.project(c, 0));
+      if (!trajetoMovimento) return;
+      const animar = () => {
+        if (!estadoMotorista.emRota || !meuOnibusMarker) return;
+        const decorrido = window.ValeBusAPI.agoraServidor() - inicio;
+        const ponto = movimento.posicao(trajetoMovimento, decorrido);
+        meuOnibusMarker.setLatLng(map.unproject(ponto, 0));
+        if (decorrido < movimento.duracaoMs) quadroMovimento = requestAnimationFrame(animar);
+      };
+      marcadoresMap.forEach(({ marker, bus }) => marker.setPopupContent(gerarHtmlPopup(bus)));
+      animar();
     }
 
     /* ──────────────────────────────────────────────────────────
@@ -1139,10 +1121,6 @@
 
     function ativarParadasNoMapa() {
       paradasVisiveis = true;
-      if (btnToggleParadasAnchieta) {
-        btnToggleParadasAnchieta.classList.add('motorista-btn-flutuante--ativo');
-        btnToggleParadasAnchieta.setAttribute('aria-pressed', 'true');
-      }
       if (map && !map.hasLayer(camadaParadasLinha)) {
         camadaParadasLinha.addTo(map);
       }
@@ -1150,10 +1128,6 @@
 
     function desativarParadasNoMapa() {
       paradasVisiveis = false;
-      if (btnToggleParadasAnchieta) {
-        btnToggleParadasAnchieta.classList.remove('motorista-btn-flutuante--ativo');
-        btnToggleParadasAnchieta.setAttribute('aria-pressed', 'false');
-      }
       if (map && map.hasLayer(camadaParadasLinha)) {
         map.removeLayer(camadaParadasLinha);
       }
@@ -1237,11 +1211,32 @@
     const elStatusTexto = document.getElementById('motorista-status-texto');
     const elTopStatus = document.getElementById('topbar-status-texto');
 
-    let intervaloContador = null;
 
     if (btnIniciarRota) {
-      btnIniciarRota.addEventListener('click', () => {
-        estadoMotorista.emRota = !estadoMotorista.emRota;
+      btnIniciarRota.addEventListener('click', async () => {
+        const iniciar = !estadoMotorista.emRota;
+        btnIniciarRota.disabled = true;
+        try {
+          estadoMotorista.viagemAtiva = iniciar
+            ? await window.ValeBusAPI.iniciarViagemAsync(estadoMotorista.linhaAtivaChave, estadoMotorista.veiculoId)
+            : await window.ValeBusAPI.encerrarViagemAsync();
+        } catch (erro) {
+          if (erro.viagemAtiva) {
+            await restaurarViagemAtiva(erro.viagemAtiva);
+            mostrarToast('A viagem que já estava ativa foi retomada.');
+            return;
+          }
+          mostrarToast(erro.message || 'Não foi possível atualizar a viagem.', 'alerta');
+          return;
+        } finally {
+          btnIniciarRota.disabled = false;
+        }
+        if (iniciar && estadoMotorista.viagemAtiva?.linhaChave) {
+          estadoMotorista.veiculo = estadoMotorista.viagemAtiva.veiculo || estadoMotorista.veiculo;
+          estadoMotorista.veiculoId = estadoMotorista.viagemAtiva.veiculoId || estadoMotorista.veiculoId;
+          ativarLinhaNoCockpit(estadoMotorista.viagemAtiva.linhaChave);
+        }
+        estadoMotorista.emRota = iniciar;
 
         if (estadoMotorista.emRota) {
           // Viagem iniciada
@@ -1268,16 +1263,7 @@
             map.flyTo(meuOnibusMarker.getLatLng(), 15.5, { duration: 0.8 });
           }
 
-          intervaloContador = setInterval(() => {
-            if (!estadoMotorista.emRota) return;
-            if (estadoMotorista.distanciaKm > 0.3) {
-              estadoMotorista.distanciaKm = Math.max(0.1, estadoMotorista.distanciaKm - 0.1);
-            }
-            if (estadoMotorista.tempoMin > 1) {
-              estadoMotorista.tempoMin = Math.max(1, estadoMotorista.tempoMin - 1);
-            }
-            renderizarDadosMotorista();
-          }, 7000);
+          iniciarMovimentoViagem();
 
         } else {
           // Viagem encerrada
@@ -1291,7 +1277,9 @@
           if (elStatusTexto) elStatusTexto.textContent = 'Conectado';
           if (elTopStatus) elTopStatus.textContent = 'Telemetria Online';
 
-          if (intervaloContador) clearInterval(intervaloContador);
+          cancelAnimationFrame(quadroMovimento);
+          estadoMotorista.viagemAtiva = null;
+          marcadoresMap.forEach(({ marker, bus }) => marker.setPopupContent(gerarHtmlPopup(bus)));
 
           estadoMotorista.viagensHoje += 1;
           let distTot = 10.9;
@@ -1332,6 +1320,31 @@
         }
       });
     }
+
+    async function restaurarViagemAtiva(viagem = viagemInicial) {
+      try {
+        if (!viagem || estadoMotorista.emRota) return;
+        estadoMotorista.viagemAtiva = viagem;
+        if (viagem.linhaChave) {
+          estadoMotorista.veiculo = viagem.veiculo || estadoMotorista.veiculo;
+          estadoMotorista.veiculoId = viagem.veiculoId || estadoMotorista.veiculoId;
+          ativarLinhaNoCockpit(viagem.linhaChave);
+        }
+        estadoMotorista.emRota = true;
+        btnIniciarRota?.classList.add('cockpit-btn-acao--encerrar');
+        if (btnAcaoTexto) btnAcaoTexto.textContent = 'Encerrar Rota';
+        if (btnAcaoIcone) btnAcaoIcone.querySelector('use')?.setAttribute('href', '#icone-stop');
+        if (bannerEmRota) bannerEmRota.style.display = 'flex';
+        if (elStatusTexto) elStatusTexto.textContent = 'Em Rota';
+        if (elTopStatus) elTopStatus.textContent = 'Em Rota';
+        ativarRotaNoMapa(false);
+        ativarParadasNoMapa();
+        iniciarMovimentoViagem();
+      } catch (erro) {
+        console.warn('Não foi possível restaurar a viagem ativa:', erro.message);
+      }
+    }
+    if (btnIniciarRota) btnIniciarRota.disabled = true;
 
     /* ──────────────────────────────────────────────────────────
       6. DROPDOWNS (MENU 3 PONTOS E USUÁRIO)
@@ -1777,6 +1790,16 @@
 
           // Replica no canal unificado do Gestor CCO pela camada de serviços.
           window.ValeBusAPI.salvarOcorrencia(novaOcorrencia);
+          window.ValeBusAPI.salvarOcorrenciaAsync(novaOcorrencia).then((ocorrenciaSalva) => {
+            const indice = ocorrenciasAtivas.findIndex((item) => item.id === novaOcorrencia.id);
+            if (indice !== -1) {
+              ocorrenciasAtivas[indice] = ocorrenciaSalva;
+              salvarOcorrencias();
+            }
+          }).catch((erro) => {
+            console.error('Não foi possível registrar a ocorrência no servidor:', erro);
+            mostrarToast('Alerta salvo neste terminal, mas não foi possível sincronizá-lo agora.', 'alerta', icone);
+          });
 
           ocorrenciasAtivas.unshift(novaOcorrencia);
           salvarOcorrencias();
@@ -1843,17 +1866,40 @@
       });
     }
 
-    // Sincronizar GPS da localização do ônibus
-    if (btnGpsSyncGaragem) {
-      btnGpsSyncGaragem.addEventListener('click', () => {
-        const parada = estadoMotorista.proximaParada ? estadoMotorista.proximaParada.replace(/^\d+\.\s*/, '') : 'Praça Urbana Carolina';
-        const coords = (meuOnibusMarker && meuOnibusMarker.getLatLng) ? meuOnibusMarker.getLatLng() : null;
-        const refGps = coords ? ` (GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})` : '';
-        if (inputLocalGaragem) {
-          inputLocalGaragem.value = `${parada}${refGps}`;
-          inputLocalGaragem.focus();
+    // GPS real somente para o suporte da garagem. Não altera o trajeto automático do mapa.
+    function obterPosicaoGpsDoNavegador() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error('GPS não está disponível neste navegador.'));
+          return;
         }
-        mostrarToast('Localização do ônibus atualizada!', 'info', '📍');
+        navigator.geolocation.getCurrentPosition(resolve, (erro) => {
+          reject(new Error(erro.code === 1 ? 'Permita o acesso ao GPS para enviar a posição à garagem.' : 'Não foi possível obter a posição GPS agora.'));
+        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      });
+    }
+
+    if (btnGpsSyncGaragem) {
+      btnGpsSyncGaragem.addEventListener('click', async () => {
+        const textoOriginal = btnGpsSyncGaragem.textContent;
+        btnGpsSyncGaragem.disabled = true;
+        try {
+          const posicao = await obterPosicaoGpsDoNavegador();
+          const latitude = posicao.coords.latitude;
+          const longitude = posicao.coords.longitude;
+          const velocidadeKmh = posicao.coords.speed === null ? null : Math.max(0, posicao.coords.speed * 3.6);
+          const registrada = await window.ValeBusAPI.enviarPosicaoGaragemAsync({ latitude, longitude, velocidadeKmh });
+          if (inputLocalGaragem) {
+            inputLocalGaragem.value = `GPS registrado: ${registrada.latitude.toFixed(5)}, ${registrada.longitude.toFixed(5)}`;
+            inputLocalGaragem.focus();
+          }
+          mostrarToast('Posição GPS enviada para o suporte da garagem.', 'sucesso', '📍');
+        } catch (erro) {
+          mostrarToast(erro.message || 'Não foi possível enviar a posição GPS.', 'alerta', '📍');
+        } finally {
+          btnGpsSyncGaragem.disabled = false;
+          btnGpsSyncGaragem.textContent = textoOriginal;
+        }
       });
     }
 
@@ -1955,6 +2001,13 @@
 
         // Notifica o canal unificado do Gestor CCO pela camada de serviços.
         window.ValeBusAPI.salvarOcorrencia(socorroGaragemAtivo);
+        window.ValeBusAPI.salvarOcorrenciaAsync(socorroGaragemAtivo).then((ocorrenciaSalva) => {
+          socorroGaragemAtivo = ocorrenciaSalva;
+          salvarSocorroGaragem();
+        }).catch((erro) => {
+          console.error('Não foi possível registrar o socorro no servidor:', erro);
+          mostrarToast('Socorro salvo neste terminal, mas não foi possível sincronizá-lo agora.', 'alerta', '🔧');
+        });
 
         salvarSocorroGaragem();
         mostrarToast(
@@ -2103,4 +2156,6 @@
       setTimeout(remover, 3800);
     }
 
+    // A restauração também usa os avisos e controles inicializados acima.
+    restaurarViagemAtiva().finally(() => { if (btnIniciarRota) btnIniciarRota.disabled = false; });
   })();

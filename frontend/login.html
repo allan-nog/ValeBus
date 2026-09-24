@@ -649,7 +649,7 @@
           </svg>
         </div>
         <h3 id="modal-motorista-titulo" class="modal-padrao__titulo">Área do Motorista</h3>
-        <p class="modal-padrao__subtitulo">Entre com o e-mail e a senha fornecidos pelo gestor.</p>
+        <p class="modal-padrao__subtitulo" id="motorista-instrucao-login">Entre com sua conta e escolha a linha e o ônibus que vai operar.</p>
       </div>
 
       <form id="form-login-motorista" class="modal-padrao__corpo" novalidate>
@@ -689,20 +689,13 @@
           </div>
         </div>
 
-        <!-- Linha e veículo serão obtidos do cadastro do gestor. -->
-        <div class="modal-linha-dupla" hidden aria-hidden="true">
+        <!-- Catálogo real carregado após a autenticação. -->
+        <div class="modal-linha-dupla" id="motorista-escolha-operacao" style="display: none;">
           <div class="campo">
             <label class="campo__label" for="select-motorista-linha">Linha</label>
             <div class="campo__wrapper campo__wrapper--select">
               <select class="campo__input campo__select" id="select-motorista-linha" required>
-                <option value="fernandes">Linha Fernandes</option>
-                <option value="anchieta">Linha Anchieta</option>
-                <option value="fortaleza">Linha Fortaleza</option>
-                <option value="industrial">Linha Industrial</option>
-                <option value="porto_sapucai">Linha Porto Sapucaí</option>
-                <option value="reforco_jose_gm">Linha Reforço José G.M</option>
-                <option value="sao_benedito_hora">Linha São Benedito (Hora)</option>
-                <option value="sao_benedito_hora_meia">Linha São Benedito (Hora e Meia)</option>
+                <option value="">Selecione a linha</option>
               </select>
             </div>
           </div>
@@ -711,14 +704,7 @@
             <label class="campo__label" for="select-motorista-veiculo">Veículo</label>
             <div class="campo__wrapper campo__wrapper--select">
               <select class="campo__input campo__select" id="select-motorista-veiculo" required>
-                <option value="01">Ônibus #01</option>
-                <option value="02" selected>Ônibus #02</option>
-                <option value="03">Ônibus #03</option>
-                <option value="04">Ônibus #04</option>
-                <option value="05">Ônibus #05</option>
-                <option value="06">Ônibus #06</option>
-                <option value="07">Ônibus #07</option>
-                <option value="08">Ônibus #08</option>
+                <option value="">Selecione o ônibus</option>
               </select>
             </div>
           </div>
@@ -829,6 +815,7 @@
     </div>
   </div>
 
+  <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/login.js"></script>
 </body>

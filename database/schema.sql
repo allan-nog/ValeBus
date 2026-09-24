@@ -260,8 +260,9 @@ revoke all on linhas, paradas, linha_paradas, trajeto_pontos, veiculos,
   perfis, motoristas, viagens, posicoes_veiculo, ocorrencias,
   solicitacoes_socorro from anon, authenticated;
 
-grant select on linhas, paradas, linha_paradas, trajeto_pontos, posicoes_veiculo
+grant select on linhas, paradas, linha_paradas, trajeto_pontos
   to anon, authenticated;
+grant select on posicoes_veiculo to authenticated;
 grant select on perfis, motoristas, viagens, ocorrencias, solicitacoes_socorro
   to authenticated;
 
@@ -298,8 +299,8 @@ create policy "trajetos publicos" on trajeto_pontos for select
   );
 
 drop policy if exists "posicoes publicas em viagem" on posicoes_veiculo;
-create policy "posicoes publicas em viagem" on posicoes_veiculo for select
-  to anon, authenticated using ((select public.posicao_eh_publica(viagem_id)));
+-- GPS de suporte da garagem não é telemetria pública.
+revoke select on posicoes_veiculo from anon;
 
 drop policy if exists "perfis proprios ou gestor" on perfis;
 create policy "perfis proprios ou gestor" on perfis for select

@@ -352,7 +352,7 @@
           <thead>
             <tr>
               <th scope="col">Motorista &amp; Matrícula</th>
-              <th scope="col">Linha &amp; Veículo</th>
+              <th scope="col">Linha &amp; Ônibus sugeridos</th>
               <th scope="col">Turno</th>
               <th scope="col">Conta de acesso</th>
               <th scope="col">Status</th>
@@ -580,8 +580,9 @@
 
             <!-- Linha Principal -->
             <div class="gestor-form-grupo">
-              <label class="gestor-form-rotulo" for="form-mot-linha">Linha Habitual *</label>
+              <label class="gestor-form-rotulo" for="form-mot-linha">Linha sugerida no login</label>
               <select class="gestor-form-select" id="form-mot-linha">
+                <option value="">Motorista escolhe no login</option>
                 <option value="Linha Fernandes">Linha Fernandes</option>
                 <option value="Linha Anchieta">Linha Anchieta</option>
                 <option value="Linha Fortaleza">Linha Fortaleza</option>
@@ -595,10 +596,11 @@
 
             <!-- Veículo Padrão -->
             <div class="gestor-form-grupo">
-              <label class="gestor-form-rotulo" for="form-mot-veiculo">Veículo / Ônibus *</label>
+              <label class="gestor-form-rotulo" for="form-mot-veiculo">Ônibus sugerido no login</label>
               <select class="gestor-form-select" id="form-mot-veiculo">
+                <option value="" selected>Motorista escolhe no login</option>
                 <option value="Ônibus #01">Ônibus #01</option>
-                <option value="Ônibus #02" selected>Ônibus #02</option>
+                <option value="Ônibus #02">Ônibus #02</option>
                 <option value="Ônibus #03">Ônibus #03</option>
                 <option value="Ônibus #04">Ônibus #04</option>
                 <option value="Ônibus #05">Ônibus #05</option>
@@ -752,6 +754,7 @@
   </div>
 
   <!-- SERVIÇO MOCK API & SCRIPT DO GESTOR -->
+  <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/gestor.js"></script>
 </body>

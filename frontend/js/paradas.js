@@ -2327,11 +2327,9 @@ window.VALEBUS_PARADAS = {
    * @param {string} linhaChave 'todas' ou chave da linha (ex: 'anchieta')
    * @returns {Array} Array de coordenadas [lat, lng]
    */
-  obterTrajeto(linhaChave = 'anchieta') {
-    if (!linhaChave || linhaChave === 'todas') {
-      return this.trajetosPorLinha.anchieta || [];
-    }
-    return this.trajetosPorLinha[linhaChave] || [];
+  obterTrajeto(linhaChave) {
+    return Object.hasOwn(this.trajetosPorLinha, linhaChave)
+      ? this.trajetosPorLinha[linhaChave] : [];
   },
 
   /**

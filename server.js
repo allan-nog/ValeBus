@@ -5,12 +5,27 @@ import { config, supabaseConfigurado } from './src/config/env.js';
 import { authRouter } from './src/routes/auth.js';
 import { linhasRouter } from './src/routes/linhas.js';
 import { motoristasRouter } from './src/routes/motoristas.js';
+import { ocorrenciasRouter } from './src/routes/ocorrencias.js';
+import { viagensRouter } from './src/routes/viagens.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 
 app.disable('x-powered-by');
+app.use((req, res, next) => {
+  const origin = req.get('origin');
+  if (!origin || !config.frontendOrigins.includes(origin)) return next();
+  res.set({
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Methods': 'GET,POST,PATCH,DELETE,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    Vary: 'Origin'
+  });
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  return next();
+});
 app.use(express.json({ limit: '1mb' }));
 
 app.get('/api/health', (_req, res) => {
@@ -23,6 +38,8 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/gestor/motoristas', motoristasRouter);
+app.use('/api/ocorrencias', ocorrenciasRouter);
+app.use('/api/viagens', viagensRouter);
 app.use('/api/linhas', linhasRouter);
 
 app.use('/api', (_req, res) => {

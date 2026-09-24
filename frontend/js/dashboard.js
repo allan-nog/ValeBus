@@ -115,14 +115,8 @@
      2. DADOS DAS LINHAS E FROTA (Santa Rita do Sapucaí - MG)
      ────────────────────────────────────────────────────────── */
   const LINHAS = window.VALEBUS_CATALOGO_OPERACIONAL.linhas;
-  const FROTA = window.VALEBUS_CATALOGO_OPERACIONAL.frota
-    .filter((onibus) => onibus.chaveLinha !== 'fernandes')
-    .map((onibus) => ({
-      ...onibus,
-      linha: LINHAS[onibus.chaveLinha],
-      posicao: [...onibus.posicao]
-    }));
-
+  const nomeLinha = chave => window.VALEBUS_PARADAS.metadadosLinhas[chave]?.nome || LINHAS[chave]?.nome || '';
+  const textoValido = valor => typeof valor === 'string' && valor.trim() && !/^(undefined|null|NaN)$/i.test(valor.trim()) ? valor.trim() : '';
   /* ──────────────────────────────────────────────────────────
      3. INICIALIZAÇÃO DO MAPA LEAFLET & CAMADAS TEMÁTICAS (DIA/NOITE)
      ────────────────────────────────────────────────────────── */
@@ -212,248 +206,161 @@
   }
 
   function gerarHtmlPopup(bus) {
-    const nomeVeiculo = bus.veiculo || 'Ônibus Municipal';
-    const numPrefixo = bus.prefixo ? `• Prefixo ${bus.prefixo}` : '';
+    const escapar = valor => String(valor).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const nomeVeiculo = escapar(bus.veiculo || 'Ônibus Municipal');
+    const numPrefixo = bus.prefixo ? `• Prefixo ${escapar(bus.prefixo)}` : '';
     return `
       <div class="popup-onibus">
         <div class="popup-onibus__header">
           <span class="popup-onibus__dot" style="background-color: ${bus.linha.cor};"></span>
           <div style="display:flex; flex-direction:column; gap: 2px;">
             <h3 class="popup-onibus__titulo" style="color: ${bus.linha.cor}; margin: 0;">
-              ${bus.linha.nome}
+              ${escapar(nomeLinha(bus.chaveLinha))}
             </h3>
             <span style="font-size: 11px; font-weight: 700; color: var(--texto-secundario);">${nomeVeiculo} ${numPrefixo}</span>
           </div>
         </div>
-        ${bus.linha.partida && bus.linha.proximaParada ?           `<div class="popup-onibus__corpo">
-            <div class="popup-onibus__item">
-              <span class="popup-onibus__rotulo">🚩 Partida:</span>
-              <span class="popup-onibus__valor">${bus.linha.partida}</span>
-            </div>
-            <div class="popup-onibus__item">
-              <span class="popup-onibus__rotulo">📍 Próxima Parada:</span>
-              <span class="popup-onibus__valor">${bus.linha.proximaParada}</span>
-            </div>
-          </div>` : ''}
         <div class="popup-onibus__footer">
-          <span class="popup-onibus__velocidade">⚡ <strong>${demoFeira && bus.chaveLinha === 'anchieta' ? 'Viagem simulada (~1 min)' : bus.velocidade === 0 ? '0 km/h (Ponto Inicial)' : bus.velocidade + ' km/h'}</strong></span>
-          <span class="popup-onibus__gps-badge">${demoFeira && bus.chaveLinha === 'anchieta' ? 'Demonstração' : 'GPS Online'}</span>
+          <span class="popup-onibus__velocidade">⚡ <strong>Movimento automático (~2min30s)</strong></span>
+          <span class="popup-onibus__gps-badge">${bus.percursoConcluido ? 'Trajeto percorrido • Aguardando encerramento' : 'Viagem ativa • Posição simulada'}</span>
         </div>
       </div>
     `;
   }
 
-  function obterPontoInicialLinha(chaveLinha) {
-    if (window.VALEBUS_PARADAS && window.VALEBUS_PARADAS.paradasPorLinha && window.VALEBUS_PARADAS.paradasPorLinha[chaveLinha]) {
-      const paradas = window.VALEBUS_PARADAS.paradasPorLinha[chaveLinha];
-      if (paradas && paradas.length > 0 && paradas[0].posicao) {
-        return [paradas[0].posicao[0], paradas[0].posicao[1]];
-      }
+  let viagensPublicas = [];
+  let consultaPublicaFalhou = false;
+  let diferencaRelogio = 0;
+  let consultaPublicaEmAndamento = false;
+  let timerConsultaPublica;
+
+  function atualizarResumoPublico() {
+    const visiveis = [...marcadoresMap.values()].filter(item => map.hasLayer(item.marker)).length;
+    const total = document.getElementById('total-onibus-ativo');
+    if (total?.querySelector('.num-total')) {
+      total.querySelector('.num-destaque').textContent = visiveis;
+      total.querySelector('.num-total').textContent = marcadoresMap.size;
     }
-    const COORDENADAS_EXATAS = {
-      anchieta: [-22.254164, -45.696709],
-      fortaleza: [-22.22582948032013, -45.71819403549861],
-      industrial: [-22.261351790494068, -45.771512667995346],
-      porto_sapucai: [-22.257161337562074, -45.80345771571105],
-      reforco_jose_gm: [-22.22582948032013, -45.71819403549861],
-      sao_benedito_hora: [-22.22582948032013, -45.71819403549861],
-      sao_benedito_hora_meia: [-22.22582948032013, -45.71819403549861]
-    };
-    return COORDENADAS_EXATAS[chaveLinha] || [-22.22582948032013, -45.71819403549861];
+    const label = document.getElementById('main-header-live-label');
+    if (label) label.textContent = consultaPublicaFalhou ? 'Viagens indisponíveis • Tentando reconectar'
+      : marcadoresMap.size ? 'Viagens ativas • Movimento automático (simulado)' : 'Aguardando início de viagem';
+    const linhas = document.getElementById('total-linhas-ativas');
+    if (linhas) linhas.textContent = new Set(viagensPublicas.map(v => v.linhaChave)).size;
+    document.querySelectorAll('[data-status-operacao]').forEach(el => {
+      el.textContent = consultaPublicaFalhou ? 'Indisponível' : marcadoresMap.size ? 'Em operação' : 'Aguardando';
+    });
+    document.querySelectorAll('.proximo-card').forEach(card => {
+      const viagens = viagensPublicas.filter(v => v.linhaChave === card.dataset.linha);
+      const ativa = viagens.length > 0;
+      card.classList.toggle('proximo-card--destaque', ativa);
+      card.classList.toggle('proximo-card--extra', !ativa && card.dataset.extra === 'true');
+      const nome = card.querySelector('.proximo-card__nome-linha');
+      if (nome) nome.textContent = nomeLinha(card.dataset.linha);
+      const detalhe = card.querySelector('.proximo-card__parada');
+      if (detalhe) detalhe.textContent = viagens.map(v => v.veiculo).filter(Boolean).join(' • ');
+      const tempo = card.querySelector('.proximo-card__tempo');
+      if (tempo) tempo.textContent = '';
+      const badge = card.querySelector('.status-badge');
+      if (badge) {
+        badge.className = 'status-badge';
+        badge.textContent = consultaPublicaFalhou ? 'Indisponível' : ativa ? 'Em viagem' : 'Aguardando';
+      }
+    });
+    document.querySelectorAll('[data-filtro-viagem]').forEach(botao => {
+      botao.hidden = !viagensPublicas.some(v => v.linhaChave === botao.dataset.linha);
+    });
+    if (visiveis) ocultarAlertaLinhaVazia();
+    else mostrarAlertaLinhaVazia(linhaAtivaFiltro, false);
   }
 
-  function normalizarChaveLinha(str) {
-    if (!str) return 'anchieta';
-    const s = String(str).toLowerCase().trim();
-    if (s === 'industrial' || s.includes('industrial')) return 'industrial';
-    if (s === 'porto_sapucai' || s.includes('porto') || s.includes('sapucai') || s.includes('sapucaí')) return 'porto_sapucai';
-    if (s === 'reforco_jose_gm' || s.includes('reforco') || s.includes('reforço') || s.includes('mcm')) return 'reforco_jose_gm';
-    if (s === 'sao_benedito_hora_meia' || s.includes('hora e meia') || (s.includes('benedito') && s.includes('meia'))) return 'sao_benedito_hora_meia';
-    if (s === 'sao_benedito_hora' || s.includes('benedito') || s.includes('hora')) return 'sao_benedito_hora';
-    if (s === 'fortaleza' || s.includes('fortaleza')) return 'fortaleza';
-    if (s === 'anchieta' || s.includes('anchieta')) return 'anchieta';
-    return 'anchieta';
+  function renderizarViagensPublicas() {
+    const ids = new Set(viagensPublicas.map(v => v.id));
+    marcadoresMap.forEach((item, id) => {
+      if (!ids.has(id)) { map.removeLayer(item.marker); marcadoresMap.delete(id); }
+    });
+    for (const viagem of viagensPublicas) {
+      const existente = marcadoresMap.get(viagem.id);
+      if (existente && existente.bus.chaveLinha === viagem.linhaChave
+          && existente.bus.iniciadaEm === Date.parse(viagem.iniciadaEm)) {
+        existente.bus.veiculo = viagem.veiculo;
+        existente.bus.prefixo = viagem.prefixo;
+        existente.marker.setPopupContent(gerarHtmlPopup(existente.bus));
+        continue;
+      }
+      if (existente) { map.removeLayer(existente.marker); marcadoresMap.delete(viagem.id); }
+      const coords = window.VALEBUS_PARADAS.obterTrajeto(viagem.linhaChave);
+      const trajeto = window.ValeBusViagemAutomatica.preparar(coords, coord => map.project(coord, 0));
+      if (!trajeto) continue;
+      const bus = { viagemId: viagem.id, chaveLinha: viagem.linhaChave, linha: LINHAS[viagem.linhaChave],
+        veiculo: viagem.veiculo, prefixo: viagem.prefixo, posicao: [...coords[0]],
+        iniciadaEm: Date.parse(viagem.iniciadaEm), trajeto };
+      atualizarPosicaoVisual(bus);
+      const marker = L.marker(bus.posicao, { icon: criarIconeBus(bus.linha.cor) }).bindPopup(gerarHtmlPopup(bus));
+      marcadoresMap.set(viagem.id, { marker, bus });
+    }
+    marcadoresMap.forEach(({ marker, bus }) => {
+      if (linhaAtivaFiltro === 'todas' || linhaAtivaFiltro === bus.chaveLinha) marker.addTo(map);
+      else map.removeLayer(marker);
+    });
+    atualizarResumoPublico();
   }
 
-  function obterOperacaoMotorista() {
-    let linhaChave = localStorage.getItem('valebus_linha_motorista_ativa');
-    let veiculoNome = localStorage.getItem('valebus_veiculo_motorista_ativo');
-
+  async function sincronizarViagensPublicas() {
+    if (consultaPublicaEmAndamento) return;
+    clearTimeout(timerConsultaPublica);
+    consultaPublicaEmAndamento = true;
     try {
-      const sessao = (window.ValeBusAPI && typeof window.ValeBusAPI.obterSessao === 'function')
-        ? window.ValeBusAPI.obterSessao()
-        : JSON.parse(localStorage.getItem('valebus_usuario') || 'null');
-
-      if (sessao && (sessao.perfil === 'motorista' || sessao.linha || sessao.veiculo)) {
-        if (sessao.linhaChave || sessao.linha) {
-          linhaChave = sessao.linhaChave || sessao.linha;
-        }
-        if (sessao.veiculo) {
-          veiculoNome = sessao.veiculo;
-        }
+      const consultaIniciadaEm = Date.now();
+      const resposta = await window.ValeBusAPI.obterViagensPublicasAsync();
+      const horaServidor = Date.parse(resposta.agora);
+      if (!Number.isFinite(horaServidor)) throw new Error('Horário de operação inválido.');
+      diferencaRelogio = horaServidor - (consultaIniciadaEm + Date.now()) / 2;
+      const assinatura = lista => JSON.stringify(lista.map(v => [v.id, v.linhaChave, v.iniciadaEm]));
+      const anteriores = assinatura(viagensPublicas);
+      const ids = new Set();
+      viagensPublicas = resposta.data.filter(v => {
+        if (!v || !textoValido(v.id) || ids.has(v.id) || !Object.hasOwn(LINHAS, v.linhaChave)
+            || !window.VALEBUS_PARADAS.temTrajeto(v.linhaChave) || !Number.isFinite(Date.parse(v.iniciadaEm))) return false;
+        ids.add(v.id);
+        return true;
+      }).map(v => ({ ...v, veiculo: textoValido(v.veiculo), prefixo: textoValido(v.prefixo) }));
+      consultaPublicaFalhou = false;
+      renderizarViagensPublicas();
+      if (anteriores !== assinatura(viagensPublicas)) {
+        // A primeira viagem iniciada muda automaticamente a rota exibida.
+        const linha = viagensPublicas.length === 1 ? viagensPublicas[0].linhaChave : 'todas';
+        document.querySelector(`#filtros-legenda [data-linha="${linha}"]`)?.click();
       }
-    } catch (e) {}
-
-    linhaChave = normalizarChaveLinha(linhaChave || 'anchieta');
-    if (!veiculoNome) {
-      const padroes = {
-        anchieta: 'Ônibus #01',
-        fortaleza: 'Ônibus #03',
-        industrial: 'Ônibus #04',
-        porto_sapucai: 'Ônibus #05',
-        reforco_jose_gm: 'Ônibus #06',
-        sao_benedito_hora: 'Ônibus #07',
-        sao_benedito_hora_meia: 'Ônibus #08'
-      };
-      veiculoNome = padroes[linhaChave] || 'Ônibus #01';
+      atualizarVisibilidadeTrajetos();
+    } catch (_erro) {
+      // Não apresenta posições antigas como operação confirmada.
+      consultaPublicaFalhou = true;
+      viagensPublicas = [];
+      renderizarViagensPublicas();
+      atualizarVisibilidadeTrajetos();
+    } finally {
+      consultaPublicaEmAndamento = false;
+      timerConsultaPublica = setTimeout(sincronizarViagensPublicas, 5000);
     }
-
-    veiculoNome = veiculoNome.replace(/\s*\(Prefixo\s*\d+\)/i, '').trim();
-
-    return { linhaChave, veiculoNome };
   }
 
-  function atualizarCardsProximos(operacao) {
-    const cards = document.querySelectorAll('.proximo-card');
-    cards.forEach(card => {
-      const chave = card.getAttribute('data-linha');
-      const badgeStatus = card.querySelector('.status-badge');
-      if (chave === operacao.linhaChave) {
-        card.classList.add('proximo-card--destaque');
-        card.style.borderColor = 'var(--cor-marca)';
-        card.style.boxShadow = '0 0 0 2px rgba(37, 99, 235, 0.2)';
-        if (badgeStatus) {
-          badgeStatus.textContent = `${operacao.veiculoNome} • Em rota`;
-          badgeStatus.className = 'status-badge status-badge--horario';
-          badgeStatus.style.background = 'rgba(34, 197, 94, 0.15)';
-          badgeStatus.style.color = '#16a34a';
-          badgeStatus.style.fontWeight = '700';
-        }
-      } else {
-        card.classList.remove('proximo-card--destaque');
-        card.style.borderColor = '';
-        card.style.boxShadow = '';
-        if (badgeStatus) {
-          badgeStatus.textContent = 'Aguardando';
-          badgeStatus.className = 'status-badge';
-          badgeStatus.style.background = 'rgba(148, 163, 184, 0.12)';
-          badgeStatus.style.color = '#64748b';
-          badgeStatus.style.fontWeight = '500';
-        }
-      }
+  function atualizarPosicaoVisual(bus) {
+    const decorrido = Date.now() + diferencaRelogio - bus.iniciadaEm;
+    const ponto = window.ValeBusViagemAutomatica.posicao(bus.trajeto, decorrido);
+    const pos = map.unproject(L.point(ponto.x, ponto.y), 0);
+    bus.posicao = [pos.lat, pos.lng];
+    bus.percursoConcluido = decorrido >= window.ValeBusViagemAutomatica.duracaoMs;
+  }
+
+  function animarViagensPublicas() {
+    marcadoresMap.forEach(({ bus, marker }) => {
+      const concluidoAntes = bus.percursoConcluido;
+      atualizarPosicaoVisual(bus);
+      marker.setLatLng(bus.posicao);
+      if (concluidoAntes !== bus.percursoConcluido) marker.setPopupContent(gerarHtmlPopup(bus));
     });
+    requestAnimationFrame(animarViagensPublicas);
   }
-
-  // DEMONSTRAÇÃO TEMPORÁRIA DA FEIRA — somente passageiro, sem API/storage.
-  // Para desativar após a feira, altere esta constante para false.
-  const DEMO_FEIRA_ATIVA = true;
-  const demoFeira = (() => {
-    if (!DEMO_FEIRA_ATIVA) return null;
-    const coords = window.VALEBUS_PARADAS?.obterTrajeto('anchieta');
-    if (!coords || coords.length < 2) return null;
-    // Interpola na mesma projeção usada pela polyline Leaflet. Não altera
-    // nenhum ponto do catálogo e percorre todos os segmentos em ordem.
-    const pontos = coords.map(coord => map.project(coord, 0));
-    const distancias = [0];
-    for (let i = 1; i < pontos.length; i++) {
-      distancias.push(distancias[i - 1] + pontos[i - 1].distanceTo(pontos[i]));
-    }
-    const total = distancias[distancias.length - 1];
-    if (!total) return null;
-    return { coords, pontos, distancias, total, posicao: [...coords[0]] };
-  })();
-
-  function obterPosicaoVisual(bus) {
-    if (demoFeira && bus.chaveLinha === 'anchieta') return demoFeira.posicao;
-    return obterPontoInicialLinha(bus.chaveLinha);
-  }
-
-  function iniciarDemoFeira() {
-    if (!demoFeira) return;
-    const DURACAO_MS = 60000;
-    const PAUSA_MS = 5000;
-    let inicio = null;
-    function animar(agora) {
-      if (inicio === null) inicio = agora;
-      const tempo = (agora - inicio) % (DURACAO_MS + PAUSA_MS);
-      const alvo = demoFeira.total * Math.min(tempo / DURACAO_MS, 1);
-      let i = 1;
-      while (i < demoFeira.distancias.length - 1 && demoFeira.distancias[i] < alvo) i++;
-      const comprimento = demoFeira.distancias[i] - demoFeira.distancias[i - 1];
-      const fracao = comprimento ? (alvo - demoFeira.distancias[i - 1]) / comprimento : 0;
-      const a = demoFeira.pontos[i - 1];
-      const b = demoFeira.pontos[i];
-      const pos = map.unproject(L.point(a.x + (b.x - a.x) * fracao, a.y + (b.y - a.y) * fracao), 0);
-      demoFeira.posicao = tempo >= DURACAO_MS
-        ? [...demoFeira.coords[demoFeira.coords.length - 1]] : [pos.lat, pos.lng];
-      const item = marcadoresMap.get('anchieta');
-      if (item) {
-        item.bus.posicao = [...demoFeira.posicao];
-        item.marker.setLatLng(demoFeira.posicao);
-      }
-      requestAnimationFrame(animar);
-    }
-    requestAnimationFrame(animar);
-  }
-  // FIM DO BLOCO DA DEMONSTRAÇÃO TEMPORÁRIA.
-
-
-  let operacaoAtual = obterOperacaoMotorista();
-
-  function renderizarMarcadores() {
-    operacaoAtual = demoFeira
-      ? { linhaChave: 'anchieta', veiculoNome: 'Ônibus #01' }
-      : obterOperacaoMotorista();
-
-    // Limpa marcadores anteriores
-    marcadoresMap.forEach(({ marker }) => {
-      if (map.hasLayer(marker)) map.removeLayer(marker);
-    });
-    marcadoresMap.clear();
-
-    // Mostra APENAS o ônibus que o motorista está operando
-    const busOperando = FROTA.find(b => b.chaveLinha === operacaoAtual.linhaChave) || FROTA[0];
-    busOperando.veiculo = operacaoAtual.veiculoNome;
-
-    // Posiciona exatamente no ponto inicial oficial da linha (Parada 1)
-    const posInicial = obterPosicaoVisual(busOperando);
-    busOperando.posicao = [posInicial[0], posInicial[1]];
-
-    const icone = criarIconeBus(busOperando.linha.cor);
-    const conteudoPopup = gerarHtmlPopup(busOperando);
-
-    const marker = L.marker(posInicial, { icon: icone })
-      .addTo(map)
-      .bindPopup(conteudoPopup);
-
-    marcadoresMap.set(busOperando.chaveLinha, { marker, bus: busOperando });
-
-    // Atualiza contadores
-    const elTotal = document.getElementById('total-onibus-ativo');
-    if (elTotal) {
-      const spanNumDestaque = elTotal.querySelector('.num-destaque');
-      const spanNumTotal = elTotal.querySelector('.num-total');
-      if (spanNumDestaque && spanNumTotal) {
-        spanNumDestaque.textContent = '1';
-        spanNumTotal.textContent = '1';
-      } else {
-        elTotal.textContent = '1 / 1';
-      }
-    }
-
-    const elMainLiveLabel = document.getElementById('main-header-live-label');
-    if (elMainLiveLabel) {
-      elMainLiveLabel.textContent = demoFeira
-        ? 'Demonstração • Anchieta • Viagem simulada'
-        : `GPS Ao Vivo • ${busOperando.veiculo} em Operação`;
-    }
-
-    // Atualiza cards da lateral
-    atualizarCardsProximos(operacaoAtual);
-  }
-
-  renderizarMarcadores();
-
 
   /* ──────────────────────────────────────────────────────────
      4.1. PONTOS (PARADAS) DE ÔNIBUS — ARQUITETURA MODULAR
@@ -531,8 +438,7 @@
     if (!window.VALEBUS_PARADAS) return;
 
     const paradas = window.VALEBUS_PARADAS
-      .obterParadas(linhaSelecionada)
-      .filter(ponto => ponto.linhaChave !== 'fernandes');
+      .obterParadas(linhaSelecionada);
 
     paradas.forEach(ponto => {
       const icone = criarIconeParada(ponto);
@@ -615,7 +521,7 @@
 
     // Se 'todas' ou uma linha com trajeto cadastrado (ex: 'anchieta')
     const linhasParaDesenhar = (linhaSelecionada === 'todas')
-      ? ['anchieta']
+      ? [...new Set(viagensPublicas.map(v => v.linhaChave))]
       : (window.VALEBUS_PARADAS.temTrajeto(linhaSelecionada) ? [linhaSelecionada] : []);
 
     linhasParaDesenhar.forEach(chave => {
@@ -706,26 +612,23 @@
 
 
   /* ──────────────────────────────────────────────────────────
-     5. TELEMETRIA GPS (ÔNIBUS NO PONTO INICIAL EXATO)
-     ────────────────────────────────────────────────────────── */
-  setInterval(() => {
-    marcadoresMap.forEach(({ marker, bus }) => {
-      // Mantém o ônibus posicionado fielmente no ponto inicial oficial
-      const posExata = obterPosicaoVisual(bus);
-      bus.posicao = [posExata[0], posExata[1]];
-      marker.setLatLng(posExata);
-
-      // Atualiza conteúdo do popup caso aberto
-      if (marker.isPopupOpen()) {
-        marker.setPopupContent(gerarHtmlPopup(bus));
-      }
-    });
-  }, 3000);
-
-
-  /* ──────────────────────────────────────────────────────────
      6. FILTRO INTERATIVO POR LINHA (LEGENDA) + FOCO NO MAPA + ESTADO VAZIO
      ────────────────────────────────────────────────────────── */
+  // Complementa os filtros somente para linhas que recebam viagens públicas.
+  const legenda = document.getElementById('filtros-legenda');
+  Object.entries(LINHAS).forEach(([chave, linha]) => {
+    if (!legenda || legenda.querySelector(`[data-linha="${chave}"]`)) return;
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = 'mapa-legenda__item';
+    botao.dataset.linha = chave;
+    botao.dataset.filtroViagem = '';
+    botao.setAttribute('role', 'tab');
+    botao.setAttribute('aria-selected', 'false');
+    botao.hidden = true;
+    botao.textContent = nomeLinha(chave);
+    legenda.appendChild(botao);
+  });
   const botoesFiltro = document.querySelectorAll('#filtros-legenda .mapa-legenda__item');
   const mapaLegenda = document.querySelector('.mapa-legenda');
   const mapaLegendaHeader = document.querySelector('.mapa-legenda__header');
@@ -741,18 +644,19 @@
   const elPainelAlertaVazio = document.getElementById('painel-alerta-vazio');
   const elPainelAlertaTitulo = document.getElementById('painel-alerta-vazio-titulo');
 
-  function mostrarAlertaLinhaVazia(chaveLinha) {
-    const nomeLinha = LINHAS[chaveLinha] ? LINHAS[chaveLinha].nome : 'desta linha';
-    const operacao = obterOperacaoMotorista();
-    const nomeLinhaOp = LINHAS[operacao.linhaChave] ? LINHAS[operacao.linhaChave].nome : operacao.linhaChave;
+  function mostrarAlertaLinhaVazia(chaveLinha, reposicionar = true) {
+    const todas = chaveLinha === 'todas';
+    const nome = nomeLinha(chaveLinha);
+    const titulo = consultaPublicaFalhou ? 'Não foi possível consultar as viagens.'
+      : todas ? 'Nenhuma viagem ativa no momento.' : `Nenhum veículo em operação na ${nome}.`;
 
     // Alerta no Mapa
     if (elMapaAlertaVazio) {
       if (elMapaAlertaTitulo) {
-        elMapaAlertaTitulo.textContent = 'Nenhum ônibus desta linha está disponível no momento.';
+        elMapaAlertaTitulo.textContent = titulo;
       }
       if (elMapaAlertaDesc) {
-        elMapaAlertaDesc.textContent = `No momento, o motorista está operando o ${operacao.veiculoNome} na ${nomeLinhaOp}. Não há veículos com telemetria GPS ativa operando na ${nomeLinha} agora.`;
+        elMapaAlertaDesc.textContent = consultaPublicaFalhou ? 'A reconexão é automática.' : 'Aguardando o motorista iniciar uma viagem.';
       }
       elMapaAlertaVazio.style.display = 'flex';
     }
@@ -760,14 +664,16 @@
     // Alerta no Painel Lateral
     if (elPainelAlertaVazio) {
       if (elPainelAlertaTitulo) {
-        elPainelAlertaTitulo.textContent = `Nenhum veículo em operação na ${nomeLinha}.`;
+        elPainelAlertaTitulo.textContent = titulo;
       }
       elPainelAlertaVazio.style.display = 'flex';
     }
 
     // Fecha popup e reposiciona visualização da cidade suavemente
-    map.closePopup();
-    map.flyTo([-22.2528, -45.7036], 13.5, { animate: true, duration: 0.8 });
+    if (reposicionar) {
+      map.closePopup();
+      map.flyTo([-22.2528, -45.7036], 13.5, { animate: true, duration: 0.8 });
+    }
   }
 
   function ocultarAlertaLinhaVazia() {
@@ -811,7 +717,7 @@
   // Ações das setas de navegação (Anterior / Próxima Linha)
   if (btnLegendaPrev) {
     btnLegendaPrev.addEventListener('click', () => {
-      const botoesArr = Array.from(botoesFiltro);
+      const botoesArr = Array.from(botoesFiltro).filter(b => !b.hidden);
       const indexAtual = botoesArr.findIndex(b => b.classList.contains('mapa-legenda__item--ativo'));
       const prevIndex = indexAtual > 0 ? indexAtual - 1 : botoesArr.length - 1;
       botoesArr[prevIndex].click();
@@ -820,7 +726,7 @@
 
   if (btnLegendaNext) {
     btnLegendaNext.addEventListener('click', () => {
-      const botoesArr = Array.from(botoesFiltro);
+      const botoesArr = Array.from(botoesFiltro).filter(b => !b.hidden);
       const indexAtual = botoesArr.findIndex(b => b.classList.contains('mapa-legenda__item--ativo'));
       const nextIndex = indexAtual < botoesArr.length - 1 ? indexAtual + 1 : 0;
       botoesArr[nextIndex].click();
@@ -845,7 +751,7 @@
 
       marcadoresMap.forEach(({ marker, bus }) => {
         if (linhaSelecionada === 'todas' || bus.chaveLinha === linhaSelecionada) {
-          const pos = obterPosicaoVisual(bus);
+          const pos = bus.posicao;
           bus.posicao = [pos[0], pos[1]];
           marker.setLatLng(pos);
           if (!map.hasLayer(marker)) map.addLayer(marker);
@@ -892,17 +798,10 @@
         const spanNumTotal = elTotal.querySelector('.num-total');
         if (spanNumDestaque && spanNumTotal) {
           spanNumDestaque.textContent = totalVisivel;
-          spanNumTotal.textContent = '1';
+          spanNumTotal.textContent = String(marcadoresMap.size);
         } else {
-          elTotal.textContent = `${totalVisivel} / 1`;
+          elTotal.textContent = `${totalVisivel} / ${marcadoresMap.size}`;
         }
-      }
-
-      const elMainLiveLabel = document.getElementById('main-header-live-label');
-      if (elMainLiveLabel) {
-        elMainLiveLabel.textContent = totalVisivel > 0
-          ? (demoFeira ? 'Demonstração • Anchieta • Viagem simulada' : `GPS Ao Vivo • ${operacaoAtual.veiculoNome} em Operação`)
-          : 'GPS Ao Vivo • Nenhum Veículo nesta Linha';
       }
 
       // ESTADO QUANDO NENHUM ÔNIBUS ESTIVER VISÍVEL
@@ -918,6 +817,7 @@
           focarOnibusPorLinha(linhaSelecionada, false);
         }
       }
+      atualizarResumoPublico();
     });
   });
 
@@ -925,9 +825,28 @@
   /* ──────────────────────────────────────────────────────────
      7. NAVEGAÇÃO INTERATIVA (Clique no Card -> flyTo no Mapa)
      ────────────────────────────────────────────────────────── */
+  // Reutiliza o card existente para linhas do catálogo ainda sem card no HTML.
+  const modeloCard = document.querySelector('.proximo-card');
+  Object.keys(LINHAS).forEach(chave => {
+    if (!modeloCard || document.querySelector(`.proximo-card[data-linha="${chave}"]`)) return;
+    const card = modeloCard.cloneNode(true);
+    card.dataset.linha = chave;
+    card.classList.add('proximo-card--extra');
+    card.setAttribute('aria-label', `${nomeLinha(chave)}. Clique para ver no mapa.`);
+    card.querySelector('.proximo-card__linha-badge').style.backgroundColor = LINHAS[chave].cor;
+    modeloCard.parentElement.appendChild(card);
+  });
   const cardsProximos = document.querySelectorAll('.proximo-card');
+  cardsProximos.forEach(card => { card.dataset.extra = String(card.classList.contains('proximo-card--extra')); });
 
   function focarOnibusPorLinha(chaveLinha, atualizarCarrossel = true) {
+    {
+      linhaAtivaFiltro = chaveLinha;
+      marcadoresMap.forEach(({ marker, bus }) => {
+        if (bus.chaveLinha === chaveLinha) marker.addTo(map);
+        else map.removeLayer(marker);
+      });
+    }
     // Sincroniza o botão correspondente no carrossel da legenda
     if (atualizarCarrossel) {
       const btnLegenda = document.querySelector(`#filtros-legenda [data-linha="${chaveLinha}"]`);
@@ -942,11 +861,14 @@
       }
     }
 
-    const itemBus = marcadoresMap.get(chaveLinha);
+    // Também troca o trajeto ao selecionar uma linha sem viagem ativa.
+    atualizarVisibilidadeParadas(chaveLinha);
+    atualizarVisibilidadeTrajetos(chaveLinha);
+    const itemBus = [...marcadoresMap.values()].find(item => item.bus.chaveLinha === chaveLinha);
     if (itemBus) {
       ocultarAlertaLinhaVazia();
       const { marker, bus } = itemBus;
-      const latLng = obterPosicaoVisual(bus);
+      const latLng = bus.posicao;
       bus.posicao = [latLng[0], latLng[1]];
       marker.setLatLng(latLng);
 
@@ -983,32 +905,12 @@
           duration: 1.2
         });
         setTimeout(() => {
-          marker.openPopup();
+          if (map.hasLayer(marker)) marker.openPopup();
         }, 1250);
       } else {
         // Faz o mapa voar suavemente até o ônibus selecionado
         map.flyTo(latLng, 16, { animate: true, duration: 1.2 });
         marker.openPopup();
-      }
-
-      // Atualiza o contador no resumo do painel
-      const elTotal = document.getElementById('total-onibus-ativo');
-      if (elTotal) {
-        const spanNumDestaque = elTotal.querySelector('.num-destaque');
-        const spanNumTotal = elTotal.querySelector('.num-total');
-        if (spanNumDestaque && spanNumTotal) {
-          spanNumDestaque.textContent = '1';
-          spanNumTotal.textContent = '1';
-        } else {
-          elTotal.textContent = '1 / 1';
-        }
-      }
-
-      const elMainLiveLabel = document.getElementById('main-header-live-label');
-      if (elMainLiveLabel) {
-        elMainLiveLabel.textContent = demoFeira && bus.chaveLinha === 'anchieta'
-          ? 'Demonstração • Anchieta • Viagem simulada'
-          : `GPS Ao Vivo • ${bus.veiculo} em Operação`;
       }
 
       // Se estiver no celular/tablet, fecha o painel lateral para mostrar o mapa
@@ -1021,29 +923,13 @@
         if (map.hasLayer(marker)) map.removeLayer(marker);
       });
 
-      const elTotal = document.getElementById('total-onibus-ativo');
-      if (elTotal) {
-        const spanNumDestaque = elTotal.querySelector('.num-destaque');
-        const spanNumTotal = elTotal.querySelector('.num-total');
-        if (spanNumDestaque && spanNumTotal) {
-          spanNumDestaque.textContent = '0';
-          spanNumTotal.textContent = '1';
-        } else {
-          elTotal.textContent = '0 / 1';
-        }
-      }
-
-      const elMainLiveLabel = document.getElementById('main-header-live-label');
-      if (elMainLiveLabel) {
-        elMainLiveLabel.textContent = 'GPS Ao Vivo • Nenhum Veículo nesta Linha';
-      }
-
       mostrarAlertaLinhaVazia(chaveLinha);
 
       if (window.innerWidth < 1100) {
         fecharPainel();
       }
     }
+    atualizarResumoPublico();
   }
 
   cardsProximos.forEach(card => {
@@ -1099,45 +985,17 @@
   /* ──────────────────────────────────────────────────────────
      8. GESTÃO DE ALERTAS, NOTIFICAÇÕES & TOASTS EM TEMPO REAL
      ────────────────────────────────────────────────────────── */
-  const ALERTAS_PADRAO = [
-    {
-      id: 'alt-2',
-      linha: 'anchieta',
-      tipo: 'info',
-      titulo: 'Linha Anchieta — Rota Especial Sentido Recanto / Inatel',
-      mensagem: 'Embarque e desembarque operando com pontualidade na Praça Urbana Carolina e Rua José Ribeiro de Barros.',
-      origem: 'Telemetria GPS Automática',
-      horario: 'Hoje às 07:00',
-      timestamp: Date.now() - 45 * 60 * 1000,
-      lida: false,
-      resolvido: false
-    },
-    {
-      id: 'alt-3',
-      linha: 'porto_sapucai',
-      tipo: 'sucesso',
-      titulo: 'Operação 100% Normal na Rodovia BR-459',
-      mensagem: 'Linha Industrial e Linha Porto Sapucaí transitando sem retenções nos acessos à Linear e trevo de Cachoeira de Minas.',
-      origem: 'CCO Operacional ValeBus',
-      horario: 'Há 35 minutos',
-      timestamp: Date.now() - 35 * 60 * 1000,
-      lida: true,
-      resolvido: true
-    }
-  ];
-
   let listaAlertasState = [];
 
   function carregarAlertas() {
     try {
       const salvo = localStorage.getItem('valebus_alertas');
-      if (salvo) {
-        listaAlertasState = JSON.parse(salvo);
-      } else {
-        listaAlertasState = [...ALERTAS_PADRAO];
-      }
+      const lista = salvo ? JSON.parse(salvo) : [];
+      // IDs fixos pertenciam aos avisos automáticos antigos. Avisos criados
+      // pelo usuário usam alt-<timestamp> e são preservados.
+      listaAlertasState = Array.isArray(lista) ? lista.filter(a => a && !['alt-2', 'alt-3'].includes(a.id)) : [];
     } catch (e) {
-      listaAlertasState = [...ALERTAS_PADRAO];
+      listaAlertasState = [];
     }
   }
 
@@ -1150,7 +1008,6 @@
   }
 
   carregarAlertas();
-  listaAlertasState = listaAlertasState.filter(alerta => alerta.linha !== 'fernandes');
 
   // Elementos do Sino e Dropdown
   const btnSino = document.getElementById('btn-sino-notificacoes');
@@ -2316,22 +2173,11 @@
     }
   });
 
-  if (demoFeira) {
-    focarLinhaNoMapaDemo();
-    iniciarDemoFeira();
-  }
-
-  function focarLinhaNoMapaDemo() {
-    // Usa o controle existente, incluindo paradas, enquadramento e filtros.
-    document.querySelector('#filtros-legenda [data-linha="anchieta"]')?.click();
-    if (polylineAtivaRef) map.fitBounds(polylineAtivaRef.getBounds(), { padding: [30, 30] });
-  }
-
-  // Sincronização em tempo real caso o motorista altere linha/veículo em outra aba
-  window.addEventListener('storage', e => {
-    if (e.key === 'valebus_linha_motorista_ativa' || e.key === 'valebus_veiculo_motorista_ativo' || e.key === 'valebus_usuario') {
-      renderizarMarcadores();
-    }
+  atualizarResumoPublico();
+  sincronizarViagensPublicas();
+  requestAnimationFrame(animarViagensPublicas);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) sincronizarViagensPublicas();
   });
 
 })();

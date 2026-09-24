@@ -372,6 +372,64 @@
   const motoristaSucesso    = document.getElementById('motorista-sucesso');
   const motoristaErro       = document.getElementById('motorista-erro');
   const motoristaErroTxt    = document.getElementById('motorista-erro-texto');
+  let usuarioOperacao = null;
+  let catalogoOperacao = null;
+
+  function mostrarErroOperacao(mensagem) {
+    motoristaErroTxt.textContent = mensagem;
+    motoristaErro.style.display = 'flex';
+  }
+
+  async function prepararEscolhaOperacao(usuario) {
+    usuarioOperacao = usuario;
+    catalogoOperacao = null;
+    abrirModal(modalMotorista);
+    motoristaErro.style.display = 'none';
+    btnConfirmarMot.disabled = true;
+    txtBtnMotorista.textContent = 'Carregando operação...';
+    try {
+      catalogoOperacao = await window.ValeBusAPI.obterOpcoesOperacaoAsync();
+      usuarioOperacao = usuario;
+      const ativa = catalogoOperacao.viagemAtiva;
+      const linhas = [...catalogoOperacao.linhas];
+      const veiculos = [...catalogoOperacao.veiculos];
+      if (ativa && !linhas.some(l => l.chave === ativa.linhaChave)) linhas.push({ chave: ativa.linhaChave, nome: ativa.linha });
+      if (ativa && !veiculos.some(v => v.id === ativa.veiculoId)) veiculos.push({ id: ativa.veiculoId, nome: ativa.veiculo, prefixo: ativa.prefixo });
+      selectMotLinha.replaceChildren(new Option('Selecione a linha', ''));
+      selectMotVeiculo.replaceChildren(new Option('Selecione o ônibus', ''));
+      linhas.forEach(l => selectMotLinha.add(new Option(l.nome, l.chave)));
+      veiculos.forEach(v => selectMotVeiculo.add(new Option(v.nome + (v.prefixo ? ' • Prefixo ' + v.prefixo : ''), v.id)));
+      selectMotLinha.value = ativa?.linhaChave || catalogoOperacao.sugestao?.linhaChave || '';
+      selectMotVeiculo.value = ativa?.veiculoId || catalogoOperacao.sugestao?.veiculoId || '';
+      selectMotLinha.disabled = selectMotVeiculo.disabled = Boolean(ativa);
+      [inputMotId, inputMotPin].forEach(input => { input.disabled = true; input.closest('.campo').style.display = 'none'; });
+      inputMotPin.value = '';
+      document.getElementById('motorista-escolha-operacao').style.display = '';
+      document.getElementById('motorista-instrucao-login').textContent = ativa
+        ? 'Você já tem uma viagem ativa. Retome-a para acompanhar ou encerrar a rota.'
+        : 'Confirme a linha e o ônibus desta operação. As sugestões do gestor podem ser alteradas.';
+      txtBtnMotorista.textContent = ativa ? 'Retomar viagem' : 'Entrar na operação';
+      if (!linhas.length || !veiculos.length) mostrarErroOperacao('Não há linhas públicas e ônibus ativos disponíveis. Solicite ao gestor a configuração do catálogo.');
+      btnConfirmarMot.disabled = !linhas.length || !veiculos.length;
+      selectMotLinha.focus();
+    } catch (erro) {
+      mostrarErroOperacao(erro.message);
+      btnConfirmarMot.disabled = false;
+      txtBtnMotorista.textContent = 'Tentar novamente';
+    }
+  }
+
+  function confirmarOperacao() {
+    const ativa = catalogoOperacao?.viagemAtiva;
+    const linha = catalogoOperacao?.linhas.find(l => l.chave === selectMotLinha.value);
+    const veiculo = catalogoOperacao?.veiculos.find(v => v.id === selectMotVeiculo.value);
+    if (!ativa && (!linha || !veiculo)) throw new Error('Selecione a linha e o ônibus que você vai operar.');
+    window.ValeBusAPI.salvarOperacaoMotorista({ usuarioId: usuarioOperacao.id,
+      linhaChave: ativa?.linhaChave || linha.chave, linha: ativa?.linha || linha.nome,
+      veiculoId: ativa?.veiculoId || veiculo.id, veiculo: ativa?.veiculo || veiculo.nome,
+      prefixo: ativa?.prefixo || veiculo?.prefixo || null });
+    window.location.href = 'motorista.html';
+  }
 
   // Modal Código de Segurança do Gestor (2FA CCO)
   const modalGestor2fa         = document.getElementById('modal-gestor-2fa');
@@ -469,7 +527,9 @@
           return;
         }
         if (usuario.papel === 'motorista') {
-          window.location.href = 'motorista.html';
+          await prepararEscolhaOperacao(usuario);
+          setCarregando(false);
+          resetarBotao();
           return;
         }
         throw new Error('Esta conta não possui acesso operacional.');
@@ -1220,50 +1280,14 @@
     });
   }
 
-  // Auto-preenchimento ao digitar a matrícula do motorista cadastrado pelo Gestor
-  if (inputMotId) {
-    const buscarMotoristaCadastrado = () => {
-      const val = inputMotId.value.trim().toUpperCase();
-      if (!val || val.length < 3) return;
-
-      try {
-        const mot = (window.ValeBusAPI && typeof window.ValeBusAPI.buscarMotoristaPorMatricula === 'function')
-          ? window.ValeBusAPI.buscarMotoristaPorMatricula(val)
-          : null;
-
-        if (mot) {
-          if (selectMotLinha && mot.linha) {
-            for (let i = 0; i < selectMotLinha.options.length; i++) {
-              if (selectMotLinha.options[i].text.toLowerCase().includes(mot.linha.toLowerCase().replace('linha ', ''))) {
-                selectMotLinha.selectedIndex = i;
-                break;
-              }
-            }
-          }
-          if (selectMotVeiculo && mot.veiculo) {
-            for (let i = 0; i < selectMotVeiculo.options.length; i++) {
-              if (mot.veiculo.includes(selectMotVeiculo.options[i].value)) {
-                selectMotVeiculo.selectedIndex = i;
-                break;
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('Erro ao consultar motoristas cadastrados:', e);
-      }
-    };
-
-    inputMotId.addEventListener('blur', buscarMotoristaCadastrado);
-    inputMotId.addEventListener('input', () => {
-      if (inputMotId.value.trim().length >= 4) {
-        buscarMotoristaCadastrado();
-      }
-    });
-  }
-
   if (btnLoginMotorista) {
     btnLoginMotorista.addEventListener('click', () => {
+      usuarioOperacao = catalogoOperacao = null;
+      [inputMotId, inputMotPin].forEach(input => { input.disabled = false; input.closest('.campo').style.display = ''; });
+      document.getElementById('motorista-escolha-operacao').style.display = 'none';
+      document.getElementById('motorista-instrucao-login').textContent = 'Entre com sua conta e escolha a linha e o ônibus que vai operar.';
+      btnConfirmarMot.disabled = false;
+      txtBtnMotorista.textContent = 'Continuar';
       if (motoristaSucesso) motoristaSucesso.style.display = 'none';
       if (motoristaErro) motoristaErro.style.display = 'none';
       abrirModal(modalMotorista, inputMotId);
@@ -1281,6 +1305,11 @@
   if (formMotorista) {
     formMotorista.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (usuarioOperacao) {
+        if (!catalogoOperacao) { await prepararEscolhaOperacao(usuarioOperacao); return; }
+        try { confirmarOperacao(); } catch (erro) { mostrarErroOperacao(erro.message); }
+        return;
+      }
       const email = inputMotId ? inputMotId.value.trim() : '';
       const senha = inputMotPin ? inputMotPin.value : '';
 
@@ -1312,8 +1341,7 @@
           await window.ValeBusAPI.encerrarSessaoAsync(null);
           throw new Error('Esta conta não possui perfil de motorista.');
         }
-        if (motoristaSucesso) motoristaSucesso.style.display = 'flex';
-        setTimeout(() => { window.location.href = 'motorista.html'; }, 650);
+        await prepararEscolhaOperacao(usuario);
       } catch (erro) {
         if (motoristaErro) {
           motoristaErroTxt.textContent = erro.message || 'Não foi possível entrar. Revise suas credenciais.';
@@ -1323,6 +1351,13 @@
         if (txtBtnMotorista) txtBtnMotorista.textContent = 'Entrar';
       }
     });
+  }
+
+  if (new URLSearchParams(window.location.search).get('operacao') === '1') {
+    window.ValeBusAPI.obterSessaoAutenticada().then(usuario => {
+      if (usuario?.papel === 'motorista') return prepararEscolhaOperacao(usuario);
+      btnLoginMotorista?.click();
+    }).catch(erro => { abrirModal(modalMotorista); mostrarErroOperacao(erro.message); });
   }
 
   // Fechar modais ao clicar no overlay

@@ -12,10 +12,16 @@
 (function (window) {
   'use strict';
 
+  function obterBaseUrlApi() {
+    const configurada = window.VALEBUS_CONFIG?.apiBaseUrl;
+    if (typeof configurada !== 'string' || !configurada.trim()) return '/api';
+    return configurada.trim().replace(/\/$/, '');
+  }
+
   // Configurações da Camada de Serviços
   const CONFIG = {
     usarBackendReal: true,
-    baseUrl: '/api',
+    baseUrl: obterBaseUrlApi(),
     simularDelayMs: 120
   };
 
@@ -500,6 +506,7 @@
   function concluirEncerramentoSessao(redirecionarPara) {
     try {
       localStorage.removeItem(KEYS.USUARIO);
+      sessionStorage.removeItem('valebus_operacao_motorista');
     } catch (e) {
       console.warn('[ValeBusAPI] Erro ao remover usuário da sessão:', e);
     }
@@ -530,7 +537,7 @@
   async function autenticar({ email, senha }) {
     const resposta = await fetch(`${CONFIG.baseUrl}/auth/login`, {
       method: 'POST',
-      credentials: 'same-origin',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha })
     });
@@ -544,7 +551,7 @@
   }
 
   async function obterSessaoAutenticada() {
-    const resposta = await fetch(`${CONFIG.baseUrl}/auth/me`, { credentials: 'same-origin' });
+    const resposta = await fetch(`${CONFIG.baseUrl}/auth/me`, { credentials: 'include' });
     if (resposta.status === 401 || resposta.status === 403) {
       try { localStorage.removeItem(KEYS.USUARIO); } catch (e) {}
       return null;
@@ -559,28 +566,22 @@
 
   /* ──────────────────────────────────────────────────────────
      4. SERVIÇO DE OPERAÇÃO LOCAL DO MOTORISTA
-     Mantém a compatibilidade com as chaves atuais até o backend assumir
-     a viagem ativa, o veículo e a telemetria.
+     Escolha por usuário e aba; não substitui os dados de autenticação.
      ────────────────────────────────────────────────────────── */
-  function obterOperacaoMotorista() {
-    const sessao = obterSessao();
-    return {
-      linhaChave: localStorage.getItem(KEYS.LINHA_MOTORISTA_ATIVA) || sessao.linhaChave || null,
-      veiculo: localStorage.getItem(KEYS.VEICULO_MOTORISTA_ATIVO) || sessao.veiculo || null
-    };
+  function obterOperacaoMotorista(usuarioId = obterSessao().id) {
+    try {
+      const operacao = JSON.parse(sessionStorage.getItem('valebus_operacao_motorista') || 'null');
+      return operacao?.usuarioId === usuarioId && operacao?.linhaChave && operacao?.veiculoId ? operacao : null;
+    } catch { return null; }
   }
 
-  function salvarOperacaoMotorista({ linhaChave, veiculo } = {}) {
+  function salvarOperacaoMotorista(operacao) {
     try {
-      if (linhaChave) localStorage.setItem(KEYS.LINHA_MOTORISTA_ATIVA, linhaChave);
-      if (veiculo) localStorage.setItem(KEYS.VEICULO_MOTORISTA_ATIVO, veiculo);
-      window.dispatchEvent(new CustomEvent('valebus:storage_update', {
-        detail: { chave: 'operacao_motorista', valor: obterOperacaoMotorista() }
-      }));
-      return obterOperacaoMotorista();
+      if (!operacao?.usuarioId || !operacao.linhaChave || !operacao.veiculoId) throw new Error('Escolha a linha e o ônibus da operação.');
+      sessionStorage.setItem('valebus_operacao_motorista', JSON.stringify(operacao));
+      return operacao;
     } catch (e) {
-      console.error('[ValeBusAPI] Erro ao salvar operação do motorista:', e);
-      return null;
+      throw new Error('Não foi possível guardar a operação nesta aba. Verifique o armazenamento do navegador e tente novamente.');
     }
   }
 
@@ -650,7 +651,7 @@
      5. WRAPPERS ASSÍNCRONOS (PREPARADOS PARA FETCH / BACKEND)
      ────────────────────────────────────────────────────────── */
   async function obterMotoristasAsync() {
-    const res = await fetch(`${CONFIG.baseUrl}/gestor/motoristas`, { credentials: 'same-origin' });
+    const res = await fetch(`${CONFIG.baseUrl}/gestor/motoristas`, { credentials: 'include' });
     const corpo = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(corpo.error || 'Falha ao obter motoristas no servidor.');
     return corpo.data || [];
@@ -659,7 +660,7 @@
   async function cadastrarMotoristaAsync(motorista) {
     const res = await fetch(`${CONFIG.baseUrl}/gestor/motoristas`, {
       method: 'POST',
-      credentials: 'same-origin',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(motorista)
     });
@@ -679,7 +680,7 @@
   async function atualizarMotoristaAsync(id, motorista) {
     const res = await fetch(`${CONFIG.baseUrl}/gestor/motoristas/${encodeURIComponent(id)}`, {
       method: 'PATCH',
-      credentials: 'same-origin',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(motorista)
     });
@@ -695,7 +696,7 @@
   async function descredenciarMotoristaAsync(id) {
     const res = await fetch(`${CONFIG.baseUrl}/gestor/motoristas/${encodeURIComponent(id)}`, {
       method: 'DELETE',
-      credentials: 'same-origin'
+      credentials: 'include'
     });
     const corpo = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(corpo.error || 'Falha ao descredenciar motorista.');
@@ -704,9 +705,10 @@
 
   async function obterOcorrenciasAsync() {
     if (CONFIG.usarBackendReal) {
-      const res = await fetch(`${CONFIG.baseUrl}/ocorrencias`);
-      if (!res.ok) throw new Error('Falha ao obter ocorrências no servidor.');
-      return await res.json();
+      const res = await fetch(`${CONFIG.baseUrl}/ocorrencias`, { credentials: 'include' });
+      const corpo = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(corpo.error || 'Falha ao obter ocorrências no servidor.');
+      return corpo.data || [];
     }
     await new Promise(r => setTimeout(r, CONFIG.simularDelayMs));
     return obterOcorrencias();
@@ -716,14 +718,110 @@
     if (CONFIG.usarBackendReal) {
       const res = await fetch(`${CONFIG.baseUrl}/ocorrencias`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(ocorrencia)
+        body: JSON.stringify({
+          categoria: ocorrencia.categoria,
+          titulo: ocorrencia.problemaTexto || ocorrencia.tipoTexto || ocorrencia.titulo,
+          descricao: ocorrencia.observacao || ocorrencia.detalhes || '',
+          gravidade: ocorrencia.condicao || ocorrencia.gravidade || 'baixa',
+          localizacaoTexto: ocorrencia.local || '',
+          precisaSocorro: ocorrencia.precisaSocorro === true
+        })
       });
-      if (!res.ok) throw new Error('Falha ao salvar ocorrência no servidor.');
-      return await res.json();
+      const corpo = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(corpo.error || 'Falha ao salvar ocorrência no servidor.');
+      return corpo.data;
     }
     await new Promise(r => setTimeout(r, CONFIG.simularDelayMs));
     return salvarOcorrencia(ocorrencia);
+  }
+
+  async function atualizarStatusOcorrenciaAsync(id, status) {
+    const res = await fetch(`${CONFIG.baseUrl}/ocorrencias/${encodeURIComponent(id)}/status`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    const corpo = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(corpo.error || 'Falha ao atualizar ocorrência no servidor.');
+    return corpo.data;
+  }
+
+  let diferencaRelogioServidor = 0;
+  function agoraServidor() { return Date.now() + diferencaRelogioServidor; }
+
+  async function lerRespostaViagem(resposta, inicio) {
+    const corpo = await resposta.json().catch(() => ({}));
+    const horario = Date.parse(corpo.agora || resposta.headers.get('Date'));
+    if (Number.isFinite(horario)) diferencaRelogioServidor = horario - (inicio + Date.now()) / 2;
+    return corpo;
+  }
+
+  async function obterViagensPublicasAsync() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    try {
+      const inicio = Date.now();
+      const resposta = await fetch(`${CONFIG.baseUrl}/viagens/publicas`, {
+        credentials: 'omit', cache: 'no-store', signal: controller.signal
+      });
+      const corpo = await lerRespostaViagem(resposta, inicio);
+      if (!resposta.ok || !Array.isArray(corpo.data)) throw new Error('Não foi possível atualizar as viagens.');
+      return corpo;
+    } finally { clearTimeout(timeout); }
+  }
+
+  async function obterViagemAtivaAsync() {
+    const inicio = Date.now();
+    const resposta = await fetch(`${CONFIG.baseUrl}/viagens/ativa`, { credentials: 'include' });
+    const corpo = await lerRespostaViagem(resposta, inicio);
+    if (!resposta.ok) throw new Error(corpo.error || 'Não foi possível consultar a viagem ativa.');
+    return corpo.data || null;
+  }
+
+  async function obterOpcoesOperacaoAsync() {
+    const resposta = await fetch(`${CONFIG.baseUrl}/viagens/opcoes`, { credentials: 'include', cache: 'no-store' });
+    const corpo = await resposta.json().catch(() => ({}));
+    if (!resposta.ok) throw new Error(corpo.error || 'Não foi possível carregar linhas e ônibus. Tente novamente.');
+    if (!Array.isArray(corpo.data?.linhas) || !Array.isArray(corpo.data?.veiculos)) throw new Error('Catálogo de operação inválido.');
+    return corpo.data;
+  }
+
+  async function iniciarViagemAsync(linhaChave, veiculoId = obterOperacaoMotorista()?.veiculoId) {
+    const inicio = Date.now();
+    const resposta = await fetch(`${CONFIG.baseUrl}/viagens/iniciar`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ linhaChave, veiculoId })
+    });
+    const corpo = await lerRespostaViagem(resposta, inicio);
+    if (!resposta.ok) {
+      const erro = new Error(corpo.error || 'Não foi possível iniciar a viagem.');
+      erro.viagemAtiva = corpo.data || null;
+      throw erro;
+    }
+    return corpo.data;
+  }
+
+  async function encerrarViagemAsync() {
+    const resposta = await fetch(`${CONFIG.baseUrl}/viagens/encerrar`, { method: 'POST', credentials: 'include' });
+    const corpo = await resposta.json().catch(() => ({}));
+    if (!resposta.ok) throw new Error(corpo.error || 'Não foi possível encerrar a viagem.');
+    return corpo.data;
+  }
+
+  async function enviarPosicaoGaragemAsync({ latitude, longitude, velocidadeKmh = null }) {
+    const resposta = await fetch(`${CONFIG.baseUrl}/viagens/posicao-garagem`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ latitude, longitude, velocidadeKmh })
+    });
+    const corpo = await resposta.json().catch(() => ({}));
+    if (!resposta.ok) throw new Error(corpo.error || 'Não foi possível enviar a posição para a garagem.');
+    return corpo.data;
   }
 
   async function obterSessaoAsync() {
@@ -739,7 +837,7 @@
   async function encerrarSessaoAsync(redirecionarPara = 'login.html') {
     const resposta = await fetch(`${CONFIG.baseUrl}/auth/logout`, {
       method: 'POST',
-      credentials: 'same-origin'
+      credentials: 'include'
     });
     if (!resposta.ok) throw new Error('Não foi possível encerrar a sessão.');
     return concluirEncerramentoSessao(redirecionarPara);
@@ -789,6 +887,14 @@
     descredenciarMotoristaAsync,
     obterOcorrenciasAsync,
     salvarOcorrenciaAsync,
+    atualizarStatusOcorrenciaAsync,
+    obterViagemAtivaAsync,
+    obterOpcoesOperacaoAsync,
+    agoraServidor,
+    obterViagensPublicasAsync,
+    iniciarViagemAsync,
+    encerrarViagemAsync,
+    enviarPosicaoGaragemAsync,
     obterSessaoAsync,
     encerrarSessaoAsync
   };
