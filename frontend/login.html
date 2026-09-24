@@ -649,39 +649,39 @@
           </svg>
         </div>
         <h3 id="modal-motorista-titulo" class="modal-padrao__titulo">Área do Motorista</h3>
-        <p class="modal-padrao__subtitulo">Informe sua matrícula e configure o veículo para acessar o sistema.</p>
+        <p class="modal-padrao__subtitulo">Entre com o e-mail e a senha fornecidos pelo gestor.</p>
       </div>
 
       <form id="form-login-motorista" class="modal-padrao__corpo" novalidate>
         <!-- Campo: Matrícula / Código Operacional -->
         <div class="campo" style="margin-bottom: 12px;">
-          <label class="campo__label" for="input-motorista-id">Matrícula ou Código Operacional</label>
+          <label class="campo__label" for="input-motorista-id">E-mail de acesso</label>
           <div class="campo__wrapper">
             <svg class="campo__icone" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><line x1="15" y1="8" x2="17" y2="8"/><line x1="15" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="17" y2="16"/>
             </svg>
             <input class="campo__input"
-                   type="text" id="input-motorista-id"
-                   placeholder="Ex: MOT-104 ou 2048"
-                   autocomplete="username" required>
+                   type="email" id="input-motorista-id"
+                   placeholder="motorista@exemplo.com"
+                   autocomplete="email" required>
           </div>
         </div>
 
         <!-- Campo: Senha / PIN de Bordo -->
         <div class="campo" style="margin-bottom: 12px;">
-          <label class="campo__label" for="input-motorista-pin">PIN ou Senha de Acesso</label>
+          <label class="campo__label" for="input-motorista-pin">Senha de acesso</label>
           <div class="campo__wrapper">
             <svg class="campo__icone" aria-hidden="true">
               <use href="#icone-cadeado"/>
             </svg>
             <input class="campo__input campo__input--com-botao"
                    type="password" id="input-motorista-pin"
-                   placeholder="••••••" required minlength="4">
+                   placeholder="••••••••" required minlength="8" autocomplete="current-password">
             <button
                 type="button"
                 class="campo__botao-olho"
                 id="botao-olho-motorista"
-                aria-label="Mostrar PIN">
+                aria-label="Mostrar senha">
               <svg class="campo__icone-olho" aria-hidden="true">
                 <use href="#icone-olho"/>
               </svg>
@@ -689,8 +689,8 @@
           </div>
         </div>
 
-        <!-- Linha da Escala & Veículo em 2 colunas -->
-        <div class="modal-linha-dupla">
+        <!-- Linha e veículo serão obtidos do cadastro do gestor. -->
+        <div class="modal-linha-dupla" hidden aria-hidden="true">
           <div class="campo">
             <label class="campo__label" for="select-motorista-linha">Linha</label>
             <div class="campo__wrapper campo__wrapper--select">
@@ -729,14 +729,14 @@
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
-          <span id="motorista-erro-texto">Informe a matrícula e o PIN de acesso.</span>
+          <span id="motorista-erro-texto">Informe seu e-mail e senha de acesso.</span>
         </div>
 
         <div class="modal-alerta modal-alerta--sucesso" id="motorista-sucesso" style="display:none;" role="alert">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
-          <span>Operador autenticado! Conectando telemetria de bordo...</span>
+          <span>Motorista autenticado! Abrindo o terminal de bordo...</span>
         </div>
 
         <!-- Botões de Ação -->

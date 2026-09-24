@@ -34,7 +34,9 @@
       proximaParada: "1. Caixa D'Água Da Copasa"
     };
 
-    const sessaoMotorista = await window.ValeBusAPI?.obterSessaoAutenticada?.();
+    let sessaoMotorista;
+    try { sessaoMotorista = await window.ValeBusAPI?.obterSessaoAutenticada?.(); }
+    catch (erro) { window.ValeBusAPI.mostrarFalhaSessao(erro.message); return; }
     if (sessaoMotorista?.papel !== 'motorista') {
       window.location.replace('login.html');
       return;

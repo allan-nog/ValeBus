@@ -509,15 +509,22 @@
     return true;
   }
 
-  function encerrarSessao(redirecionarPara = 'login.html') {
-    // keepalive permite que o logout alcance o servidor mesmo com o
-    // redirecionamento imediato usado pelos botões já existentes.
-    fetch(`${CONFIG.baseUrl}/auth/logout`, {
-      method: 'POST',
-      credentials: 'same-origin',
-      keepalive: true
-    }).catch(() => null);
-    return concluirEncerramentoSessao(redirecionarPara);
+  async function encerrarSessao(redirecionarPara = 'login.html') {
+    try { return await encerrarSessaoAsync(redirecionarPara); }
+    catch (erro) { window.alert('Não foi possível encerrar a sessão. Tente novamente.'); return false; }
+  }
+
+  function mostrarFalhaSessao(mensagem) {
+    const aviso = document.createElement('div');
+    aviso.setAttribute('role', 'alert');
+    aviso.style.cssText = 'position:fixed;inset:0;z-index:99999;background:var(--fundo-card,#fff);padding:32px;color:var(--texto-primario,#222)';
+    const texto = document.createElement('p');
+    texto.textContent = mensagem || 'Não foi possível verificar a sessão. Tente novamente.';
+    const tentar = document.createElement('button');
+    tentar.textContent = 'Tentar novamente';
+    tentar.onclick = () => window.location.reload();
+    aviso.append(texto, tentar);
+    document.body.append(aviso);
   }
 
   async function autenticar({ email, senha }) {
@@ -538,10 +545,11 @@
 
   async function obterSessaoAutenticada() {
     const resposta = await fetch(`${CONFIG.baseUrl}/auth/me`, { credentials: 'same-origin' });
-    if (!resposta.ok) {
+    if (resposta.status === 401 || resposta.status === 403) {
       try { localStorage.removeItem(KEYS.USUARIO); } catch (e) {}
       return null;
     }
+    if (!resposta.ok) throw new Error('Serviço temporariamente indisponível. Tente novamente; sua sessão não foi apagada.');
 
     const corpo = await resposta.json();
     const usuario = corpo?.data?.usuario || null;
@@ -642,27 +650,56 @@
      5. WRAPPERS ASSÍNCRONOS (PREPARADOS PARA FETCH / BACKEND)
      ────────────────────────────────────────────────────────── */
   async function obterMotoristasAsync() {
-    if (CONFIG.usarBackendReal) {
-      const res = await fetch(`${CONFIG.baseUrl}/motoristas`);
-      if (!res.ok) throw new Error('Falha ao obter motoristas no servidor.');
-      return await res.json();
+    const res = await fetch(`${CONFIG.baseUrl}/gestor/motoristas`, { credentials: 'same-origin' });
+    const corpo = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(corpo.error || 'Falha ao obter motoristas no servidor.');
+    return corpo.data || [];
+  }
+
+  async function cadastrarMotoristaAsync(motorista) {
+    const res = await fetch(`${CONFIG.baseUrl}/gestor/motoristas`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(motorista)
+    });
+    const corpo = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const erro = new Error(corpo.error || 'Falha ao cadastrar motorista no servidor.');
+      erro.campo = corpo.campo;
+      throw erro;
     }
-    await new Promise(r => setTimeout(r, CONFIG.simularDelayMs));
-    return obterMotoristas();
+    return corpo.data;
   }
 
   async function salvarMotoristaAsync(motorista) {
-    if (CONFIG.usarBackendReal) {
-      const res = await fetch(`${CONFIG.baseUrl}/motoristas`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(motorista)
-      });
-      if (!res.ok) throw new Error('Falha ao salvar motorista no servidor.');
-      return await res.json();
+    return cadastrarMotoristaAsync(motorista);
+  }
+
+  async function atualizarMotoristaAsync(id, motorista) {
+    const res = await fetch(`${CONFIG.baseUrl}/gestor/motoristas/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(motorista)
+    });
+    const corpo = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const erro = new Error(corpo.error || 'Falha ao atualizar motorista.');
+      erro.campo = corpo.campo;
+      throw erro;
     }
-    await new Promise(r => setTimeout(r, CONFIG.simularDelayMs));
-    return salvarMotorista(motorista);
+    return corpo.data;
+  }
+
+  async function descredenciarMotoristaAsync(id) {
+    const res = await fetch(`${CONFIG.baseUrl}/gestor/motoristas/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      credentials: 'same-origin'
+    });
+    const corpo = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(corpo.error || 'Falha ao descredenciar motorista.');
+    return corpo.data;
   }
 
   async function obterOcorrenciasAsync() {
@@ -700,10 +737,11 @@
   }
 
   async function encerrarSessaoAsync(redirecionarPara = 'login.html') {
-    await fetch(`${CONFIG.baseUrl}/auth/logout`, {
+    const resposta = await fetch(`${CONFIG.baseUrl}/auth/logout`, {
       method: 'POST',
       credentials: 'same-origin'
-    }).catch(() => null);
+    });
+    if (!resposta.ok) throw new Error('Não foi possível encerrar a sessão.');
     return concluirEncerramentoSessao(redirecionarPara);
   }
 
@@ -733,6 +771,7 @@
     encerrarSessao,
     autenticar,
     obterSessaoAutenticada,
+    mostrarFalhaSessao,
     obterOperacaoMotorista,
     salvarOperacaoMotorista,
     obterViagensHoje,
@@ -744,7 +783,10 @@
     ativarLinha,
     // Assíncronos (Ponte direta para fetch)
     obterMotoristasAsync,
+    cadastrarMotoristaAsync,
     salvarMotoristaAsync,
+    atualizarMotoristaAsync,
+    descredenciarMotoristaAsync,
     obterOcorrenciasAsync,
     salvarOcorrenciaAsync,
     obterSessaoAsync,

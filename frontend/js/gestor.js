@@ -18,13 +18,18 @@
       const usuario = await window.ValeBusAPI?.obterSessaoAutenticada?.();
       return usuario?.papel === 'gestor' ? usuario : null;
     } catch (e) {
-      console.warn('Erro ao verificar sessão do gestor:', e);
-      return null;
+      console.warn('Erro ao verificar sessão do gestor:', e.message);
+      throw e;
     }
   }
 
   async function verificarPermissaoGestor() {
-    const usuario = await obterSessaoGestor();
+    let usuario;
+    try { usuario = await obterSessaoGestor(); }
+    catch (erro) {
+      window.ValeBusAPI.mostrarFalhaSessao(erro.message);
+      return false;
+    }
     if (!usuario) {
       window.location.replace('login.html');
       return false;
@@ -185,7 +190,10 @@
     }
   ];
 
+  let motoristasServidor = null;
+
   function obterMotoristas() {
+    if (motoristasServidor) return motoristasServidor;
     if (window.ValeBusAPI && typeof window.ValeBusAPI.obterMotoristas === 'function') {
       return window.ValeBusAPI.obterMotoristas();
     }
@@ -210,6 +218,16 @@
       localStorage.setItem(CHAVE_STORAGE_MOTORISTAS, JSON.stringify(lista));
     } catch (e) {
       console.error('Erro ao salvar motoristas no localStorage:', e);
+    }
+  }
+
+  async function carregarMotoristasDoServidor() {
+    try {
+      const lista = await window.ValeBusAPI.obterMotoristasAsync();
+      motoristasServidor = lista;
+      renderizarTabela();
+    } catch (erro) {
+      console.error('Erro ao carregar motoristas do servidor:', erro);
     }
   }
 
@@ -309,7 +327,7 @@
           const corLinha = obterCorLinha(m.linha);
           const partesNome = m.nome.split(' ');
           const iniciais = (partesNome[0][0] + (partesNome[1] ? partesNome[1][0] : '')).toUpperCase();
-          const pinMostrado = pinsVisiveis[m.id] ? m.pin : '••••';
+          const contaAcesso = m.email || 'Conta pendente';
 
           // Badge de Status
           let statusBadge = '';
@@ -357,12 +375,7 @@
               </td>
               <td>
                 <span class="gestor-pin-box">
-                  <span>${pinMostrado}</span>
-                  <button type="button" class="gestor-pin-olho-btn" data-acao="toggle-pin" data-id="${m.id}" title="Mostrar/ocultar PIN">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                    </svg>
-                  </button>
+                  <span>${contaAcesso}</span>
                 </span>
               </td>
               <td>${statusBadge}</td>
@@ -397,7 +410,7 @@
           const corLinha = obterCorLinha(m.linha);
           const partesNome = m.nome.split(' ');
           const iniciais = (partesNome[0][0] + (partesNome[1] ? partesNome[1][0] : '')).toUpperCase();
-          const pinMostrado = pinsVisiveis[m.id] ? m.pin : '••••';
+          const contaAcesso = m.email || 'Conta pendente';
 
           let statusBadge = '';
           if (m.status === 'ativo') {
@@ -439,14 +452,9 @@
                   <span class="gestor-card-motorista-mob__item-valor">${m.turno.split('(')[0].trim()}</span>
                 </div>
                 <div class="gestor-card-motorista-mob__item">
-                  <span class="gestor-card-motorista-mob__item-label">PIN Terminal</span>
+                  <span class="gestor-card-motorista-mob__item-label">Conta de acesso</span>
                   <span class="gestor-pin-box" style="display:inline-flex; width:fit-content;">
-                    <span>${pinMostrado}</span>
-                    <button type="button" class="gestor-pin-olho-btn" data-acao="toggle-pin" data-id="${m.id}" title="Ver PIN">
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                      </svg>
-                    </button>
+                    <span>${contaAcesso}</span>
                   </span>
                 </div>
               </div>
@@ -1394,14 +1402,17 @@
     });
   }
 
-  const inputMotPin = document.getElementById('form-mot-pin');
-  const spanErroMotPin = document.getElementById('erro-mot-pin');
-  if (inputMotPin) {
-    inputMotPin.addEventListener('input', () => {
-      inputMotPin.value = inputMotPin.value.replace(/\D/g, '').slice(0, 6);
-      if (inputMotPin.value.length >= 4) {
-        limparErroCampo(inputMotPin, spanErroMotPin);
-      }
+  const inputMotEmail = document.getElementById('form-mot-email');
+  const spanErroMotEmail = document.getElementById('erro-mot-email');
+  if (inputMotEmail) {
+    inputMotEmail.addEventListener('input', () => limparErroCampo(inputMotEmail, spanErroMotEmail));
+  }
+
+  const inputMotSenha = document.getElementById('form-mot-senha');
+  const spanErroMotSenha = document.getElementById('erro-mot-senha');
+  if (inputMotSenha) {
+    inputMotSenha.addEventListener('input', () => {
+      if (inputMotSenha.value.length >= 8) limparErroCampo(inputMotSenha, spanErroMotSenha);
     });
   }
 
@@ -1488,7 +1499,8 @@
     const inputId = document.getElementById('input-motorista-id-edit');
     const inputNome = document.getElementById('form-mot-nome');
     const inputMatricula = document.getElementById('form-mot-matricula');
-    const inputPin = document.getElementById('form-mot-pin');
+    const inputEmail = document.getElementById('form-mot-email');
+    const inputSenha = document.getElementById('form-mot-senha');
     const inputCpf = document.getElementById('form-mot-cpf');
     const inputTelefone = document.getElementById('form-mot-telefone');
     const inputCnh = document.getElementById('form-mot-cnh');
@@ -1499,17 +1511,25 @@
     const selectTurno = document.getElementById('form-mot-turno');
     const selectStatus = document.getElementById('form-mot-status');
     const tituloModal = document.getElementById('modal-titulo-motorista');
+    const textoBotaoSalvar = document.getElementById('texto-btn-salvar');
 
     if (idMotorista) {
       // Edição
       const lista = obterMotoristas();
       const mot = lista.find(m => m.id === idMotorista);
       if (mot) {
-        if (tituloModal) tituloModal.textContent = 'Editar Credenciais do Motorista';
+        if (tituloModal) tituloModal.textContent = 'Editar Motorista';
+        if (textoBotaoSalvar) textoBotaoSalvar.textContent = 'Salvar Alterações';
+        if (inputEmail) inputEmail.readOnly = true;
+        if (inputSenha) {
+          inputSenha.required = false;
+          inputSenha.placeholder = 'Deixe em branco para manter a senha';
+        }
         if (inputId) inputId.value = mot.id;
         if (inputNome) inputNome.value = mot.nome;
         if (inputMatricula) inputMatricula.value = mot.matricula;
-        if (inputPin) inputPin.value = mot.pin;
+        if (inputEmail) inputEmail.value = mot.email || '';
+        if (inputSenha) inputSenha.value = '';
         if (inputCpf) inputCpf.value = formatarCPF(mot.cpf || '');
         if (inputTelefone) inputTelefone.value = formatarTelefone(mot.telefone || '');
         if (inputCnh) inputCnh.value = formatarCNH(mot.cnh || '');
@@ -1523,10 +1543,17 @@
     } else {
       // Novo Cadastro
       if (tituloModal) tituloModal.textContent = 'Cadastrar Novo Motorista';
+      if (textoBotaoSalvar) textoBotaoSalvar.textContent = 'Cadastrar Motorista';
+      if (inputEmail) inputEmail.readOnly = false;
+      if (inputSenha) {
+        inputSenha.required = true;
+        inputSenha.placeholder = 'Mínimo de 8 caracteres';
+      }
       formCadastro.reset();
       if (inputId) inputId.value = '';
       if (inputMatricula) inputMatricula.value = gerarMatriculaAleatoria();
-      if (inputPin) inputPin.value = Math.floor(1000 + Math.random() * 9000).toString();
+      if (inputEmail) inputEmail.value = '';
+      if (inputSenha) inputSenha.value = '';
       if (inputValidade) {
         // Data de validade padrão: 2 anos a partir de hoje
         const d = new Date();
@@ -1591,15 +1618,16 @@
 
   window.abrirModalEdicao = abrirModal;
 
-  // Submissão do Formulário com Validação Estrita e Feedback Visual
+  // Cadastro real: a senha inicial é enviada uma única vez ao Express.
   if (formCadastro) {
-    formCadastro.addEventListener('submit', (e) => {
+    formCadastro.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const inputId = document.getElementById('input-motorista-id-edit')?.value;
       const nome = document.getElementById('form-mot-nome')?.value.trim();
       const matricula = document.getElementById('form-mot-matricula')?.value.trim().toUpperCase();
-      const pin = document.getElementById('form-mot-pin')?.value.trim();
+      const email = document.getElementById('form-mot-email')?.value.trim();
+      const senha = document.getElementById('form-mot-senha')?.value || '';
       const cpf = document.getElementById('form-mot-cpf')?.value.trim();
       const telefone = document.getElementById('form-mot-telefone')?.value.trim();
       const cnh = document.getElementById('form-mot-cnh')?.value.trim();
@@ -1613,149 +1641,104 @@
       limparTodosErrosModal();
       let temErros = false;
       let primeiroCampoInvalido = null;
-
-      // 1. Validação de campos obrigatórios
-      if (!nome || nome.length < 3) {
-        mostrarErroCampo(inputMotNome, spanErroMotNome, 'Nome completo é obrigatório (mínimo 3 caracteres).');
+      const marcarErro = (campo, mensagem) => {
+        const span = campo === inputMotNome ? spanErroMotNome
+          : campo === inputMotMatricula ? spanErroMotMatricula
+          : campo === inputMotEmail ? spanErroMotEmail
+          : campo === inputMotSenha ? spanErroMotSenha
+          : campo === inputMotCpf ? spanErroMotCpf
+          : campo === inputMotCnh ? spanErroMotCnh
+          : spanErroMotValidade;
+        mostrarErroCampo(campo, span, mensagem);
         temErros = true;
-        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotNome;
-      }
+        if (!primeiroCampoInvalido) primeiroCampoInvalido = campo;
+      };
 
-      if (!matricula || matricula.length < 3) {
-        mostrarErroCampo(inputMotMatricula, spanErroMotMatricula, 'Matrícula operacional é obrigatória.');
-        temErros = true;
-        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotMatricula;
+      if (!nome || nome.length < 3) marcarErro(inputMotNome, 'Nome completo é obrigatório.');
+      if (!matricula || !/^[A-Z0-9-]{3,12}$/.test(matricula)) marcarErro(inputMotMatricula, 'Matrícula inválida.');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || '')) marcarErro(inputMotEmail, 'Informe um e-mail válido.');
+      if ((!inputId && senha.length < 8) || (inputId && senha && senha.length < 8)) {
+        marcarErro(inputMotSenha, inputId ? 'A nova senha deve ter pelo menos 8 caracteres.' : 'A senha inicial deve ter pelo menos 8 caracteres.');
       }
-
-      if (!pin || pin.length < 4 || pin.length > 6 || !/^\d{4,6}$/.test(pin)) {
-        mostrarErroCampo(inputMotPin, spanErroMotPin, 'PIN de bordo deve conter de 4 a 6 dígitos numéricos.');
-        temErros = true;
-        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotPin;
-      }
-
-      if (!cnhValidade) {
-        mostrarErroCampo(inputMotValidade, spanErroMotValidade, 'Validade da CNH é obrigatória para a escala.');
-        temErros = true;
-        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotValidade;
-      }
-
-      // 2. Validação de formato (CPF, Telefone, CNH)
-      if (cpf && !validarCPF(cpf)) {
-        mostrarErroCampo(inputMotCpf, spanErroMotCpf, 'CPF inválido. Verifique os dígitos informados.');
-        temErros = true;
-        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotCpf;
-      }
-
-      if (telefone && !validarTelefone(telefone)) {
-        mostrarErroCampo(inputMotTelefone, spanErroMotTelefone, 'Telefone inválido. Formato esperado: (35) 99999-0000.');
-        temErros = true;
-        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotTelefone;
-      }
-
-      if (cnh && !validarCNH(cnh)) {
-        mostrarErroCampo(inputMotCnh, spanErroMotCnh, 'Número da CNH deve ter exatamente 11 dígitos numéricos.');
-        temErros = true;
-        if (!primeiroCampoInvalido) primeiroCampoInvalido = inputMotCnh;
-      }
-
-      // Bloqueio se houver qualquer erro de formulário
+      if (!cnhValidade) marcarErro(inputMotValidade, 'Validade da CNH é obrigatória.');
+      if (cpf && !validarCPF(cpf)) marcarErro(inputMotCpf, 'CPF inválido.');
+      if (telefone && !validarTelefone(telefone)) marcarErro(inputMotTelefone, 'Telefone inválido.');
+      if (cnh && !validarCNH(cnh)) marcarErro(inputMotCnh, 'Número da CNH inválido.');
       if (temErros) {
-        mostrarToast('Preencha os campos obrigatórios destacados corretamente.', 'alerta');
-        if (primeiroCampoInvalido) {
-          primeiroCampoInvalido.focus();
-        }
-        return; // Interrompe! Evita gravar dados inválidos no localStorage
+        primeiroCampoInvalido?.focus();
+        mostrarToast('Revise os campos destacados.', 'alerta');
+        return;
       }
 
       const btnSalvar = document.getElementById('btn-salvar-motorista');
       setBotaoLoading(btnSalvar, true);
-
-      setTimeout(() => {
-        const lista = obterMotoristas();
-
-        if (inputId) {
-          // Atualizar Motorista existente
-          const index = lista.findIndex(m => m.id === inputId);
-          if (index !== -1) {
-            lista[index] = {
-              ...lista[index],
-              nome, matricula, pin, cpf, telefone, cnh, cnhCat, cnhValidade, linha, veiculo, turno, status
-            };
-            salvarMotoristas(lista);
-            mostrarToast(`Motorista ${nome} atualizado com sucesso!`, 'sucesso');
-          }
-        } else {
-          // Criar Novo Motorista
-          if (lista.some(m => m.matricula === matricula)) {
-            setBotaoLoading(btnSalvar, false);
-            mostrarErroCampo(inputMotMatricula, spanErroMotMatricula, 'Esta matrícula já está em uso por outro condutor.');
-            inputMotMatricula.focus();
-            mostrarToast('Já existe um motorista cadastrado com esta matrícula.', 'erro');
-            return;
-          }
-
-          const novoMotorista = {
-            id: 'mot-' + Date.now(),
-            nome,
-            matricula,
-            pin,
-            cpf,
-            telefone,
-            cnh,
-            cnhCat,
-            cnhValidade,
-            linha,
-            veiculo,
-            turno,
-            status,
-            observacoes: 'Cadastrado pelo Gestor CCO via portal administrativo.'
-          };
-
-          lista.unshift(novoMotorista);
-          salvarMotoristas(lista);
-          mostrarToast('Motorista cadastrado com sucesso!', 'sucesso');
-        }
-
-        setBotaoLoading(btnSalvar, false);
+      try {
+        const dadosMotorista = {
+          nome, matricula, email, senha, cpf, telefone, cnh, cnhCat, cnhValidade,
+          linha, veiculo, turno, status
+        };
+        const motoristaSalvo = inputId
+          ? await window.ValeBusAPI.atualizarMotoristaAsync(inputId, dadosMotorista)
+          : await window.ValeBusAPI.cadastrarMotoristaAsync(dadosMotorista);
+        motoristasServidor = inputId
+          ? (motoristasServidor || []).map(m => m.id === inputId ? motoristaSalvo : m)
+          : [motoristaSalvo, ...(motoristasServidor || [])];
+        mostrarToast(inputId ? 'Motorista atualizado com sucesso.' : 'Motorista cadastrado e conta de acesso criada.', 'sucesso');
         fecharModal();
         renderizarTabela();
-      }, 350);
+      } catch (erro) {
+        const campos = {
+          nome: [inputMotNome, spanErroMotNome], matricula: [inputMotMatricula, spanErroMotMatricula],
+          email: [inputMotEmail, spanErroMotEmail], senha: [inputMotSenha, spanErroMotSenha],
+          cpf: [inputMotCpf, spanErroMotCpf], cnhValidade: [inputMotValidade, spanErroMotValidade]
+        };
+        const alvo = campos[erro.campo];
+        if (alvo) mostrarErroCampo(alvo[0], alvo[1], erro.message);
+        mostrarToast(erro.message || 'Não foi possível cadastrar o motorista.', 'erro');
+      } finally {
+        setBotaoLoading(btnSalvar, false);
+      }
     });
   }
 
   /* ──────────────────────────────────────────────────────────
      8. DELEGAÇÃO DE EVENTOS NA TABELA E CARDS MÓVEIS (AÇÕES)
      ────────────────────────────────────────────────────────── */
-  function tratarAcaoMotorista(e) {
+  async function tratarAcaoMotorista(e) {
     const btn = e.target.closest('button[data-acao]');
     if (!btn) return;
 
     const acao = btn.getAttribute('data-acao');
     const id = btn.getAttribute('data-id');
+    const lista = motoristasServidor || [];
+    const mot = lista.find(m => m.id === id);
+    if (!mot) return;
 
-    if (acao === 'toggle-pin') {
-      pinsVisiveis[id] = !pinsVisiveis[id];
-      renderizarTabela();
-    } else if (acao === 'editar') {
-      abrirModal(id);
-    } else if (acao === 'toggle-status') {
-      const lista = obterMotoristas();
-      const mot = lista.find(m => m.id === id);
-      if (mot) {
-        mot.status = mot.status === 'ativo' ? 'folga' : (mot.status === 'folga' ? 'inativo' : 'ativo');
-        salvarMotoristas(lista);
-        mostrarToast(`Status de ${mot.nome} alterado para "${mot.status.toUpperCase()}".`);
+    try {
+      if (acao === 'editar') {
+        abrirModal(id);
+        return;
+      }
+      if (acao === 'toggle-status') {
+        const proximoStatus = mot.status === 'ativo' ? 'folga' : (mot.status === 'folga' ? 'inativo' : 'ativo');
+        const atualizado = await window.ValeBusAPI.atualizarMotoristaAsync(id, {
+          ...mot,
+          senha: '',
+          status: proximoStatus
+        });
+        motoristasServidor = lista.map(item => item.id === id ? atualizado : item);
+        mostrarToast('Status de ' + mot.nome + ' alterado para "' + atualizado.status.toUpperCase() + '".', 'sucesso');
+        renderizarTabela();
+        return;
+      }
+      if (acao === 'excluir' && confirm('Excluir permanentemente ' + mot.nome + ' (' + mot.matricula + ')? A conta, o perfil e o cadastro serão apagados. Esta ação não pode ser desfeita.')) {
+        await window.ValeBusAPI.descredenciarMotoristaAsync(id);
+        motoristasServidor = lista.filter(item => item.id !== id);
+        mostrarToast('Motorista e conta excluídos permanentemente.', 'sucesso');
         renderizarTabela();
       }
-    } else if (acao === 'excluir') {
-      const lista = obterMotoristas();
-      const mot = lista.find(m => m.id === id);
-      if (mot && confirm(`Deseja realmente descredenciar o motorista ${mot.nome} (${mot.matricula})?`)) {
-        const novaLista = lista.filter(m => m.id !== id);
-        salvarMotoristas(novaLista);
-        mostrarToast(`Motorista ${mot.nome} descredenciado com sucesso.`);
-        renderizarTabela();
-      }
+    } catch (erro) {
+      mostrarToast(erro.message || 'Não foi possível concluir a operação.', 'erro');
     }
   }
 
@@ -1783,6 +1766,10 @@
 
   if (btnRestaurarDemo) {
     btnRestaurarDemo.addEventListener('click', () => {
+      if (motoristasServidor) {
+        mostrarToast('A base real de motoristas não pode ser substituída por dados de demonstração.', 'alerta');
+        return;
+      }
       if (confirm('Deseja recarregar a base de motoristas padrão de Santa Rita do Sapucaí?')) {
         salvarMotoristas(MOTORISTAS_PADRAO_SRS);
         mostrarToast('Base de motoristas de demonstração restaurada.');
@@ -2155,6 +2142,7 @@
 
   // Inicialização
   renderizarTabela();
+  carregarMotoristasDoServidor();
   renderizarFeedOcorrencias();
   renderizarPainelChamados();
 

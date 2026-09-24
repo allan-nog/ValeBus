@@ -354,7 +354,7 @@
               <th scope="col">Motorista &amp; Matrícula</th>
               <th scope="col">Linha &amp; Veículo</th>
               <th scope="col">Turno</th>
-              <th scope="col">PIN de Bordo</th>
+              <th scope="col">Conta de acesso</th>
               <th scope="col">Status</th>
               <th scope="col" style="text-align: right;">Ações</th>
             </tr>
@@ -523,11 +523,17 @@
               <span class="gestor-form-msg-erro" id="erro-mot-matricula"></span>
             </div>
 
-            <!-- PIN do Terminal -->
+            <!-- Credenciais da conta Auth do motorista -->
             <div class="gestor-form-grupo">
-              <label class="gestor-form-rotulo" for="form-mot-pin">PIN de Bordo (4 a 6 dígitos) *</label>
-              <input type="text" class="gestor-form-input" id="form-mot-pin" placeholder="Ex: 4821" maxlength="6" pattern="[0-9]*" inputmode="numeric" required>
-              <span class="gestor-form-msg-erro" id="erro-mot-pin"></span>
+              <label class="gestor-form-rotulo" for="form-mot-email">E-mail de acesso *</label>
+              <input type="email" class="gestor-form-input" id="form-mot-email" placeholder="motorista@exemplo.com" autocomplete="email" required>
+              <span class="gestor-form-msg-erro" id="erro-mot-email"></span>
+            </div>
+
+            <div class="gestor-form-grupo">
+              <label class="gestor-form-rotulo" for="form-mot-senha">Senha inicial *</label>
+              <input type="password" class="gestor-form-input" id="form-mot-senha" placeholder="Mínimo de 8 caracteres" autocomplete="new-password" minlength="8" required>
+              <span class="gestor-form-msg-erro" id="erro-mot-senha"></span>
             </div>
 
             <!-- CPF -->
@@ -633,7 +639,7 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <span id="texto-btn-salvar">Salvar Credenciais</span>
+            <span id="texto-btn-salvar">Cadastrar Motorista</span>
           </button>
         </div>
       </form>

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { config, supabaseConfigurado } from './src/config/env.js';
 import { authRouter } from './src/routes/auth.js';
 import { linhasRouter } from './src/routes/linhas.js';
+import { motoristasRouter } from './src/routes/motoristas.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRouter);
+app.use('/api/gestor/motoristas', motoristasRouter);
 app.use('/api/linhas', linhasRouter);
 
 app.use('/api', (_req, res) => {
@@ -42,6 +44,7 @@ app.use('/frontend', express.static(frontendPath));
 app.use(express.static(frontendPath));
 
 app.use((error, _req, res, _next) => {
+  if (error.status === 503) return res.status(503).json({ error: error.message });
   if (error.code === 'SUPABASE_NOT_CONFIGURED') {
     return res.status(503).json({ error: error.message, code: error.code });
   }

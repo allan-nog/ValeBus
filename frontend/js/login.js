@@ -176,13 +176,7 @@
   }
 
   if (btnAcessoPassageiro) {
-    btnAcessoPassageiro.addEventListener('click', async () => {
-      if (window.ValeBusAPI?.encerrarSessaoAsync) {
-        await window.ValeBusAPI.encerrarSessaoAsync('dashboard.html');
-      } else {
-        window.location.href = 'dashboard.html';
-      }
-    });
+    btnAcessoPassageiro.addEventListener('click', () => { window.location.href = 'dashboard.html'; });
   }
 
   if (btnLoginGoogle) {
@@ -1287,106 +1281,47 @@
   if (formMotorista) {
     formMotorista.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const id = inputMotId ? inputMotId.value.trim() : '';
-      const pin = inputMotPin ? inputMotPin.value.trim() : '';
-      const linhaValor = selectMotLinha ? selectMotLinha.value : 'fernandes';
-      const linhaNome = (selectMotLinha && selectMotLinha.selectedIndex >= 0)
-        ? selectMotLinha.options[selectMotLinha.selectedIndex].text
-        : 'Linha Fernandes';
-      const veiculoValor = selectMotVeiculo ? selectMotVeiculo.value : '02';
-      const veiculoNome = (selectMotVeiculo && selectMotVeiculo.selectedIndex >= 0)
-        ? selectMotVeiculo.options[selectMotVeiculo.selectedIndex].text
-        : 'Ônibus #02';
+      const email = inputMotId ? inputMotId.value.trim() : '';
+      const senha = inputMotPin ? inputMotPin.value : '';
 
-      if (!id || id.length < 3) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         if (motoristaErro) {
-          motoristaErroTxt.textContent = 'Informe a matrícula ou código operacional (mínimo 3 dígitos).';
+          motoristaErroTxt.textContent = 'Informe um e-mail válido.';
           motoristaErro.style.display = 'flex';
         }
-        if (motoristaSucesso) motoristaSucesso.style.display = 'none';
-        if (inputMotId) inputMotId.focus();
+        inputMotId?.focus();
         return;
       }
-
-      if (!pin || pin.length < 4) {
+      if (!senha) {
         if (motoristaErro) {
-          motoristaErroTxt.textContent = 'O PIN de segurança deve ter pelo menos 4 caracteres.';
+          motoristaErroTxt.textContent = 'Informe sua senha.';
           motoristaErro.style.display = 'flex';
         }
-        if (motoristaSucesso) motoristaSucesso.style.display = 'none';
-        if (inputMotPin) inputMotPin.focus();
+        inputMotPin?.focus();
         return;
-      }
-
-      // Validação de credenciais contra a base do Gestor CCO
-      let motoristaCadastrado = null;
-      try {
-        if (window.ValeBusAPI && typeof window.ValeBusAPI.buscarMotoristaPorMatricula === 'function') {
-          motoristaCadastrado = window.ValeBusAPI.buscarMotoristaPorMatricula(id);
-        } else {
-          const salvos = localStorage.getItem('valebus_motoristas_cadastrados');
-          if (salvos) {
-            const lista = JSON.parse(salvos);
-            motoristaCadastrado = lista.find(m =>
-              m.matricula.toUpperCase() === id.toUpperCase() ||
-              m.matricula.replace('MOT-', '').toUpperCase() === id.replace('MOT-', '').toUpperCase()
-            );
-          }
-        }
-      } catch (e) {}
-
-      if (motoristaCadastrado) {
-        if (motoristaCadastrado.status === 'inativo') {
-          if (motoristaErro) {
-            motoristaErroTxt.textContent = `Acesso suspenso pelo Gestor: Matrícula ${motoristaCadastrado.matricula} está inativa. Contate o CCO.`;
-            motoristaErro.style.display = 'flex';
-          }
-          if (motoristaSucesso) motoristaSucesso.style.display = 'none';
-          return;
-        }
-
-        if (motoristaCadastrado.pin && pin !== motoristaCadastrado.pin) {
-          if (motoristaErro) {
-            motoristaErroTxt.textContent = `PIN de bordo incorreto para a matrícula ${motoristaCadastrado.matricula}. Consulte o Gestor CCO.`;
-            motoristaErro.style.display = 'flex';
-          }
-          if (motoristaSucesso) motoristaSucesso.style.display = 'none';
-          if (inputMotPin) inputMotPin.focus();
-          return;
-        }
       }
 
       if (motoristaErro) motoristaErro.style.display = 'none';
+      if (motoristaSucesso) motoristaSucesso.style.display = 'none';
       if (btnConfirmarMot) btnConfirmarMot.disabled = true;
-      if (txtBtnMotorista) txtBtnMotorista.textContent = 'Conectando telemetria...';
+      if (txtBtnMotorista) txtBtnMotorista.textContent = 'Entrando...';
 
-      await esperar(800);
-
-      const nomeFinal = motoristaCadastrado ? motoristaCadastrado.nome : `Motorista ${id.toUpperCase()}`;
-      const sessaoMotorista = {
-        nome: nomeFinal,
-        email: `${id.toLowerCase()}@motorista.valebus.com.br`,
-        cargo: `Motorista Operacional — ${linhaNome}`,
-        matricula: motoristaCadastrado ? motoristaCadastrado.matricula : id,
-        perfil: 'motorista',
-        linha: linhaNome,
-        linhaChave: linhaValor,
-        veiculo: veiculoNome,
-        veiculoNumero: veiculoValor,
-        metodo: 'Terminal de Bordo',
-        logado: true
-      };
-
-      salvarSessaoLogin(sessaoMotorista);
-      if (window.ValeBusAPI && typeof window.ValeBusAPI.salvarOperacaoMotorista === 'function') {
-        window.ValeBusAPI.salvarOperacaoMotorista({ linhaChave: linhaValor, veiculo: veiculoNome });
+      try {
+        const usuario = await window.ValeBusAPI.autenticar({ email, senha });
+        if (usuario.papel !== 'motorista') {
+          await window.ValeBusAPI.encerrarSessaoAsync(null);
+          throw new Error('Esta conta não possui perfil de motorista.');
+        }
+        if (motoristaSucesso) motoristaSucesso.style.display = 'flex';
+        setTimeout(() => { window.location.href = 'motorista.html'; }, 650);
+      } catch (erro) {
+        if (motoristaErro) {
+          motoristaErroTxt.textContent = erro.message || 'Não foi possível entrar. Revise suas credenciais.';
+          motoristaErro.style.display = 'flex';
+        }
+        if (btnConfirmarMot) btnConfirmarMot.disabled = false;
+        if (txtBtnMotorista) txtBtnMotorista.textContent = 'Entrar';
       }
-
-      if (motoristaSucesso) motoristaSucesso.style.display = 'flex';
-
-      setTimeout(() => {
-        window.location.href = 'motorista.html';
-      }, 850);
     });
   }
 

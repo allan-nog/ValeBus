@@ -1,22 +1,11 @@
 import { obterSupabase } from '../lib/supabase.js';
-
-function lerCookies(cabecalho = '') {
-  return cabecalho.split(';').reduce((cookies, item) => {
-    const separador = item.indexOf('=');
-    if (separador < 0) return cookies;
-
-    const nome = item.slice(0, separador).trim();
-    const valor = item.slice(separador + 1).trim();
-    if (nome) cookies[nome] = decodeURIComponent(valor);
-    return cookies;
-  }, {});
-}
+import { cookiesDaRequisicao, renovarSessao, salvarCookiesSessao, removerCookiesSessao, falhaTemporariaAuth, indisponivel } from '../lib/sessao.js';
 
 export function obterTokenDaRequisicao(req) {
   const autorizacao = req.get('authorization') || '';
   if (autorizacao.startsWith('Bearer ')) return autorizacao.slice(7).trim();
 
-  return lerCookies(req.headers.cookie).valebus_access_token || null;
+  return cookiesDaRequisicao(req).valebus_access_token || null;
 }
 
 export async function obterUsuarioAutenticado(req) {
@@ -25,6 +14,7 @@ export async function obterUsuarioAutenticado(req) {
 
   const supabase = obterSupabase();
   const { data: authData, error: authError } = await supabase.auth.getUser(token);
+  if (falhaTemporariaAuth(authError)) throw indisponivel();
   if (authError || !authData.user) return null;
 
   const { data: perfil, error: perfilError } = await supabase
@@ -36,18 +26,41 @@ export async function obterUsuarioAutenticado(req) {
   if (perfilError) throw perfilError;
   if (!perfil?.ativo) return null;
 
+  let dadosMotorista = null;
+  if (perfil.papel === 'motorista') {
+    const { data, error } = await supabase
+      .from('motoristas')
+      .select('matricula, linha_habitual, veiculo_habitual, ativo')
+      .eq('usuario_id', perfil.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data?.ativo) return null;
+    dadosMotorista = data;
+  }
+
   return {
     id: perfil.id,
     nome: perfil.nome,
     papel: perfil.papel,
-    email: authData.user.email || null
+    email: authData.user.email || null,
+    matricula: dadosMotorista?.matricula || null,
+    linha: dadosMotorista?.linha_habitual || null,
+    veiculo: dadosMotorista?.veiculo_habitual || null
   };
 }
 
 export async function exigirAutenticacao(req, res, next) {
   try {
-    const usuario = await obterUsuarioAutenticado(req);
+    let usuario = await obterUsuarioAutenticado(req);
+    if (!usuario && !req.get('authorization')) {
+      const session = await renovarSessao(cookiesDaRequisicao(req).valebus_refresh_token);
+      if (session) {
+        usuario = await obterUsuarioAutenticado({ get: () => 'Bearer ' + session.access_token, headers: {} });
+        if (usuario) salvarCookiesSessao(res, session);
+      }
+    }
     if (!usuario) {
+      removerCookiesSessao(res);
       return res.status(401).json({ error: 'Sessão inválida, expirada ou sem permissão.' });
     }
 
@@ -56,4 +69,14 @@ export async function exigirAutenticacao(req, res, next) {
   } catch (error) {
     return next(error);
   }
+}
+
+
+export function exigirPapel(...papeisPermitidos) {
+  return (req, res, next) => {
+    if (!req.usuario || !papeisPermitidos.includes(req.usuario.papel)) {
+      return res.status(403).json({ error: 'Você não possui permissão para esta operação.' });
+    }
+    return next();
+  };
 }
