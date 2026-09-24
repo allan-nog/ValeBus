@@ -29,6 +29,8 @@
     LINHAS_ATIVAS: 'valebus_linhas_ativas',
     ALERTAS: 'valebus_alertas',
     VIAGENS_HOJE: 'valebus_viagens_hoje',
+    LINHA_MOTORISTA_ATIVA: 'valebus_linha_motorista_ativa',
+    VEICULO_MOTORISTA_ATIVO: 'valebus_veiculo_motorista_ativo',
     TEMA: 'valebus_tema',
     EMAIL_LEMBRADO: 'valebus_email'
   };
@@ -427,6 +429,43 @@
     return lista[index];
   }
 
+  function obterOcorrenciasMotorista() {
+    const lista = lerJSON(KEYS.OCORRENCIAS_MOTORISTA, []);
+    return Array.isArray(lista) ? lista : [];
+  }
+
+  function salvarOcorrenciasMotorista(lista) {
+    if (!Array.isArray(lista)) return false;
+    return gravarJSON(KEYS.OCORRENCIAS_MOTORISTA, lista);
+  }
+
+  function obterSocorroGaragem() {
+    return lerJSON(KEYS.SOCORRO_GARAGEM, null);
+  }
+
+  function salvarSocorroGaragem(socorro) {
+    if (!socorro || typeof socorro !== 'object') return false;
+    return gravarJSON(KEYS.SOCORRO_GARAGEM, socorro);
+  }
+
+  function limparSocorroGaragem() {
+    try {
+      localStorage.removeItem(KEYS.SOCORRO_GARAGEM);
+      window.dispatchEvent(new CustomEvent('valebus:storage_update', {
+        detail: { chave: KEYS.SOCORRO_GARAGEM, valor: null }
+      }));
+      return true;
+    } catch (e) {
+      console.error('[ValeBusAPI] Erro ao limpar socorro da garagem:', e);
+      return false;
+    }
+  }
+
+  function salvarOcorrencias(lista) {
+    if (!Array.isArray(lista)) return false;
+    return gravarJSON(KEYS.CHAMADOS_GESTOR, lista.slice(0, 80));
+  }
+
   /* ──────────────────────────────────────────────────────────
      3. SERVIÇO DE SESSÃO & AUTENTICAÇÃO
      ────────────────────────────────────────────────────────── */
@@ -471,6 +510,68 @@
       window.location.href = redirecionarPara;
     }
     return true;
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     4. SERVIÇO DE OPERAÇÃO LOCAL DO MOTORISTA
+     Mantém a compatibilidade com as chaves atuais até o backend assumir
+     a viagem ativa, o veículo e a telemetria.
+     ────────────────────────────────────────────────────────── */
+  function obterOperacaoMotorista() {
+    const sessao = obterSessao();
+    return {
+      linhaChave: localStorage.getItem(KEYS.LINHA_MOTORISTA_ATIVA) || sessao.linhaChave || null,
+      veiculo: localStorage.getItem(KEYS.VEICULO_MOTORISTA_ATIVO) || sessao.veiculo || null
+    };
+  }
+
+  function salvarOperacaoMotorista({ linhaChave, veiculo } = {}) {
+    try {
+      if (linhaChave) localStorage.setItem(KEYS.LINHA_MOTORISTA_ATIVA, linhaChave);
+      if (veiculo) localStorage.setItem(KEYS.VEICULO_MOTORISTA_ATIVO, veiculo);
+      window.dispatchEvent(new CustomEvent('valebus:storage_update', {
+        detail: { chave: 'operacao_motorista', valor: obterOperacaoMotorista() }
+      }));
+      return obterOperacaoMotorista();
+    } catch (e) {
+      console.error('[ValeBusAPI] Erro ao salvar operação do motorista:', e);
+      return null;
+    }
+  }
+
+  function obterViagensHoje(padrao = 0) {
+    const valor = Number.parseInt(localStorage.getItem(KEYS.VIAGENS_HOJE), 10);
+    return Number.isInteger(valor) && valor >= 0 ? valor : padrao;
+  }
+
+  function salvarViagensHoje(quantidade) {
+    const valor = Number.parseInt(quantidade, 10);
+    if (!Number.isInteger(valor) || valor < 0) return false;
+    try {
+      localStorage.setItem(KEYS.VIAGENS_HOJE, String(valor));
+      window.dispatchEvent(new CustomEvent('valebus:storage_update', {
+        detail: { chave: KEYS.VIAGENS_HOJE, valor }
+      }));
+      return true;
+    } catch (e) {
+      console.error('[ValeBusAPI] Erro ao salvar viagens do motorista:', e);
+      return false;
+    }
+  }
+
+  function obterTema(padrao = 'light') {
+    return localStorage.getItem(KEYS.TEMA) || padrao;
+  }
+
+  function salvarTema(tema) {
+    if (tema !== 'light' && tema !== 'dark') return false;
+    try {
+      localStorage.setItem(KEYS.TEMA, tema);
+      return true;
+    } catch (e) {
+      console.error('[ValeBusAPI] Erro ao salvar tema:', e);
+      return false;
+    }
   }
 
   /* ──────────────────────────────────────────────────────────
@@ -583,9 +684,21 @@
     obterOcorrencias,
     salvarOcorrencia,
     atualizarStatusOcorrencia,
+    salvarOcorrencias,
+    obterOcorrenciasMotorista,
+    salvarOcorrenciasMotorista,
+    obterSocorroGaragem,
+    salvarSocorroGaragem,
+    limparSocorroGaragem,
     obterSessao,
     salvarSessao,
     encerrarSessao,
+    obterOperacaoMotorista,
+    salvarOperacaoMotorista,
+    obterViagensHoje,
+    salvarViagensHoje,
+    obterTema,
+    salvarTema,
     obterLinhasAtivas,
     salvarLinhasAtivas,
     ativarLinha,

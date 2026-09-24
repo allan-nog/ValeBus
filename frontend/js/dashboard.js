@@ -114,76 +114,14 @@
   /* ──────────────────────────────────────────────────────────
      2. DADOS DAS LINHAS E FROTA (Santa Rita do Sapucaí - MG)
      ────────────────────────────────────────────────────────── */
-  const LINHAS = {
-    anchieta: {
-      chave: 'anchieta',
-      nome: 'Linha Anchieta',
-      cor: '#16a34a',
-      partida: 'Praça Urbana Carolina | Praça Do Murilo',
-      proximaParada: 'R. José Ribeiro De Barros, 59 | Inatel - Sentido Recanto'
-    },
-    fernandes: {
-      chave: 'fernandes',
-      nome: 'Linha Fernandes',
-      cor: '#2563eb',
-      partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-      proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-    },
-    fortaleza: {
-      chave: 'fortaleza',
-      nome: 'Linha Fortaleza',
-      cor: '#9333ea',
-      partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-      proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-    },
-    industrial: {
-      chave: 'industrial',
-      nome: 'Linha Industrial',
-      cor: '#ea580c',
-      partida: 'Br-459 Rod. Jk, Km 119,8 Leste | Entr. Mg-173 Para Cachoeira De Minas',
-      proximaParada: 'Br-459 Rod. Jk, Km 120,7 Leste | Linear'
-    },
-    porto_sapucai: {
-      chave: 'porto_sapucai',
-      nome: 'Linha Porto Sapucaí',
-      cor: '#0891b2',
-      partida: 'Br-459 Rod. Jk, Km 116 Leste | Porto Sapucaí',
-      proximaParada: 'Br-459 Rod. Jk, Km 116,3 Leste | Acesso Ao Porto Sapucaí'
-    },
-    reforco_jose_gm: {
-      chave: 'reforco_jose_gm',
-      nome: 'Linha Reforço José G.M (via MCM)',
-      cor: '#dc2626',
-      partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-      proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-    },
-    sao_benedito_hora_meia: {
-      chave: 'sao_benedito_hora_meia',
-      nome: 'Linha São Benedito (Hora e Meia)',
-      cor: '#db2777',
-      partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-      proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-    },
-    sao_benedito_hora: {
-      chave: 'sao_benedito_hora',
-      nome: 'Linha São Benedito (Hora)',
-      cor: '#eab308',
-      partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-      proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-    }
-  };
-
-  const FROTA = [
-    { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               veiculo: 'Ônibus #01', prefixo: '101', posicao: [-22.254164, -45.696709], velocidade: 0 },
-    { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              veiculo: 'Ônibus #02', prefixo: '102', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 },
-    { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              veiculo: 'Ônibus #03', prefixo: '103', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 },
-    { chaveLinha: 'industrial',             linha: LINHAS.industrial,             veiculo: 'Ônibus #04', prefixo: '104', posicao: [-22.261351790494068, -45.771512667995346], velocidade: 0 },
-    { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          veiculo: 'Ônibus #05', prefixo: '105', posicao: [-22.257161337562074, -45.80345771571105], velocidade: 0 },
-    { chaveLinha: 'reforco_jose_gm',        linha: LINHAS.reforco_jose_gm,        veiculo: 'Ônibus #06', prefixo: '106', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 },
-    { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      veiculo: 'Ônibus #07', prefixo: '107', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 },
-    { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, veiculo: 'Ônibus #08', prefixo: '108', posicao: [-22.22582948032013, -45.71819403549861], velocidade: 0 }
-  ];
-
+  const LINHAS = window.VALEBUS_CATALOGO_OPERACIONAL.linhas;
+  const FROTA = window.VALEBUS_CATALOGO_OPERACIONAL.frota
+    .filter((onibus) => onibus.chaveLinha !== 'fernandes')
+    .map((onibus) => ({
+      ...onibus,
+      linha: LINHAS[onibus.chaveLinha],
+      posicao: [...onibus.posicao]
+    }));
 
   /* ──────────────────────────────────────────────────────────
      3. INICIALIZAÇÃO DO MAPA LEAFLET & CAMADAS TEMÁTICAS (DIA/NOITE)
@@ -314,7 +252,6 @@
     }
     const COORDENADAS_EXATAS = {
       anchieta: [-22.254164, -45.696709],
-      fernandes: [-22.22582948032013, -45.71819403549861],
       fortaleza: [-22.22582948032013, -45.71819403549861],
       industrial: [-22.261351790494068, -45.771512667995346],
       porto_sapucai: [-22.257161337562074, -45.80345771571105],
@@ -326,7 +263,7 @@
   }
 
   function normalizarChaveLinha(str) {
-    if (!str) return 'fernandes';
+    if (!str) return 'anchieta';
     const s = String(str).toLowerCase().trim();
     if (s === 'industrial' || s.includes('industrial')) return 'industrial';
     if (s === 'porto_sapucai' || s.includes('porto') || s.includes('sapucai') || s.includes('sapucaí')) return 'porto_sapucai';
@@ -335,7 +272,7 @@
     if (s === 'sao_benedito_hora' || s.includes('benedito') || s.includes('hora')) return 'sao_benedito_hora';
     if (s === 'fortaleza' || s.includes('fortaleza')) return 'fortaleza';
     if (s === 'anchieta' || s.includes('anchieta')) return 'anchieta';
-    return 'fernandes';
+    return 'anchieta';
   }
 
   function obterOperacaoMotorista() {
@@ -357,11 +294,10 @@
       }
     } catch (e) {}
 
-    linhaChave = normalizarChaveLinha(linhaChave || 'fernandes');
+    linhaChave = normalizarChaveLinha(linhaChave || 'anchieta');
     if (!veiculoNome) {
       const padroes = {
         anchieta: 'Ônibus #01',
-        fernandes: 'Ônibus #02',
         fortaleza: 'Ônibus #03',
         industrial: 'Ônibus #04',
         porto_sapucai: 'Ônibus #05',
@@ -369,7 +305,7 @@
         sao_benedito_hora: 'Ônibus #07',
         sao_benedito_hora_meia: 'Ônibus #08'
       };
-      veiculoNome = padroes[linhaChave] || 'Ônibus #02';
+      veiculoNome = padroes[linhaChave] || 'Ônibus #01';
     }
 
     veiculoNome = veiculoNome.replace(/\s*\(Prefixo\s*\d+\)/i, '').trim();
@@ -424,7 +360,7 @@
     marcadoresMap.clear();
 
     // Mostra APENAS o ônibus que o motorista está operando
-    const busOperando = FROTA.find(b => b.chaveLinha === operacaoAtual.linhaChave) || FROTA[1];
+    const busOperando = FROTA.find(b => b.chaveLinha === operacaoAtual.linhaChave) || FROTA[0];
     busOperando.veiculo = operacaoAtual.veiculoNome;
 
     // Posiciona exatamente no ponto inicial oficial da linha (Parada 1)
@@ -540,7 +476,9 @@
 
     if (!window.VALEBUS_PARADAS) return;
 
-    const paradas = window.VALEBUS_PARADAS.obterParadas(linhaSelecionada);
+    const paradas = window.VALEBUS_PARADAS
+      .obterParadas(linhaSelecionada)
+      .filter(ponto => ponto.linhaChave !== 'fernandes');
 
     paradas.forEach(ponto => {
       const icone = criarIconeParada(ponto);
@@ -1107,18 +1045,6 @@
      ────────────────────────────────────────────────────────── */
   const ALERTAS_PADRAO = [
     {
-      id: 'alt-1',
-      linha: 'fernandes',
-      tipo: 'atencao', // 'atencao' | 'critico' | 'info' | 'sucesso'
-      titulo: 'Trânsito Moderado — Próximo ao Ginásio Poliesportivo',
-      mensagem: 'Linha Fernandes e São Benedito com acréscimo estimado de 3 a 5 minutos devido ao fluxo de entrada/saída escolar e universitário na região central.',
-      origem: 'CCO Operacional ValeBus',
-      horario: 'Há 12 minutos',
-      timestamp: Date.now() - 12 * 60 * 1000,
-      lida: false,
-      resolvido: false
-    },
-    {
       id: 'alt-2',
       linha: 'anchieta',
       tipo: 'info',
@@ -1168,6 +1094,7 @@
   }
 
   carregarAlertas();
+  listaAlertasState = listaAlertasState.filter(alerta => alerta.linha !== 'fernandes');
 
   // Elementos do Sino e Dropdown
   const btnSino = document.getElementById('btn-sino-notificacoes');

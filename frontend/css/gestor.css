@@ -2358,3 +2358,36 @@ button, [role="button"], a, select, input {
   align-items: center;
   gap: 4px;
 }
+
+
+.gestor-chamado-meta-item--localizacao {
+  grid-column: span 2;
+}
+
+/* CORREÇÃO: METADADOS DOS CHAMADOS EM CELULAR */
+@media (max-width: 640px) {
+  .gestor-chamado-card,
+  .gestor-chamado-card__topo,
+  .gestor-chamado-card__ident,
+  .gestor-chamado-card__titulos,
+  .gestor-chamado-card__metas,
+  .gestor-chamado-meta-item {
+    min-width: 0;
+  }
+
+  .gestor-chamado-card__metas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gestor-chamado-meta-item--localizacao {
+    grid-column: auto;
+  }
+
+  .gestor-chamado-meta-valor {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}

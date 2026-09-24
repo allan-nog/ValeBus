@@ -1,48 +1,51 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { config, supabaseConfigurado } from './src/config/env.js';
+import { linhasRouter } from './src/routes/linhas.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', app: 'ValeBus' });
+app.disable('x-powered-by');
+app.use(express.json({ limit: '1mb' }));
+
+app.get('/api/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    app: 'ValeBus',
+    database: supabaseConfigurado() ? 'configured' : 'not_configured'
+  });
 });
 
-// Route aliases
-app.get(['/', '/login', '/login.html'], (req, res) => {
+app.use('/api/linhas', linhasRouter);
+
+app.use('/api', (_req, res) => {
+  res.status(404).json({ error: 'Rota da API não encontrada.' });
+});
+
+app.get(['/', '/login', '/login.html'], (_req, res) => {
   res.redirect('/frontend/login.html');
 });
+app.get(['/dashboard', '/dashboard.html'], (_req, res) => res.redirect('/frontend/dashboard.html'));
+app.get(['/gestor', '/gestor.html'], (_req, res) => res.redirect('/frontend/gestor.html'));
+app.get(['/motorista', '/motorista.html'], (_req, res) => res.redirect('/frontend/motorista.html'));
 
-app.get(['/dashboard', '/dashboard.html'], (req, res) => {
-  res.redirect('/frontend/dashboard.html');
-});
-
-app.get(['/gestor', '/gestor.html'], (req, res) => {
-  res.redirect('/frontend/gestor.html');
-});
-
-app.get(['/motorista', '/motorista.html'], (req, res) => {
-  res.redirect('/frontend/motorista.html');
-});
-
-// Serve static assets: support both /frontend/... and direct paths (/vendor, /css, /js)
 app.use(express.static(path.join(__dirname, 'frontend')));
-app.use('/vendor', express.static(path.join(__dirname, 'frontend/vendor')));
-app.use('/css', express.static(path.join(__dirname, 'frontend/css')));
-app.use('/js', express.static(path.join(__dirname, 'frontend/js')));
-app.use('/assets', express.static(path.join(__dirname, 'frontend/assets')));
 app.use(express.static(__dirname));
 
-// Fallback: redirect unmatched routes to login
-app.use((req, res) => {
-  res.redirect('/frontend/login.html');
+app.use((error, _req, res, _next) => {
+  if (error.code === 'SUPABASE_NOT_CONFIGURED') {
+    return res.status(503).json({ error: error.message, code: error.code });
+  }
+
+  console.error(error);
+  return res.status(500).json({ error: 'Erro interno no servidor.' });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`ValeBus running on http://0.0.0.0:${PORT}`);
+app.use((_req, res) => res.redirect('/frontend/login.html'));
+
+app.listen(config.port, '0.0.0.0', () => {
+  console.log(`ValeBus running on http://0.0.0.0:${config.port}`);
 });

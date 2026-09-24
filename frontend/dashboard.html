@@ -516,11 +516,6 @@
                   <span>Anchieta</span>
                 </button>
 
-                <button type="button" class="mapa-legenda__item" data-linha="fernandes" role="tab" aria-selected="false">
-                  <span class="mapa-legenda__dot" style="background:#2563eb;"></span>
-                  <span>Fernandes</span>
-                </button>
-
                 <button type="button" class="mapa-legenda__item" data-linha="fortaleza" role="tab" aria-selected="false">
                   <span class="mapa-legenda__dot" style="background:#9333ea;"></span>
                   <span>Fortaleza</span>
@@ -575,7 +570,7 @@
               type="text" 
               id="input-busca-linha" 
               class="busca-input" 
-              placeholder="Digite o nome da linha, destino, bairro ou rua (ex: Inatel, Copasa, Fernandes, BR-459...)" 
+              placeholder="Digite o nome da linha, destino, bairro ou rua (ex: Inatel, Copasa, BR-459...)"
               aria-label="Buscar linha ou destino"
               autocomplete="off"
             >
@@ -599,7 +594,7 @@
           </div>
 
           <div class="busca-contador-wrapper">
-            <span id="busca-contador-resultado" class="busca-contador">Exibindo 8 linhas disponíveis em Santa Rita do Sapucaí</span>
+            <span id="busca-contador-resultado" class="busca-contador">Exibindo 7 linhas disponíveis em Santa Rita do Sapucaí</span>
           </div>
 
           <!-- Grade de Linhas para Busca -->
@@ -627,33 +622,6 @@
                 </div>
               </div>
               <button type="button" class="linha-card__btn-acao btn-ver-linha-mapa" data-linha="anchieta" style="--cor-btn:#16a34a;">
-                <svg width="16" height="16" aria-hidden="true"><use href="#icone-mapa"/></svg>
-                <span>Ver no Mapa em Tempo Real</span>
-              </button>
-            </article>
-
-            <!-- Fernandes -->
-            <article class="linha-card" data-linha="fernandes" data-busca="linha fernandes rua das rosas caixa dagua copasa ginasio poliesportivo">
-              <div class="linha-card__topo">
-                <span class="linha-card__dot" style="background-color: #2563eb;"></span>
-                <h3 class="linha-card__titulo">Linha Fernandes</h3>
-                <span class="linha-card__status-tag">GPS Ativo</span>
-              </div>
-              <div class="linha-card__conteudo">
-                <div class="linha-card__dado">
-                  <span class="linha-card__rotulo">🚩 Partida:</span>
-                  <span class="linha-card__texto">Rua Das Rosas, 300 | Caixa D'Água Da Copasa</span>
-                </div>
-                <div class="linha-card__dado">
-                  <span class="linha-card__rotulo">📍 Próxima Parada / Trajeto:</span>
-                  <span class="linha-card__texto">Rua Das Rosas, 400 | Ginásio Poliesportivo</span>
-                </div>
-                <div class="linha-card__dado">
-                  <span class="linha-card__rotulo">⏱️ Frequência &amp; Horários:</span>
-                  <span class="linha-card__texto">08:30 às 18:45 (Seg a Sex) | 08:30 às 17:15 (Sáb)</span>
-                </div>
-              </div>
-              <button type="button" class="linha-card__btn-acao btn-ver-linha-mapa" data-linha="fernandes" style="--cor-btn:#2563eb;">
                 <svg width="16" height="16" aria-hidden="true"><use href="#icone-mapa"/></svg>
                 <span>Ver no Mapa em Tempo Real</span>
               </button>
@@ -850,20 +818,6 @@
               <button type="button" class="btn-link-mapa btn-ver-linha-mapa" data-linha="anchieta">Localizar Ônibus no Mapa →</button>
             </div>
 
-            <div class="horario-card" style="border-top-color: #2563eb;">
-              <div class="horario-card__header">
-                <span class="horario-card__dot" style="background:#2563eb;"></span>
-                <h4>Linha Fernandes</h4>
-              </div>
-              <p class="horario-card__partida">Partida: Rua Das Rosas, 300 | Caixa D'Água Da Copasa</p>
-              <div class="horario-card__grade">
-                <div><strong>Dias Úteis (Seg a Sex):</strong> 08:30 às 18:45 (Horários variáveis)</div>
-                <div><strong>Sábados:</strong> 08:30 às 17:15 (Horários variáveis)</div>
-                <div><strong>Domingos e Feriados:</strong> Consultar escala / Sob aviso</div>
-                <div><strong>Observação:</strong> Conexão Bairro Fernandes ao Centro e Algodoeira (Ônibus #02)</div>
-              </div>
-              <button type="button" class="btn-link-mapa btn-ver-linha-mapa" data-linha="fernandes">Localizar Ônibus no Mapa →</button>
-            </div>
 
             <div class="horario-card" style="border-top-color: #9333ea;">
               <div class="horario-card__header">
@@ -1136,21 +1090,6 @@
             </div>
           </article>
 
-          <!-- Fernandes -->
-          <article class="proximo-card" data-linha="fernandes" role="button" tabindex="0" aria-label="Linha Fernandes. Clique para ver no mapa.">
-            <div class="proximo-card__linha-badge" style="background-color: #2563eb;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
-            </div>
-            <div class="proximo-card__info">
-              <span class="proximo-card__nome-linha">Linha Fernandes</span>
-              <span class="proximo-card__parada">Rua Das Rosas | Ginásio Poliesportivo</span>
-            </div>
-            <div class="proximo-card__lado-direito">
-              <span class="proximo-card__tempo">4 min</span>
-              <span class="status-badge status-badge--atrasado">Atrasado</span>
-            </div>
-          </article>
-
           <!-- Fortaleza -->
           <article class="proximo-card" data-linha="fortaleza" role="button" tabindex="0" aria-label="Linha Fortaleza. Clique para ver no mapa.">
             <div class="proximo-card__linha-badge" style="background-color: #9333ea;">
@@ -1243,9 +1182,9 @@
 
         </div><!-- /proximos-lista -->
 
-        <button class="painel__ver-todos" id="btn-ver-todos" aria-expanded="false" aria-label="Ver todas as 8 linhas da frota">
-          <span class="btn-ver-todos__texto">Ver todas as 8 linhas da frota</span>
-          <span class="btn-ver-todos__badge">+5</span>
+        <button class="painel__ver-todos" id="btn-ver-todos" aria-expanded="false" aria-label="Ver todas as 7 linhas da frota">
+          <span class="btn-ver-todos__texto">Ver todas as 7 linhas da frota</span>
+          <span class="btn-ver-todos__badge">+4</span>
           <svg class="btn-ver-todos__icone" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
@@ -1280,7 +1219,7 @@
             <div class="resumo-item__info">
               <span class="resumo-item__label">Linhas ativas</span>
               <div class="resumo-item__dados">
-                <span class="resumo-item__valor"><strong class="num-destaque">8</strong><span class="num-sufixo">linhas</span></span>
+                <span class="resumo-item__valor"><strong class="num-destaque">7</strong><span class="num-sufixo">linhas</span></span>
                 <span class="resumo-item__tag resumo-item__tag--operacao">Em operação</span>
               </div>
             </div>
@@ -1480,7 +1419,6 @@
               <select id="alerta-input-linha" class="form-select" required>
                 <option value="todas">Todas as Linhas (Aviso Geral)</option>
                 <option value="anchieta">Linha Anchieta (Praça Urbana / Inatel)</option>
-                <option value="fernandes">Linha Fernandes (Copasa / Ginásio)</option>
                 <option value="fortaleza">Linha Fortaleza (Copasa / Bairro)</option>
                 <option value="industrial">Linha Industrial (BR-459 / Distrito)</option>
                 <option value="porto_sapucai">Linha Porto Sapucaí (BR-459 Km 116)</option>
@@ -1544,6 +1482,7 @@
   <!-- Bibliotecas de Terceiros e Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/paradas.js"></script>
+  <script src="js/catalogo-operacional.js"></script>
   <script src="js/api.js"></script>
   <script src="js/dashboard.js"></script>
 </body>

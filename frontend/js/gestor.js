@@ -9,49 +9,34 @@
   'use strict';
 
   /* ──────────────────────────────────────────────────────────
-     1. VALIDAÇÃO DE ACESSO DO GESTOR & SESSÃO PADRÃO
+     1. VALIDAÇÃO DE ACESSO DO GESTOR
      ────────────────────────────────────────────────────────── */
   const EMAIL_GESTOR_OFICIAL = 'valebussrs@gmail.com';
-  const USUARIO_PADRAO_GESTOR = {
-    nome: 'Gestor Operacional ValeBus',
-    email: 'valebussrs@gmail.com',
-    cargo: 'Gestor CCO & Frotas Master',
-    perfil: 'gestor',
-    matricula: 'CCO-001',
-    metodo: 'Sessão CCO Gestor',
-    veiculo: 'Supervisor CCO (Frota Geral)'
-  };
 
-  function garantirSessaoGestor() {
+  function obterSessaoGestor() {
     try {
-      let usuario = window.ValeBusAPI ? window.ValeBusAPI.obterSessao() : null;
-      if (!usuario || !usuario.logado) {
-        usuario = { ...USUARIO_PADRAO_GESTOR };
-      } else {
-        usuario.nome = (usuario.nome && usuario.nome !== 'João da Silva') ? usuario.nome : USUARIO_PADRAO_GESTOR.nome;
-        usuario.email = EMAIL_GESTOR_OFICIAL;
-        usuario.cargo = usuario.cargo || USUARIO_PADRAO_GESTOR.cargo;
-        usuario.perfil = 'gestor';
-        usuario.matricula = usuario.matricula || USUARIO_PADRAO_GESTOR.matricula;
-        usuario.metodo = usuario.metodo || USUARIO_PADRAO_GESTOR.metodo;
-        usuario.veiculo = usuario.veiculo || USUARIO_PADRAO_GESTOR.veiculo;
-      }
+      const usuario = window.ValeBusAPI ? window.ValeBusAPI.obterSessao() : null;
+      const email = (usuario?.email || '').trim().toLowerCase();
+      const autorizado = Boolean(
+        usuario?.logado &&
+        usuario.perfil === 'gestor' &&
+        usuario.autenticado2FA === true &&
+        email === EMAIL_GESTOR_OFICIAL
+      );
 
-      if (window.ValeBusAPI && typeof window.ValeBusAPI.salvarSessao === 'function') {
-        window.ValeBusAPI.salvarSessao(usuario);
-      } else {
-        localStorage.setItem('valebus_usuario', JSON.stringify(usuario));
-      }
-      return usuario;
+      return autorizado ? usuario : null;
     } catch (e) {
-      console.warn('Erro ao garantir sessão do gestor:', e);
-      return USUARIO_PADRAO_GESTOR;
+      console.warn('Erro ao verificar sessão do gestor:', e);
+      return null;
     }
   }
 
   function verificarPermissaoGestor() {
-    // Garante sempre a sessão ativa com credenciais de Gestor CCO
-    const usuario = garantirSessaoGestor();
+    const usuario = obterSessaoGestor();
+    if (!usuario) {
+      window.location.replace('login.html');
+      return false;
+    }
 
     // Atualiza cabeçalho com os dados do gestor
     const elNome = document.getElementById('gestor-nome');
@@ -724,11 +709,10 @@
   }
 
   function salvarChamadosGestor(lista) {
-    try {
-      localStorage.setItem(CHAVE_STORAGE_CHAMADOS, JSON.stringify(lista));
-    } catch (e) {
-      console.error('Erro ao salvar chamados do gestor:', e);
+    if (window.ValeBusAPI && typeof window.ValeBusAPI.salvarOcorrencias === 'function') {
+      return window.ValeBusAPI.salvarOcorrencias(lista);
     }
+    return false;
   }
 
   let chamadoSelecionadoAtual = null;
@@ -861,7 +845,7 @@
               <span class="gestor-chamado-meta-rotulo">Veículo & Linha</span>
               <span class="gestor-chamado-meta-valor" title="${item.veiculo || 'Ônibus #02'} - ${item.linha || 'Linha Anchieta'}">${item.veiculo || 'Ônibus #02'} • ${item.linha || 'Linha Anchieta'}</span>
             </div>
-            <div class="gestor-chamado-meta-item" style="grid-column: span 2;">
+            <div class="gestor-chamado-meta-item gestor-chamado-meta-item--localizacao">
               <span class="gestor-chamado-meta-rotulo">Localização Informada</span>
               <span class="gestor-chamado-meta-valor" title="${item.local || 'Itinerário Regular'}">📍 ${item.local || 'Itinerário Regular'}</span>
             </div>
@@ -1034,16 +1018,11 @@
 
     salvarChamadosGestor(lista);
 
-    // Também sincroniza se for o socorro garagem ativo
-    try {
-      const socorroSalvo = localStorage.getItem(CHAVE_STORAGE_SOCORRO_MOTORISTA);
-      if (socorroSalvo) {
-        const obj = JSON.parse(socorroSalvo);
-        if (obj.id === idChamado) {
-          localStorage.removeItem(CHAVE_STORAGE_SOCORRO_MOTORISTA);
-        }
-      }
-    } catch (e) {}
+    // Também sincroniza se for o socorro de garagem ativo.
+    const socorroAtivo = window.ValeBusAPI.obterSocorroGaragem();
+    if (socorroAtivo?.id === idChamado) {
+      window.ValeBusAPI.limparSocorroGaragem();
+    }
 
     mostrarToast(`Chamado #${idChamado} marcado como atendido pelo CCO!`, 'sucesso');
     renderizarPainelChamados();
@@ -1173,10 +1152,8 @@
         lista.unshift(novoReport);
         salvarChamadosGestor(lista);
 
-        // Também espelha no localStorage do motorista para que ambas as telas sincronizem
-        try {
-          localStorage.setItem(CHAVE_STORAGE_SOCORRO_MOTORISTA, JSON.stringify(novoReport));
-        } catch (e) {}
+        // Espelha o socorro para o motorista pela camada de serviços.
+        window.ValeBusAPI.salvarSocorroGaragem(novoReport);
 
         setBotaoLoading(btnSimularReport, false);
         mostrarToast('Ocorrência registrada com sucesso!', 'sucesso');
@@ -2079,8 +2056,6 @@
           window.location.href = 'login.html';
         }
       } else if (destino.url) {
-        // Assegura que o usuário vá logado com o usuário padrão de gestor
-        garantirSessaoGestor();
         window.location.href = destino.url;
       }
     });
@@ -2105,7 +2080,7 @@
     });
   }
 
-  const btnSairMobile = document.getElementById('btn-sair-gestor-mobile');
+  const btnSairMobile = document.getElementById('btn-sair-mobile');
   if (btnSairMobile) {
     btnSairMobile.addEventListener('click', (e) => {
       e.preventDefault();

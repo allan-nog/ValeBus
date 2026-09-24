@@ -10,6 +10,8 @@
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "@supabase/supabase-js": "^2.49.8",
+    "dotenv": "^18.0.3",
+    "express": "^4.22.3"
   }
 }

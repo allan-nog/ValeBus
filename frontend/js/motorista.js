@@ -34,6 +34,14 @@
       proximaParada: "1. Caixa D'Água Da Copasa"
     };
 
+    const sessaoMotorista = window.ValeBusAPI && typeof window.ValeBusAPI.obterSessao === 'function'
+      ? window.ValeBusAPI.obterSessao()
+      : null;
+    if (!sessaoMotorista?.logado || sessaoMotorista.perfil !== 'motorista') {
+      window.location.replace('login.html');
+      return;
+    }
+
     function atualizarRelogio() {
       const el = document.getElementById('topbar-hora');
       if (!el) return;
@@ -45,9 +53,8 @@
 
     function carregarDadosSessao() {
       try {
-        const salvo = localStorage.getItem('valebus_usuario');
-        if (salvo) {
-          const u = JSON.parse(salvo);
+        const u = window.ValeBusAPI.obterSessao();
+        if (u.logado) {
           const ehGestor = (u.email && u.email.toLowerCase().trim() === 'valebussrs@gmail.com') || u.perfil === 'gestor';
           if (ehGestor) {
             estadoMotorista.ehGestor = true;
@@ -129,10 +136,7 @@
           }
         }
 
-        const viagensSalvas = localStorage.getItem('valebus_viagens_hoje');
-        if (viagensSalvas) {
-          estadoMotorista.viagensHoje = parseInt(viagensSalvas, 10) || 12;
-        }
+        estadoMotorista.viagensHoje = window.ValeBusAPI.obterViagensHoje(estadoMotorista.viagensHoje);
       } catch (e) {
         console.warn('Erro ao carregar sessão do motorista:', e);
       }
@@ -148,14 +152,10 @@
     const btnTema = document.getElementById('btn-tema-toggle');
     function aplicarTema(tema) {
       document.documentElement.setAttribute('data-theme', tema);
-      try {
-        localStorage.setItem('valebus_tema', tema);
-      } catch (e) {
-        console.warn(e);
-      }
+      window.ValeBusAPI.salvarTema(tema);
     }
 
-    const temaSalvo = localStorage.getItem('valebus_tema') || 'light';
+    const temaSalvo = window.ValeBusAPI.obterTema('light');
     aplicarTema(temaSalvo);
 
     if (btnTema) {
@@ -377,75 +377,13 @@
     /* ──────────────────────────────────────────────────────────
       4. DADOS DAS LINHAS E FROTA COMPLETA (Santa Rita do Sapucaí)
       ────────────────────────────────────────────────────────── */
-    const LINHAS = {
-      anchieta: {
-        chave: 'anchieta',
-        nome: 'Linha Anchieta',
-        cor: '#16a34a',
-        partida: 'Praça Urbana Carolina | Praça Do Murilo',
-        proximaParada: 'Rua José Ribeiro De Barros, 59 | Inatel - Sentido Recanto'
-      },
-      fernandes: {
-        chave: 'fernandes',
-        nome: 'Linha Fernandes (Seu Ônibus)',
-        cor: '#2563eb',
-        partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-        proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-      },
-      fortaleza: {
-        chave: 'fortaleza',
-        nome: 'Linha Fortaleza',
-        cor: '#9333ea',
-        partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-        proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-      },
-      industrial: {
-        chave: 'industrial',
-        nome: 'Linha Industrial',
-        cor: '#ea580c',
-        partida: 'Br-459 Rod. Jk, Km 119,8 Leste | Entr. Mg-173 Para Cachoeira De Minas',
-        proximaParada: 'Br-459 Rod. Jk, Km 120,7 Leste | Linear'
-      },
-      porto_sapucai: {
-        chave: 'porto_sapucai',
-        nome: 'Linha Porto Sapucaí',
-        cor: '#0891b2',
-        partida: 'Br-459 Rod. Jk, Km 116 Leste | Porto Sapucaí',
-        proximaParada: 'Br-459 Rod. Jk, Km 116,3 Leste | Acesso Ao Porto Sapucaí'
-      },
-      reforco_jose_gm: {
-        chave: 'reforco_jose_gm',
-        nome: 'Linha Reforço José G.M (via MCM)',
-        cor: '#dc2626',
-        partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-        proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-      },
-      sao_benedito_hora_meia: {
-        chave: 'sao_benedito_hora_meia',
-        nome: 'Linha São Benedito (Hora e Meia)',
-        cor: '#db2777',
-        partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-        proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-      },
-      sao_benedito_hora: {
-        chave: 'sao_benedito_hora',
-        nome: 'Linha São Benedito (Hora)',
-        cor: '#eab308',
-        partida: 'Rua Das Rosas, 300 | Caixa D\'Água Da Copasa',
-        proximaParada: 'Rua Das Rosas, 400 | Ginásio Poliesportivo'
-      }
-    };
-
-    const FROTA = [
-      { chaveLinha: 'anchieta',               linha: LINHAS.anchieta,               veiculo: 'Ônibus #01', prefixo: '101', posicao: [-22.254164, -45.696709], velocidade: 0, isMeuOnibus: false },
-      { chaveLinha: 'fernandes',              linha: LINHAS.fernandes,              veiculo: 'Ônibus #02', prefixo: '102', posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: true },
-      { chaveLinha: 'fortaleza',              linha: LINHAS.fortaleza,              veiculo: 'Ônibus #03', prefixo: '103', posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false },
-      { chaveLinha: 'industrial',             linha: LINHAS.industrial,             veiculo: 'Ônibus #04', prefixo: '104', posicao: [-22.261352, -45.771513], velocidade: 0, isMeuOnibus: false },
-      { chaveLinha: 'porto_sapucai',          linha: LINHAS.porto_sapucai,          veiculo: 'Ônibus #05', prefixo: '105', posicao: [-22.257161, -45.803458], velocidade: 0, isMeuOnibus: false },
-      { chaveLinha: 'reforco_jose_gm',        linha: LINHAS.reforco_jose_gm,        veiculo: 'Ônibus #06', prefixo: '106', posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false },
-      { chaveLinha: 'sao_benedito_hora',      linha: LINHAS.sao_benedito_hora,      veiculo: 'Ônibus #07', prefixo: '107', posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false },
-      { chaveLinha: 'sao_benedito_hora_meia', linha: LINHAS.sao_benedito_hora_meia, veiculo: 'Ônibus #08', prefixo: '108', posicao: [-22.225829, -45.718194], velocidade: 0, isMeuOnibus: false }
-    ];
+    const LINHAS = window.VALEBUS_CATALOGO_OPERACIONAL.linhas;
+    const FROTA = window.VALEBUS_CATALOGO_OPERACIONAL.frota.map((onibus) => ({
+      ...onibus,
+      linha: LINHAS[onibus.chaveLinha],
+      posicao: [...onibus.posicao],
+      isMeuOnibus: onibus.chaveLinha === 'fernandes'
+    }));
 
     /* ──────────────────────────────────────────────────────────
       5. INICIALIZAÇÃO DO MAPA LEAFLET & MARCADORES INTERATIVOS
@@ -526,6 +464,32 @@
     let polylineLinha = null;
     let waypointLinhaIndex = 0;
     const marcadoresParadasLinha = [];
+
+    function renderizarMarcadorMeuOnibus(chaveLinha) {
+      if (!map) return null;
+
+      const meuOnibus = FROTA.find(bus => bus.chaveLinha === chaveLinha) || FROTA[0];
+      FROTA.forEach(bus => {
+        bus.isMeuOnibus = bus === meuOnibus;
+      });
+
+      meuOnibus.veiculo = estadoMotorista.veiculo || meuOnibus.veiculo;
+
+      if (meuOnibusMarker && map.hasLayer(meuOnibusMarker)) {
+        map.removeLayer(meuOnibusMarker);
+      }
+      marcadoresMap.clear();
+
+      const marker = L_API.marker(meuOnibus.posicao, {
+        icon: criarIconeBus(meuOnibus.linha.cor, true)
+      })
+        .addTo(map)
+        .bindPopup(gerarHtmlPopup(meuOnibus));
+
+      meuOnibusMarker = marker;
+      marcadoresMap.set(meuOnibus.chaveLinha, { marker, bus: meuOnibus });
+      return meuOnibus;
+    }
 
     function criarIconeBus(cor, isMeu = false) {
       const htmlIcone = `
@@ -997,19 +961,7 @@
         estadoMotorista.proximaParada = "1. Caixa D'Água Da Copasa";
       }
 
-      // Atualiza ônibus no mapa: marca qual veículo é o "Meu Ônibus"
-      FROTA.forEach(b => {
-        b.isMeuOnibus = (b.chaveLinha === chaveLinha);
-        const entry = marcadoresMap.get(b.chaveLinha);
-        if (entry) {
-          entry.bus.isMeuOnibus = b.isMeuOnibus;
-          entry.marker.setIcon(criarIconeBus(b.linha.cor, b.isMeuOnibus));
-          entry.marker.setPopupContent(gerarHtmlPopup(b));
-          if (b.isMeuOnibus) {
-            meuOnibusMarker = entry.marker;
-          }
-        }
-      });
+      renderizarMarcadorMeuOnibus(chaveLinha);
 
       // Posiciona o ônibus do motorista na Parada 1 da linha
       if (meuOnibusMarker && window.VALEBUS_PARADAS) {
@@ -1061,23 +1013,8 @@
         renderizarRotaLinha(linhaInicial);
         renderizarParadasLinha(linhaInicial);
 
-        // Renderiza marcadores da frota
-        FROTA.forEach(bus => {
-          const isMeu = bus.chaveLinha === linhaInicial;
-          bus.isMeuOnibus = isMeu;
-          const icone = criarIconeBus(bus.linha.cor, isMeu);
-          const conteudoPopup = gerarHtmlPopup(bus);
-
-          const marker = L_API.marker(bus.posicao, { icon: icone })
-            .addTo(map)
-            .bindPopup(conteudoPopup);
-
-          if (isMeu) {
-            meuOnibusMarker = marker;
-          }
-
-          marcadoresMap.set(bus.chaveLinha, { marker, bus });
-        });
+        // Exibe somente o veículo associado ao motorista atual.
+        renderizarMarcadorMeuOnibus(linhaInicial);
 
         // Event listener para cliques dentro de popups (ex: Definir como Próxima Parada)
         map.on('popupopen', (e) => {
@@ -1385,7 +1322,7 @@
           estadoMotorista.tempoMin = tempoTot;
 
           try {
-            localStorage.setItem('valebus_viagens_hoje', estadoMotorista.viagensHoje.toString());
+            window.ValeBusAPI.salvarViagensHoje(estadoMotorista.viagensHoje);
           } catch (e) {
             console.warn(e);
           }
@@ -1439,6 +1376,19 @@
       if (!e.target.closest('#topbar-acoes-wrapper') && !e.target.closest('#topbar-usuario-wrapper')) {
         fecharTodosDropdowns();
       }
+    });
+
+    // Encerramento da sessão do motorista: mantém os dados operacionais locais.
+    document.querySelectorAll('.nav__item--sair, .usuario-dropdown__item--sair').forEach((botao) => {
+      botao.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (window.ValeBusAPI && typeof window.ValeBusAPI.encerrarSessao === 'function') {
+          window.ValeBusAPI.encerrarSessao('login.html');
+          return;
+        }
+        localStorage.removeItem('valebus_usuario');
+        window.location.href = 'login.html';
+      });
     });
 
     /* ──────────────────────────────────────────────────────────
@@ -1658,37 +1608,20 @@
     const btnFecharSuporteRodape = document.getElementById('btn-fechar-suporte-rodape');
 
     // Estado persistente de alertas de trânsito e suporte da garagem
-    let ocorrenciasAtivas = [];
-    try {
-      const salvas = localStorage.getItem('valebus_ocorrencias_motorista');
-      if (salvas) ocorrenciasAtivas = JSON.parse(salvas);
-    } catch (e) {
-      ocorrenciasAtivas = [];
-    }
-
-    let socorroGaragemAtivo = null;
-    try {
-      const socorroSalvo = localStorage.getItem('valebus_socorro_garagem');
-      if (socorroSalvo) socorroGaragemAtivo = JSON.parse(socorroSalvo);
-    } catch (e) {
-      socorroGaragemAtivo = null;
-    }
+    let ocorrenciasAtivas = window.ValeBusAPI.obterOcorrenciasMotorista();
+    let socorroGaragemAtivo = window.ValeBusAPI.obterSocorroGaragem();
 
     function salvarOcorrencias() {
-      try {
-        localStorage.setItem('valebus_ocorrencias_motorista', JSON.stringify(ocorrenciasAtivas));
-      } catch (e) {}
+      window.ValeBusAPI.salvarOcorrenciasMotorista(ocorrenciasAtivas);
       renderizarOcorrenciasPainel();
     }
 
     function salvarSocorroGaragem() {
-      try {
-        if (socorroGaragemAtivo) {
-          localStorage.setItem('valebus_socorro_garagem', JSON.stringify(socorroGaragemAtivo));
-        } else {
-          localStorage.removeItem('valebus_socorro_garagem');
-        }
-      } catch (e) {}
+      if (socorroGaragemAtivo) {
+        window.ValeBusAPI.salvarSocorroGaragem(socorroGaragemAtivo);
+      } else {
+        window.ValeBusAPI.limparSocorroGaragem();
+      }
       renderizarOcorrenciasPainel();
       atualizarCardSocorroModal();
     }
@@ -1752,7 +1685,7 @@
     if (btnGpsSyncProblema) {
       btnGpsSyncProblema.addEventListener('click', () => {
         const parada = estadoMotorista.proximaParada ? estadoMotorista.proximaParada.replace(/^\d+\.\s*/, '') : 'Praça Urbana Carolina';
-        const coords = (marcadorVeiculo && marcadorVeiculo.getLatLng) ? marcadorVeiculo.getLatLng() : null;
+        const coords = (meuOnibusMarker && meuOnibusMarker.getLatLng) ? meuOnibusMarker.getLatLng() : null;
         const refGps = coords ? ` (GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})` : '';
         if (inputLocalProblema) {
           inputLocalProblema.value = `${parada}${refGps}`;
@@ -1842,16 +1775,8 @@
             criadoEm: agora.toISOString()
           };
 
-          // Salva na fila de chamados do Gestor CCO
-          try {
-            let historicoChamados = [];
-            const historicoSalvo = localStorage.getItem('valebus_chamados_gestor');
-            if (historicoSalvo) historicoChamados = JSON.parse(historicoSalvo);
-            historicoChamados.unshift(novaOcorrencia);
-            localStorage.setItem('valebus_chamados_gestor', JSON.stringify(historicoChamados.slice(0, 50)));
-          } catch (e) {
-            console.warn('Erro ao replicar alerta no canal do gestor:', e);
-          }
+          // Replica no canal unificado do Gestor CCO pela camada de serviços.
+          window.ValeBusAPI.salvarOcorrencia(novaOcorrencia);
 
           ocorrenciasAtivas.unshift(novaOcorrencia);
           salvarOcorrencias();
@@ -1922,7 +1847,7 @@
     if (btnGpsSyncGaragem) {
       btnGpsSyncGaragem.addEventListener('click', () => {
         const parada = estadoMotorista.proximaParada ? estadoMotorista.proximaParada.replace(/^\d+\.\s*/, '') : 'Praça Urbana Carolina';
-        const coords = (marcadorVeiculo && marcadorVeiculo.getLatLng) ? marcadorVeiculo.getLatLng() : null;
+        const coords = (meuOnibusMarker && meuOnibusMarker.getLatLng) ? meuOnibusMarker.getLatLng() : null;
         const refGps = coords ? ` (GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})` : '';
         if (inputLocalGaragem) {
           inputLocalGaragem.value = `${parada}${refGps}`;
@@ -2028,16 +1953,8 @@
           criadoEm: agora.toISOString()
         };
 
-        // Notifica o canal do Gestor CCO salvando na fila unificada de chamados
-        try {
-          let historicoChamados = [];
-          const historicoSalvo = localStorage.getItem('valebus_chamados_gestor');
-          if (historicoSalvo) historicoChamados = JSON.parse(historicoSalvo);
-          historicoChamados.unshift(socorroGaragemAtivo);
-          localStorage.setItem('valebus_chamados_gestor', JSON.stringify(historicoChamados.slice(0, 50)));
-        } catch (e) {
-          console.warn('Erro ao replicar chamado no canal do gestor:', e);
-        }
+        // Notifica o canal unificado do Gestor CCO pela camada de serviços.
+        window.ValeBusAPI.salvarOcorrencia(socorroGaragemAtivo);
 
         salvarSocorroGaragem();
         mostrarToast(

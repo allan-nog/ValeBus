@@ -1376,10 +1376,9 @@
       };
 
       salvarSessaoLogin(sessaoMotorista);
-      try {
-        localStorage.setItem('valebus_linha_motorista_ativa', linhaValor);
-        localStorage.setItem('valebus_veiculo_motorista_ativo', veiculoNome);
-      } catch (e) {}
+      if (window.ValeBusAPI && typeof window.ValeBusAPI.salvarOperacaoMotorista === 'function') {
+        window.ValeBusAPI.salvarOperacaoMotorista({ linhaChave: linhaValor, veiculo: veiculoNome });
+      }
 
       if (motoristaSucesso) motoristaSucesso.style.display = 'flex';
 
