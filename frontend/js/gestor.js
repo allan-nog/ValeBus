@@ -5,7 +5,7 @@
  * credenciamento de PIN de bordo e telemetria da frota de Santa Rita do Sapucaí.
  */
 
-(function () {
+(async function () {
   'use strict';
 
   /* ──────────────────────────────────────────────────────────
@@ -13,26 +13,18 @@
      ────────────────────────────────────────────────────────── */
   const EMAIL_GESTOR_OFICIAL = 'valebussrs@gmail.com';
 
-  function obterSessaoGestor() {
+  async function obterSessaoGestor() {
     try {
-      const usuario = window.ValeBusAPI ? window.ValeBusAPI.obterSessao() : null;
-      const email = (usuario?.email || '').trim().toLowerCase();
-      const autorizado = Boolean(
-        usuario?.logado &&
-        usuario.perfil === 'gestor' &&
-        usuario.autenticado2FA === true &&
-        email === EMAIL_GESTOR_OFICIAL
-      );
-
-      return autorizado ? usuario : null;
+      const usuario = await window.ValeBusAPI?.obterSessaoAutenticada?.();
+      return usuario?.papel === 'gestor' ? usuario : null;
     } catch (e) {
       console.warn('Erro ao verificar sessão do gestor:', e);
       return null;
     }
   }
 
-  function verificarPermissaoGestor() {
-    const usuario = obterSessaoGestor();
+  async function verificarPermissaoGestor() {
+    const usuario = await obterSessaoGestor();
     if (!usuario) {
       window.location.replace('login.html');
       return false;
@@ -53,7 +45,7 @@
     return true;
   }
 
-  if (!verificarPermissaoGestor()) {
+  if (!await verificarPermissaoGestor()) {
     return;
   }
 

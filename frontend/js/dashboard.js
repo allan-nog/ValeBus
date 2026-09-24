@@ -236,8 +236,8 @@
           </div>
         </div>
         <div class="popup-onibus__footer">
-          <span class="popup-onibus__velocidade">⚡ <strong>${bus.velocidade === 0 ? '0 km/h (Ponto Inicial)' : bus.velocidade + ' km/h'}</strong></span>
-          <span class="popup-onibus__gps-badge">GPS Online</span>
+          <span class="popup-onibus__velocidade">⚡ <strong>${demoFeira && bus.chaveLinha === 'anchieta' ? 'Viagem simulada (~1 min)' : bus.velocidade === 0 ? '0 km/h (Ponto Inicial)' : bus.velocidade + ' km/h'}</strong></span>
+          <span class="popup-onibus__gps-badge">${demoFeira && bus.chaveLinha === 'anchieta' ? 'Demonstração' : 'GPS Online'}</span>
         </div>
       </div>
     `;
@@ -344,14 +344,66 @@
     });
   }
 
+  // DEMONSTRAÇÃO TEMPORÁRIA DA FEIRA — somente passageiro, sem API/storage.
+  // Para desativar após a feira, altere esta constante para false.
+  const DEMO_FEIRA_ATIVA = true;
+  const demoFeira = (() => {
+    if (!DEMO_FEIRA_ATIVA) return null;
+    const coords = window.VALEBUS_PARADAS?.obterTrajeto('anchieta');
+    if (!coords || coords.length < 2) return null;
+    // Interpola na mesma projeção usada pela polyline Leaflet. Não altera
+    // nenhum ponto do catálogo e percorre todos os segmentos em ordem.
+    const pontos = coords.map(coord => map.project(coord, 0));
+    const distancias = [0];
+    for (let i = 1; i < pontos.length; i++) {
+      distancias.push(distancias[i - 1] + pontos[i - 1].distanceTo(pontos[i]));
+    }
+    const total = distancias[distancias.length - 1];
+    if (!total) return null;
+    return { coords, pontos, distancias, total, posicao: [...coords[0]] };
+  })();
+
   function obterPosicaoVisual(bus) {
+    if (demoFeira && bus.chaveLinha === 'anchieta') return demoFeira.posicao;
     return obterPontoInicialLinha(bus.chaveLinha);
   }
+
+  function iniciarDemoFeira() {
+    if (!demoFeira) return;
+    const DURACAO_MS = 60000;
+    const PAUSA_MS = 5000;
+    let inicio = null;
+    function animar(agora) {
+      if (inicio === null) inicio = agora;
+      const tempo = (agora - inicio) % (DURACAO_MS + PAUSA_MS);
+      const alvo = demoFeira.total * Math.min(tempo / DURACAO_MS, 1);
+      let i = 1;
+      while (i < demoFeira.distancias.length - 1 && demoFeira.distancias[i] < alvo) i++;
+      const comprimento = demoFeira.distancias[i] - demoFeira.distancias[i - 1];
+      const fracao = comprimento ? (alvo - demoFeira.distancias[i - 1]) / comprimento : 0;
+      const a = demoFeira.pontos[i - 1];
+      const b = demoFeira.pontos[i];
+      const pos = map.unproject(L.point(a.x + (b.x - a.x) * fracao, a.y + (b.y - a.y) * fracao), 0);
+      demoFeira.posicao = tempo >= DURACAO_MS
+        ? [...demoFeira.coords[demoFeira.coords.length - 1]] : [pos.lat, pos.lng];
+      const item = marcadoresMap.get('anchieta');
+      if (item) {
+        item.bus.posicao = [...demoFeira.posicao];
+        item.marker.setLatLng(demoFeira.posicao);
+      }
+      requestAnimationFrame(animar);
+    }
+    requestAnimationFrame(animar);
+  }
+  // FIM DO BLOCO DA DEMONSTRAÇÃO TEMPORÁRIA.
+
 
   let operacaoAtual = obterOperacaoMotorista();
 
   function renderizarMarcadores() {
-    operacaoAtual = obterOperacaoMotorista();
+    operacaoAtual = demoFeira
+      ? { linhaChave: 'anchieta', veiculoNome: 'Ônibus #01' }
+      : obterOperacaoMotorista();
 
     // Limpa marcadores anteriores
     marcadoresMap.forEach(({ marker }) => {
@@ -364,7 +416,7 @@
     busOperando.veiculo = operacaoAtual.veiculoNome;
 
     // Posiciona exatamente no ponto inicial oficial da linha (Parada 1)
-    const posInicial = obterPontoInicialLinha(busOperando.chaveLinha);
+    const posInicial = obterPosicaoVisual(busOperando);
     busOperando.posicao = [posInicial[0], posInicial[1]];
 
     const icone = criarIconeBus(busOperando.linha.cor);
@@ -391,7 +443,9 @@
 
     const elMainLiveLabel = document.getElementById('main-header-live-label');
     if (elMainLiveLabel) {
-      elMainLiveLabel.textContent = `GPS Ao Vivo • ${busOperando.veiculo} em Operação`;
+      elMainLiveLabel.textContent = demoFeira
+        ? 'Demonstração • Anchieta • Viagem simulada'
+        : `GPS Ao Vivo • ${busOperando.veiculo} em Operação`;
     }
 
     // Atualiza cards da lateral
@@ -657,7 +711,7 @@
   setInterval(() => {
     marcadoresMap.forEach(({ marker, bus }) => {
       // Mantém o ônibus posicionado fielmente no ponto inicial oficial
-      const posExata = obterPontoInicialLinha(bus.chaveLinha);
+      const posExata = obterPosicaoVisual(bus);
       bus.posicao = [posExata[0], posExata[1]];
       marker.setLatLng(posExata);
 
@@ -791,7 +845,7 @@
 
       marcadoresMap.forEach(({ marker, bus }) => {
         if (linhaSelecionada === 'todas' || bus.chaveLinha === linhaSelecionada) {
-          const pos = obterPontoInicialLinha(bus.chaveLinha);
+          const pos = obterPosicaoVisual(bus);
           bus.posicao = [pos[0], pos[1]];
           marker.setLatLng(pos);
           if (!map.hasLayer(marker)) map.addLayer(marker);
@@ -847,7 +901,7 @@
       const elMainLiveLabel = document.getElementById('main-header-live-label');
       if (elMainLiveLabel) {
         elMainLiveLabel.textContent = totalVisivel > 0
-          ? `GPS Ao Vivo • ${operacaoAtual.veiculoNome} em Operação`
+          ? (demoFeira ? 'Demonstração • Anchieta • Viagem simulada' : `GPS Ao Vivo • ${operacaoAtual.veiculoNome} em Operação`)
           : 'GPS Ao Vivo • Nenhum Veículo nesta Linha';
       }
 
@@ -892,7 +946,7 @@
     if (itemBus) {
       ocultarAlertaLinhaVazia();
       const { marker, bus } = itemBus;
-      const latLng = obterPontoInicialLinha(bus.chaveLinha);
+      const latLng = obterPosicaoVisual(bus);
       bus.posicao = [latLng[0], latLng[1]];
       marker.setLatLng(latLng);
 
@@ -952,7 +1006,9 @@
 
       const elMainLiveLabel = document.getElementById('main-header-live-label');
       if (elMainLiveLabel) {
-        elMainLiveLabel.textContent = `GPS Ao Vivo • ${bus.veiculo} em Operação`;
+        elMainLiveLabel.textContent = demoFeira && bus.chaveLinha === 'anchieta'
+          ? 'Demonstração • Anchieta • Viagem simulada'
+          : `GPS Ao Vivo • ${bus.veiculo} em Operação`;
       }
 
       // Se estiver no celular/tablet, fecha o painel lateral para mostrar o mapa
@@ -2259,6 +2315,17 @@
       fecharPainel();
     }
   });
+
+  if (demoFeira) {
+    focarLinhaNoMapaDemo();
+    iniciarDemoFeira();
+  }
+
+  function focarLinhaNoMapaDemo() {
+    // Usa o controle existente, incluindo paradas, enquadramento e filtros.
+    document.querySelector('#filtros-legenda [data-linha="anchieta"]')?.click();
+    if (polylineAtivaRef) map.fitBounds(polylineAtivaRef.getBounds(), { padding: [30, 30] });
+  }
 
   // Sincronização em tempo real caso o motorista altere linha/veículo em outra aba
   window.addEventListener('storage', e => {

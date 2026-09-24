@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { config, supabaseConfigurado } from './src/config/env.js';
+import { authRouter } from './src/routes/auth.js';
 import { linhasRouter } from './src/routes/linhas.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,6 +20,7 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+app.use('/api/auth', authRouter);
 app.use('/api/linhas', linhasRouter);
 
 app.use('/api', (_req, res) => {
@@ -32,8 +34,12 @@ app.get(['/dashboard', '/dashboard.html'], (_req, res) => res.redirect('/fronten
 app.get(['/gestor', '/gestor.html'], (_req, res) => res.redirect('/frontend/gestor.html'));
 app.get(['/motorista', '/motorista.html'], (_req, res) => res.redirect('/frontend/motorista.html'));
 
-app.use(express.static(path.join(__dirname, 'frontend')));
-app.use(express.static(__dirname));
+// Arquivos públicos: preserva tanto /frontend/... quanto os caminhos diretos
+// usados pelos documentos HTML dentro dessa pasta. Nunca exponha a raiz do
+// repositório, que contém o código do servidor e arquivos de banco.
+const frontendPath = path.join(__dirname, 'frontend');
+app.use('/frontend', express.static(frontendPath));
+app.use(express.static(frontendPath));
 
 app.use((error, _req, res, _next) => {
   if (error.code === 'SUPABASE_NOT_CONFIGURED') {

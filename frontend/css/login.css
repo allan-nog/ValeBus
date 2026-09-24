@@ -2303,3 +2303,12 @@ body.tema-noite .btn-reenviar-codigo {
     animation: none !important;
   }
 }
+
+
+.login-acesso-publico {
+  margin: 9px 0 2px;
+  color: var(--texto-secundario);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}

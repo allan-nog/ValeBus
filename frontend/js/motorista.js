@@ -13,7 +13,7 @@
    *  9. Modais e Toasts de Notificação
    */
 
-  (function () {
+  (async function () {
     'use strict';
 
     /* ──────────────────────────────────────────────────────────
@@ -34,10 +34,8 @@
       proximaParada: "1. Caixa D'Água Da Copasa"
     };
 
-    const sessaoMotorista = window.ValeBusAPI && typeof window.ValeBusAPI.obterSessao === 'function'
-      ? window.ValeBusAPI.obterSessao()
-      : null;
-    if (!sessaoMotorista?.logado || sessaoMotorista.perfil !== 'motorista') {
+    const sessaoMotorista = await window.ValeBusAPI?.obterSessaoAutenticada?.();
+    if (sessaoMotorista?.papel !== 'motorista') {
       window.location.replace('login.html');
       return;
     }

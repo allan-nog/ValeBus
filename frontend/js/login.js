@@ -131,6 +131,7 @@
   /* ──────────────────────────────────────────────────────────
      4. AUTENTICAÇÃO COM O GOOGLE (SIMULAÇÃO REALISTA)
      ────────────────────────────────────────────────────────── */
+  const btnAcessoPassageiro = document.getElementById('btn-acesso-passageiro');
   const btnLoginGoogle   = document.getElementById('btn-login-google');
   const modalGoogle      = document.getElementById('modal-google');
   const btnCancelarG     = document.getElementById('btn-cancelar-google');
@@ -172,6 +173,16 @@
         if (btnLoginGoogle) btnLoginGoogle.focus();
       });
     }
+  }
+
+  if (btnAcessoPassageiro) {
+    btnAcessoPassageiro.addEventListener('click', async () => {
+      if (window.ValeBusAPI?.encerrarSessaoAsync) {
+        await window.ValeBusAPI.encerrarSessaoAsync('dashboard.html');
+      } else {
+        window.location.href = 'dashboard.html';
+      }
+    });
   }
 
   if (btnLoginGoogle) {
@@ -431,7 +442,7 @@
 
       // Validação combinada de credenciais de login
       const emailOk = emailValido(email);
-      const senhaErro = validarSenha(senha);
+      const senhaErro = !senha;
 
       if (!emailOk || senhaErro) {
         mostrarErro('Não foi possível entrar. Revise seu e-mail e senha e tente novamente.');
@@ -454,34 +465,25 @@
 
       ocultarErro();
 
-      // Se for o e-mail de gestor, intercepta e solicita o Código de segurança enviado pelo e-mail
-      const ehGestor = verificarSeEhGestor(email);
-      if (ehGestor) {
-        setCarregando(true);
-        if (textoBotao) textoBotao.textContent = 'Verificando Gestor...';
-        await esperar(450);
+      setCarregando(true);
+      if (textoBotao) textoBotao.textContent = 'Entrando...';
+
+      try {
+        const usuario = await window.ValeBusAPI.autenticar({ email, senha });
+        if (usuario.papel === 'gestor') {
+          window.location.href = 'gestor.html';
+          return;
+        }
+        if (usuario.papel === 'motorista') {
+          window.location.href = 'motorista.html';
+          return;
+        }
+        throw new Error('Esta conta não possui acesso operacional.');
+      } catch (erro) {
+        mostrarErro(erro.message || 'Não foi possível entrar. Tente novamente.');
         setCarregando(false);
         resetarBotao();
-        solicitarCodigoSegurancaGestor({
-          nome: 'Gestor ValeBus SRS',
-          email: email,
-          metodo: 'Email/Senha'
-        });
-        return;
       }
-
-      // Salva nome derivado do e-mail para a sessão
-      const parteNome = email.split('@')[0];
-      const nomeFormatado = parteNome.charAt(0).toUpperCase() + parteNome.slice(1);
-      salvarSessaoLogin({
-        nome: nomeFormatado,
-        email: email,
-        cargo: 'Passageiro / Usuário da Linha',
-        perfil: 'passageiro',
-        metodo: 'Email/Senha'
-      });
-
-      await simularLogin(email, senha);
     });
   }
 

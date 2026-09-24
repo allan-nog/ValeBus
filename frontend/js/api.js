@@ -14,7 +14,7 @@
 
   // Configurações da Camada de Serviços
   const CONFIG = {
-    usarBackendReal: false, // Alterne para true quando o servidor backend estiver ativo
+    usarBackendReal: true,
     baseUrl: '/api',
     simularDelayMs: 120
   };
@@ -497,7 +497,7 @@
     return gravarJSON(KEYS.USUARIO, sessaoAtualizada);
   }
 
-  function encerrarSessao(redirecionarPara = 'login.html') {
+  function concluirEncerramentoSessao(redirecionarPara) {
     try {
       localStorage.removeItem(KEYS.USUARIO);
     } catch (e) {
@@ -505,11 +505,48 @@
     }
 
     window.dispatchEvent(new CustomEvent('valebus:logout'));
-
-    if (redirecionarPara) {
-      window.location.href = redirecionarPara;
-    }
+    if (redirecionarPara) window.location.href = redirecionarPara;
     return true;
+  }
+
+  function encerrarSessao(redirecionarPara = 'login.html') {
+    // keepalive permite que o logout alcance o servidor mesmo com o
+    // redirecionamento imediato usado pelos botões já existentes.
+    fetch(`${CONFIG.baseUrl}/auth/logout`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      keepalive: true
+    }).catch(() => null);
+    return concluirEncerramentoSessao(redirecionarPara);
+  }
+
+  async function autenticar({ email, senha }) {
+    const resposta = await fetch(`${CONFIG.baseUrl}/auth/login`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
+    const corpo = await resposta.json().catch(() => ({}));
+    if (!resposta.ok) throw new Error(corpo.error || 'Não foi possível iniciar a sessão.');
+
+    const usuario = corpo?.data?.usuario;
+    if (!usuario) throw new Error('Resposta de autenticação inválida.');
+    salvarSessao({ ...usuario, logado: true });
+    return usuario;
+  }
+
+  async function obterSessaoAutenticada() {
+    const resposta = await fetch(`${CONFIG.baseUrl}/auth/me`, { credentials: 'same-origin' });
+    if (!resposta.ok) {
+      try { localStorage.removeItem(KEYS.USUARIO); } catch (e) {}
+      return null;
+    }
+
+    const corpo = await resposta.json();
+    const usuario = corpo?.data?.usuario || null;
+    if (usuario) salvarSessao({ ...usuario, logado: true });
+    return usuario;
   }
 
   /* ──────────────────────────────────────────────────────────
@@ -663,10 +700,11 @@
   }
 
   async function encerrarSessaoAsync(redirecionarPara = 'login.html') {
-    if (CONFIG.usarBackendReal) {
-      await fetch(`${CONFIG.baseUrl}/logout`, { method: 'POST' });
-    }
-    return encerrarSessao(redirecionarPara);
+    await fetch(`${CONFIG.baseUrl}/auth/logout`, {
+      method: 'POST',
+      credentials: 'same-origin'
+    }).catch(() => null);
+    return concluirEncerramentoSessao(redirecionarPara);
   }
 
   /* ──────────────────────────────────────────────────────────
@@ -693,6 +731,8 @@
     obterSessao,
     salvarSessao,
     encerrarSessao,
+    autenticar,
+    obterSessaoAutenticada,
     obterOperacaoMotorista,
     salvarOperacaoMotorista,
     obterViagensHoje,
