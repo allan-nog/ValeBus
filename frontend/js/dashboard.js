@@ -225,16 +225,16 @@
             <span style="font-size: 11px; font-weight: 700; color: var(--texto-secundario);">${nomeVeiculo} ${numPrefixo}</span>
           </div>
         </div>
-        <div class="popup-onibus__corpo">
-          <div class="popup-onibus__item">
-            <span class="popup-onibus__rotulo">🚩 Partida:</span>
-            <span class="popup-onibus__valor">${bus.linha.partida}</span>
-          </div>
-          <div class="popup-onibus__item">
-            <span class="popup-onibus__rotulo">📍 Próxima Parada:</span>
-            <span class="popup-onibus__valor">${bus.linha.proximaParada}</span>
-          </div>
-        </div>
+        ${bus.linha.partida && bus.linha.proximaParada ?           `<div class="popup-onibus__corpo">
+            <div class="popup-onibus__item">
+              <span class="popup-onibus__rotulo">🚩 Partida:</span>
+              <span class="popup-onibus__valor">${bus.linha.partida}</span>
+            </div>
+            <div class="popup-onibus__item">
+              <span class="popup-onibus__rotulo">📍 Próxima Parada:</span>
+              <span class="popup-onibus__valor">${bus.linha.proximaParada}</span>
+            </div>
+          </div>` : ''}
         <div class="popup-onibus__footer">
           <span class="popup-onibus__velocidade">⚡ <strong>${demoFeira && bus.chaveLinha === 'anchieta' ? 'Viagem simulada (~1 min)' : bus.velocidade === 0 ? '0 km/h (Ponto Inicial)' : bus.velocidade + ' km/h'}</strong></span>
           <span class="popup-onibus__gps-badge">${demoFeira && bus.chaveLinha === 'anchieta' ? 'Demonstração' : 'GPS Online'}</span>

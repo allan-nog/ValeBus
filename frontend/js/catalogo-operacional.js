@@ -7,7 +7,13 @@
  */
 window.VALEBUS_CATALOGO_OPERACIONAL = {
   linhas: {
-    anchieta: { chave: 'anchieta', nome: 'Linha Anchieta', cor: '#16a34a' },
+    anchieta: {
+      chave: 'anchieta',
+      nome: 'Linha Anchieta',
+      cor: '#16a34a',
+      partida: 'Praça Urbana Carolina | Praça Do Murilo',
+      proximaParada: 'Rua José Ribeiro De Barros, 59 | Inatel - Sentido Recanto'
+    },
     fernandes: { chave: 'fernandes', nome: 'Linha Fernandes (Seu Ônibus)', cor: '#2563eb' },
     fortaleza: { chave: 'fortaleza', nome: 'Linha Fortaleza', cor: '#9333ea' },
     industrial: { chave: 'industrial', nome: 'Linha Industrial', cor: '#ea580c' },

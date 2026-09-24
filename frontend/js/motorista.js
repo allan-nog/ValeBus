@@ -524,16 +524,16 @@
               ${isMeu ? 'Seu Veículo (#02) • ' : ''}${bus.linha.nome}
             </h3>
           </div>
-          <div class="popup-onibus__corpo">
-            <div class="popup-onibus__item">
-              <span class="popup-onibus__rotulo">🚩 Partida:</span>
-              <span class="popup-onibus__valor">${bus.linha.partida}</span>
-            </div>
-            <div class="popup-onibus__item">
-              <span class="popup-onibus__rotulo">📍 Próxima Parada:</span>
-              <span class="popup-onibus__valor">${bus.linha.proximaParada}</span>
-            </div>
-          </div>
+          ${bus.linha.partida && bus.linha.proximaParada ?             `<div class="popup-onibus__corpo">
+              <div class="popup-onibus__item">
+                <span class="popup-onibus__rotulo">🚩 Partida:</span>
+                <span class="popup-onibus__valor">${bus.linha.partida}</span>
+              </div>
+              <div class="popup-onibus__item">
+                <span class="popup-onibus__rotulo">📍 Próxima Parada:</span>
+                <span class="popup-onibus__valor">${bus.linha.proximaParada}</span>
+              </div>
+            </div>` : ''}
           <div class="popup-onibus__footer">
             <span class="popup-onibus__velocidade">⚡ <strong>${bus.velocidade} km/h</strong></span>
             <span class="popup-onibus__gps-badge">${isMeu ? 'Transmissão Ao Vivo' : 'GPS Online'}</span>
